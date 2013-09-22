@@ -1,0 +1,41 @@
+{
+  "general": {
+    "ini_file": "vagrant_launch.conf"
+  },
+  "node_config": {
+    "master": {
+      "type": "master",
+      "floatip": 10.0.20.213,
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      "second_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_master_script.sh",
+        "templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh",
+        "templates/server_setup_scripts/ubuntu_12.04_master_dcc_portal_script.sh"
+      ]
+    },
+    "worker1": {
+      "type": "worker",
+      "floatip": 10.0.20.214,
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      "second_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh",
+        "templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh"
+      ]
+    },
+    "worker2": {
+      "type": "worker",
+      "floatip": 10.0.20.215,
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      "second_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh",
+        "templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh"
+      ]
+    }
+  }
+}
