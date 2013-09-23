@@ -1,7 +1,7 @@
 use strict;
 use Getopt::Long;
 use Data::Dumper;
-use JSON:
+use JSON;
 #use Config;
 #$Config{useithreads} or die('Recompile Perl with threads to run this program.');
 
@@ -12,17 +12,11 @@ use JSON:
 # EC2_URL=https://api.opensciencedatacloud.org:8773/sullivan/services/Cloud
 
 # TODO:
-# * need to prepare /etc/hosts as %{HOSTS}
-# * need to find/replace post-initialization scripts
+# * parallel node launching, each with their own target dir (vs. having Vagrant launch multiple nodes). This will be faster but more work on my part.
+# * the box URLs are hardcoded, add them to the config JSON file instead
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
-# runs unit tests
-# my $seqware_build_cmd = 'mvn clean install &> build.log';
-# all unit and integration tests that only require postgres
-#my $seqware_build_cmd = 'mvn clean install -DskipITs=false &> build.log';
-# the full unit and integration tests including those needing globus/oozie
-#my $seqware_build_cmd = 'mvn clean install -DskipITs=false -P extITs &> build.log';
 my $seqware_version = 'UNKNOWN';
 my $aws_key = '';
 my $aws_secret_key = '';
@@ -31,13 +25,12 @@ my $launch_vb = 0;
 my $launch_os = 0;
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
-my $config_file = 'vagrant_launch.conf';
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_its = 0;
 my $skip_launch = 0;
-my $config_scripts = "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh";
-my $master_config_scripts = "";
-my $worker_config_scripts = "";
+#my $config_scripts = "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh";
+#my $master_config_scripts = "";
+#my $worker_config_scripts = "";
 # allow the specification of a specific commit to build and use instead of using the latest from develop
 my $git_commit = 0;
 # allow the hostname to be specified
@@ -48,11 +41,10 @@ GetOptions (
   "use-virtualbox" => \$launch_vb,
   "use-openstack" => \$launch_os,
   "working-dir=s" => \$work_dir,
-  "config-file=s" => \$config_file,
-  "json-config-file=s" => \$json_config_file,
-  "os-initial-config-scripts=s" => \$config_scripts,
-  "os-master-config-scripts=s" => \$master_config_scripts,
-  "os-worker-config-scripts=s" => \$worker_config_scripts,
+  "config-file=s" => \$json_config_file,
+  #"os-initial-config-scripts=s" => \$config_scripts,
+  #"os-master-config-scripts=s" => \$master_config_scripts,
+  #"os-worker-config-scripts=s" => \$worker_config_scripts,
   "skip-it-tests" => \$skip_its,
   "skip-launch" => \$skip_launch,
   "git-commit=s" => \$git_commit,
@@ -70,45 +62,41 @@ run("mkdir $work_dir");
 
 # config object used for find and replace
 my $configs = {};
-my $json_configs = {};
-####read_config($config_file, $configs);
-# LEFT OFF HERE
-read_json_config($json_config_file, $configs, $json_configs);
-if (!defined($configs->{'%{SEQWARE_BUILD_CMD}'})) { $configs->{'%{SEQWARE_BUILD_CMD}'} = $default_seqware_build_cmd; }
+my $cluster_configs = {};
+($configs, $cluster_configs) = read_json_config($json_config_file);
 
-$configs->{'%{SEQWARE_VERSION}'} = $seqware_version;
-
+# dealing with defaults from the config including various SeqWare-specific items
+if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
+$configs->{'SEQWARE_VERSION'} = $seqware_version;
 # for jenkins, override the branch command if required
-
 if ($git_commit){
-  $configs->{'%{SEQWARE_BRANCH_CMD}'} = "git checkout $git_commit";
+  $configs->{'SEQWARE_BRANCH_CMD'} = "git checkout $git_commit";
 }
+$configs->{'custom_hostname'} = $custom_hostname;
 
-$configs->{'%{custom_hostname}'} = $custom_hostname;
-
-# make this explicit, one or the other, aws is given priority
+# define the "boxes" used for each provider
+# TODO: these are hardcoded and may change
 if ($launch_vb) {
   $launch_cmd = "vagrant up";
-  $configs->{'%{BOX}'} = "Ubuntu_12.04";
-  $configs->{'%{BOX_URL}'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
+  $configs->{'BOX'} = "Ubuntu_12.04";
+  $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
 } elsif ($launch_os) {
   $launch_cmd = "vagrant up --provider=openstack";
-  $configs->{'%{BOX}'} = "dummy";
-  $configs->{'%{BOX_URL}'} = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box";
+  $configs->{'BOX'} = "dummy";
+  $configs->{'BOX_URL'} = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box";
 } elsif ($launch_aws) {
   $launch_cmd = "vagrant up --provider=aws";
-  $configs->{'%{BOX}'} = "dummy";
-  $configs->{'%{BOX_URL}'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
+  $configs->{'BOX'} = "dummy";
+  $configs->{'BOX_URL'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
 } else {
   die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
 }
 
 # skip the integration tests if specified --skip-its
-if ($skip_its) { $configs->{'%{SEQWARE_IT_CMD}'} = ""; }
+if ($skip_its) { $configs->{'SEQWARE_IT_CMD'} = ""; }
 
 # process server scripts into single bash script
-read_json_config($json_config_file);
-setup_os_config_scripts($config_scripts, "$work_dir/os_server_setup.sh");
+setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
 prepare_files();
 if (!$skip_launch) {
   # this launches and does first round setup
@@ -175,36 +163,33 @@ sub provision_instances {
     print "PROVISION: $host\n";
     if ($host =~ /master/) {
       # has all the master daemons
-      run_provision_script($master_config_scripts, $hosts->{$host}, $hosts);
+      ################ FIXME
+      #run_provision_script($master_config_scripts, $hosts->{$host}, $hosts);
     } else {
       # then it's a worker node
-      run_provision_script($worker_config_scripts, $hosts->{$host}, $hosts);
+      ################ FIXME
+      #run_provision_script($worker_config_scripts, $hosts->{$host}, $hosts);
     }
   }
 }
 
 # TODO: don't I need to process the script files before sending them over? I'll need to fill in with host info for sure!
 sub run_provision_script {
+  ########## FIXME
   my ($config_scripts, $host, $hosts) = @_;
   my $host_str = figure_out_host_str($hosts);
-  $configs->{'%{HOSTS}'} = $host_str;
+  $configs->{'HOSTS'} = $host_str;
   my $master_pip = $hosts->{master}{pip};
-  $configs->{'%{MASTER_PIP}'} = $hosts->{master}{pip};
+  $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
   my $exports = make_exports_str($hosts);
-  $configs->{'%{EXPORTS}'} = $exports;
+  $configs->{'EXPORTS'} = $exports;
   my @a = split /,/, $config_scripts;
   foreach my $script (@a) {
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
     system("rm /tmp/config_script.sh");
-    setup_os_config_scripts($script, "/tmp/config_script.sh");
+    setup_os_config_scripts_list($script, "/tmp/config_script.sh");
     run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
-    #replace($script, "/tmp/config_script.sh", '%{HOSTS}', $host_str);
-    #replace("/tmp/config_script.sh", "/tmp/config_script.2.sh", '%{MASTER_PIP}', $master_pip);
-    #autoreplace("/tmp/config_script.2.sh", "/tmp/config_script.3.sh");
-    #replace("/tmp/config_script.3.sh", "/tmp/config_script.sh", '%{EXPORTS}', $exports);
-    #run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
-    #run("rm /tmp/config_script.sh /tmp/config_script.2.sh");
   }
 }
 
@@ -237,7 +222,7 @@ sub figure_out_host_str {
 
 
 # this basically cats files together after doing an autoreplace
-sub setup_os_config_scripts() {
+sub setup_os_config_scripts_list() {
   my ($config_scripts, $output) = @_;
   my @scripts = split /,/, $config_scripts;
   foreach my $script (@scripts) {
@@ -247,6 +232,19 @@ sub setup_os_config_scripts() {
   }
 }
 
+# this basically cats files together after doing an autoreplace
+sub setup_os_config_scripts() {
+  my ($configs, $output_dir, $output_file) = @_;
+  foreach my $host (keys %{$configs}) {
+    foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
+      autoreplace($script, "$output_file.temp");
+      run("cat $output_file.temp >> $output_dir/$host\_$output_file");
+      run("rm $output_file.temp");
+    }
+  }
+}
+
+
 sub read_config() {
   my ($file, $config) = @_;
   open IN, "<$file" or die "Can't open your vagrant launch config file: $file\n";
@@ -254,7 +252,7 @@ sub read_config() {
    chomp;
    next if (/^#/);
    if (/^\s*(\S+)\s*=\s*(.*)$/) {
-     $config->{'%{'.$1.'}'} = $2;
+     $config->{$1} = $2;
      #print "$1 \t $2\n";
    }
   }
@@ -277,10 +275,11 @@ sub find_version {
   }
 }
 
+# this assumes the first pass script was created per host by setup_os_config_scripts
 sub prepare_files {
   # Vagrantfile
   #autoreplace("templates/Vagrantfile.template", "$work_dir/Vagrantfile");
-  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $json_configs, "$work_dir/Vagrantfile");
+  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, "$work_dir/Vagrantfile");
   # cron
   autoreplace("templates/status.cron", "$work_dir/status.cron");
   # settings, user data
@@ -297,19 +296,24 @@ sub prepare_files {
   copy("templates/DCC/settings.yml", "$work_dir/settings.yml");
 }
 
+# this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
   my ($start, $part, $end, $json, $output);
-  # left off here
+  # LEFT OFF HERE
 }
 
-# TODO: strip out comments
+# reads a JSON-based config
 sub read_json_config {
   my ($config_file) = @_;
   open IN, "<$config_file" or die;
   my $json_txt = "";
-  while(<IN>) { $json_txt .= $_; }
+  while(<IN>) { 
+    next if (/^\s*#/);
+    $json_txt .= $_;
+  }
   close IN;
-  $json_configs = decode_json($json_txt);
+  my $temp_configs = decode_json($json_txt);
+  return($temp_configs->{general}, $temp_configs->{node_config});
 }
 
 sub autoreplace {
@@ -320,7 +324,7 @@ sub autoreplace {
   while(<IN>) {
     foreach my $key (keys %{$configs}) {
       my $value = $configs->{$key};
-      $_ =~ s/$key/$value/g;
+      $_ =~ s/%{$key}/$value/g;
     }
     print OUT $_;
   }
