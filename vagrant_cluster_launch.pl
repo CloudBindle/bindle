@@ -14,6 +14,10 @@ use JSON;
 # TODO:
 # * parallel node launching, each with their own target dir (vs. having Vagrant launch multiple nodes). This will be faster but more work on my part.
 # * the box URLs are hardcoded, add them to the config JSON file instead
+# * there's a lot of hard-coded (but relative) file paths in this code which could cause problems if we move around or rename template files
+# * this is closely tied to SeqWare so we waste some time downloading and building that tool for other projects that use this tool but don't depend on SeqWare
+# * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
+# * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
@@ -28,9 +32,6 @@ my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_its = 0;
 my $skip_launch = 0;
-#my $config_scripts = "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh";
-#my $master_config_scripts = "";
-#my $worker_config_scripts = "";
 # allow the specification of a specific commit to build and use instead of using the latest from develop
 my $git_commit = 0;
 # allow the hostname to be specified
@@ -42,9 +43,6 @@ GetOptions (
   "use-openstack" => \$launch_os,
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
-  #"os-initial-config-scripts=s" => \$config_scripts,
-  #"os-master-config-scripts=s" => \$master_config_scripts,
-  #"os-worker-config-scripts=s" => \$worker_config_scripts,
   "skip-it-tests" => \$skip_its,
   "skip-launch" => \$skip_launch,
   "git-commit=s" => \$git_commit,
@@ -97,7 +95,7 @@ if ($skip_its) { $configs->{'SEQWARE_IT_CMD'} = ""; }
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
-prepare_files();
+prepare_files($cluster_configs, $configs, $work_dir);
 if (!$skip_launch) {
   # this launches and does first round setup
   launch_instances();
@@ -108,6 +106,7 @@ if (!$skip_launch) {
 
 # SUBS
 
+# uses Vagrant to find the IP and local IP address of the launched machines
 sub find_node_info {
   my $d = {};
 
@@ -145,11 +144,6 @@ sub find_node_info {
     }
   }
 
-#  my $hosts_file = "";
-#  foreach my $host (keys %{$d}) {
-#   $hosts_file .= "$host  ".$d->{$host}{pip}."\n";
-#  } 
- 
   return($d);
 }
 
@@ -161,17 +155,31 @@ sub provision_instances {
 
   foreach my $host (keys %{$hosts}) {
     print "PROVISION: $host\n";
-    if ($host =~ /master/) {
-      # has all the master daemons
-      ################ FIXME
-      #run_provision_script($master_config_scripts, $hosts->{$host}, $hosts);
-    } else {
-      # then it's a worker node
-      ################ FIXME
-      #run_provision_script($worker_config_scripts, $hosts->{$host}, $hosts);
-    }
+    run_provision_script_list($cluster_configs->{$host}, $hosts->{$host}, $hosts);
   }
 }
+
+# this runs all the "second_pass_scripts" in the json for a given host
+# FIXME: this is hacking on the configs object which is not good
+sub run_provision_script_list {
+  my ($cluster_config, $host, $hosts) = @_;
+  # this is putting in a variable for the /etc/hosts file
+  my $host_str = figure_out_host_str($hosts);
+  $configs->{'HOSTS'} = $host_str;
+  # FIXME: notice hard-coded to be "master"
+  my $master_pip = $hosts->{master}{pip};
+  $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
+  my $exports = make_exports_str($hosts);
+  $configs->{'EXPORTS'} = $exports;
+  foreach my $script (@{$cluster_config->{$host}{second_pass_scripts}}) {
+    $script =~ /\/([^\/]+)$/;
+    my $script_name = $1;
+    system("rm /tmp/config_script.sh");
+    setup_os_config_scripts_list($script, "/tmp/config_script.sh");
+    run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+  }
+}
+
 
 # TODO: don't I need to process the script files before sending them over? I'll need to fill in with host info for sure!
 sub run_provision_script {
@@ -275,12 +283,12 @@ sub find_version {
   }
 }
 
-# this assumes the first pass script was created per host by setup_os_config_scripts
+# this assumes the first pass setup script was created per host by setup_os_config_scripts
 sub prepare_files {
-  # Vagrantfile
-  #autoreplace("templates/Vagrantfile.template", "$work_dir/Vagrantfile");
-  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, "$work_dir/Vagrantfile");
-  # cron
+  my ($cluster_configs, $configs, $work_dir) = @_;
+  # Vagrantfile, the core file used by Vagrant that defines each of our nodes
+  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir/Vagrantfile");
+  # cron for SeqWare
   autoreplace("templates/status.cron", "$work_dir/status.cron");
   # settings, user data
   copy("templates/settings", "$work_dir/settings");
@@ -294,12 +302,23 @@ sub prepare_files {
   # DCC
   # FIXME: break out into config driven provisioner
   copy("templates/DCC/settings.yml", "$work_dir/settings.yml");
+  die;
 }
 
 # this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
-  my ($start, $part, $end, $json, $output);
-  # LEFT OFF HERE
+  my ($start, $part, $end, $cluster_configs, $configs, $output) = @_;
+  print Dumper($cluster_configs);
+  print Dumper($configs);
+  autoreplace("$start", "$output");
+  foreach my $node (sort keys %{$cluster_configs}) {
+    $configs->{custom_hostname} = $node;
+    $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
+    autoreplace("$part", "$output.temp");
+    run("cat $output.temp >> $output");
+    run("rm $output.temp");
+  } 
+  run("cat $end >> $output");
 }
 
 # reads a JSON-based config

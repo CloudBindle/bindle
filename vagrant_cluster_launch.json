@@ -15,6 +15,8 @@
     "OS_SSH_KEY_NAME": "<FILLMEIN>",
     "OS_SSH_USERNAME": "ubuntu",
     "OS_SSH_PEM_FILE": "<FILLMEIN>",
+    "OS_TENANT": "<FILLMEIN>",
+    "OS_NETWORK": "<FILLMEIN>",
     # AMAZON
     "AWS_KEY": "<FILLMEIN>",
     "AWS_SECRET_KEY": "<FILLMEIN>",
@@ -35,6 +37,7 @@
   # type=[master|worker], in the future we may have more types
   # you need 1 master and 0..n workers
   "node_config": {
+    # NOTE: the master node is assumed to be called "master" (for now), things will break if named something else
     "master": {
       "type": "master",
       "floatip": "10.0.20.213",
