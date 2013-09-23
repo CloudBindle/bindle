@@ -71,7 +71,9 @@ run("mkdir $work_dir");
 # config object used for find and replace
 my $configs = {};
 my $json_configs = {};
-read_config($config_file, $configs);
+####read_config($config_file, $configs);
+# LEFT OFF HERE
+read_json_config($json_config_file, $configs, $json_configs);
 if (!defined($configs->{'%{SEQWARE_BUILD_CMD}'})) { $configs->{'%{SEQWARE_BUILD_CMD}'} = $default_seqware_build_cmd; }
 
 $configs->{'%{SEQWARE_VERSION}'} = $seqware_version;
@@ -300,6 +302,7 @@ sub setup_vagrantfile {
   # left off here
 }
 
+# TODO: strip out comments
 sub read_json_config {
   my ($config_file) = @_;
   open IN, "<$config_file" or die;
