@@ -107,6 +107,14 @@ Keep in mind you should look at the templates/Vagrantfile.template before you la
 
 Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
 
+Updated on 20130923:
+
+    # setup your vagrant_cluster_launch.json config file, see templates/vagrant_cluster_launch.json.template
+    perl vagrant_cluster_launch.pl --use-openstack --config-file vagrant_cluster_launch.json --skip-it-tests
+
+The above is the next version which should be much nicer for dealing with flexible numbers of worker nodes. In testing.
+
+
 ## Debugging
 
 If you need to debug a problem set the VAGRANT_LOG variable e.g.:

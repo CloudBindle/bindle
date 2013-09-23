@@ -46,7 +46,7 @@ GetOptions (
   "skip-it-tests" => \$skip_its,
   "skip-launch" => \$skip_launch,
   "git-commit=s" => \$git_commit,
-  "custom-hostname=s" => \$custom_hostname,
+  "custom-hostname=s" => \$custom_hostname, # FIXME: I think I broke this, it should probably be removed in favor of the json doc but I assume the master is called master!
 );
 
 
