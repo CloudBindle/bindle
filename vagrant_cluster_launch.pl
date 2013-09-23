@@ -171,7 +171,9 @@ sub run_provision_script_list {
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
   my $exports = make_exports_str($hosts);
   $configs->{'EXPORTS'} = $exports;
-  foreach my $script (@{$cluster_config->{$host}{second_pass_scripts}}) {
+  print Dumper (@{$cluster_config->{second_pass_scripts}});
+  foreach my $script (@{$cluster_config->{second_pass_scripts}}) {
+    print "SECOND PASS SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
     system("rm /tmp/config_script.sh");
@@ -302,7 +304,6 @@ sub prepare_files {
   # DCC
   # FIXME: break out into config driven provisioner
   copy("templates/DCC/settings.yml", "$work_dir/settings.yml");
-  die;
 }
 
 # this assumes the first pass script was created per host by setup_os_config_scripts
