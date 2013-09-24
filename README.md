@@ -1,29 +1,48 @@
-## WARNING
-
-I'm working on multi-pass provisioning, be aware I'm probably going to break
-the script quite badly at times.  You probably want to stick to the develop
-branch until I merge this feature branch.
-
 ## About
 
-This Vagrant script will setup a single-node SeqWare box configured to use the
-Oozie workflow engine. We are currently focused on AWS but have also added
-support for OpenStack and VirtualBox and are testing now.
+This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
+provides the ability to launch either a single node or a cluster of compute
+nodes configured with one or more Bash shell scripts.  The big difference
+between building a cluster with this script vs. Vagrant directly is Vagrant
+provides a single pass at running provisioning script.  This tool, however,
+launches one or more instances, runs a base Bash configuration script on each,
+then queries Vagrant to identify the external and internal IP address of each
+of the launched instances. This script then runs one or more "secondary"
+provisioning scripts that can include variables substituted, for example, the
+IP addreses and domain names of the other hosts in the cluster.  This
+functionality makes it possible to build clusters of nodes that know about each
+other without knowing the IP addreses ahead of time.
 
-The current script is designed for single-nodes but we will soon add code that
-lets you launch clusters as well.
+Together with this Vagrant-wrapping  script, we provide secondary provisioning
+shell scripts that setup a single-node or multi-node SeqWare cluster configured
+to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic
+the same process can be adapted to build other cluster types to serve other
+projects.  We include sample JSON configs below that show you how to build
+nodes/clusters for the following projects:
 
-In the latest version of the script you can specify multiple OS setup scripts.
-This lets you have different "profiles" that can be combined to setup different
-types of servers (e.g. database vs. web server etc). In the near future this
-functionality will be re-implemented as Puppet scripts instead but for now this
-will let us setup different types of SeqWare boxes if we need to.
+* SeqWare Pipeline (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
+* the ICGC DCC Data Portal web application and elasticsearch index (with both a small and large index option)
+* the ICGC DCC Data Submission and Validation system (TBD)
+* the ICGC DCC Extract, Transform, and Load system for creating elasticsearch indexes (TBD)
+
+In the latest version of the script you can specify multiple nodes with their
+own set of provisioning bash shell scripts making it easy to configure a single
+node or cluster with a simple to author config file. In the near future the
+mechanism of using shell scripts to configure nodes will be re-implemented (or
+supplemented) with Puppet scripts which should make it easier to maintain
+different clusters and node types.  We will also improve the seperation between
+SeqWare and the generic functionality of this cluster builder.
 
 ## Installing 
 
-Install Vagrant using the package from their site: http://www.vagrantup.com/.
-You then need to install plugins to handle AWS and OpenStack. Virtualbox is 
-available out of the box with Vagrant.
+Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let
+you launch a local node or cluster of virtual machine nodes on your desktop or
+local server. If you will *only* launch a node or cluster of nodes on Amazon
+or an OpenStack cloud you can skip this step.
+
+Install Vagrant using the package from their [site](http://www.vagrantup.com/).
+You then need to install plugins to handle AWS and OpenStack. The Virtualbox
+provider is available out of the box with Vagrant.
 
   vagrant plugin install vagrant-aws
   vagrant plugin install vagrant-openstack-plugin
@@ -40,9 +59,12 @@ For example, to download the base Ubuntu 12.04 box you do the following:
 
   vagrant box add Ubuntu_12.04 http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box
 
+For Amazon or an OpenStack cloud a "dummy" box will be used and is already
+configured in the code.
+
 ## Configuration
 
-Copy the file templates/vagrant_launch.conf.template to the root dir of this
+Copy one of the files in templates/sample_configs/vagrant_launch.conf.template to the root dir of this
 project (seqware-vagrant) and rename it vagrant_launch.conf.  Next, fill in
 your various settings.  You can keep distinct settings for each of the backend
 types which allows you to launch both AWS and OpenStack-based machines with

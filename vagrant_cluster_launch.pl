@@ -18,6 +18,7 @@ use JSON;
 # * this is closely tied to SeqWare so we waste some time downloading and building that tool for other projects that use this tool but don't depend on SeqWare
 # * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
+# * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
@@ -153,7 +154,7 @@ sub provision_instances {
   my $hosts = find_node_info();
   print Dumper($hosts);
 
-  foreach my $host (keys %{$hosts}) {
+  foreach my $host (sort keys %{$hosts}) {
     print "PROVISION: $host\n";
     run_provision_script_list($cluster_configs->{$host}, $hosts->{$host}, $hosts);
   }
@@ -185,7 +186,6 @@ sub run_provision_script_list {
 
 # TODO: don't I need to process the script files before sending them over? I'll need to fill in with host info for sure!
 sub run_provision_script {
-  ########## FIXME
   my ($config_scripts, $host, $hosts) = @_;
   my $host_str = figure_out_host_str($hosts);
   $configs->{'HOSTS'} = $host_str;
@@ -207,7 +207,7 @@ sub run_provision_script {
 sub make_exports_str {
   my $hosts = shift;
   my $result = "";
-  foreach my $host (keys %{$hosts}) {
+  foreach my $host (sort keys %{$hosts}) {
     my $pip = $hosts->{$host}{pip};
     $result .= "
 /home $pip(rw,sync,no_root_squash,no_subtree_check)
@@ -223,7 +223,7 @@ sub make_exports_str {
 sub figure_out_host_str {
   my ($hosts) = @_;
   my $s = "";
-  foreach my $host (keys %{$hosts}) {
+  foreach my $host (sort keys %{$hosts}) {
     $s .= $hosts->{$host}{pip}."  $host\n";
   }
   print "HOSTS: $s\n";
@@ -245,7 +245,7 @@ sub setup_os_config_scripts_list() {
 # this basically cats files together after doing an autoreplace
 sub setup_os_config_scripts() {
   my ($configs, $output_dir, $output_file) = @_;
-  foreach my $host (keys %{$configs}) {
+  foreach my $host (sort keys %{$configs}) {
     foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
       autoreplace($script, "$output_file.temp");
       run("cat $output_file.temp >> $output_dir/$host\_$output_file");
@@ -298,7 +298,8 @@ sub prepare_files {
   # script for setting up hadoop hdfs
   copy("templates/setup_hdfs_volumes.pl", "$work_dir/setup_hdfs_volumes.pl");
   # hadoop settings files
-  # FIXME: break out into config driven provisioniner
+  # FIXME: right now these config files have "master" hardcoded as the master node
+  # FIXME: break out into config driven provisioner
   copy("templates/conf.worker.tar.gz", "$work_dir/conf.worker.tar.gz");
   copy("templates/conf.master.tar.gz", "$work_dir/conf.master.tar.gz");
   # DCC
@@ -342,7 +343,7 @@ sub autoreplace {
   open IN, "<$src" or die "Can't open input file $src\n";
   open OUT, ">$dest" or die "Can't open output file $dest\n";
   while(<IN>) {
-    foreach my $key (keys %{$configs}) {
+    foreach my $key (sort keys %{$configs}) {
       my $value = $configs->{$key};
       $_ =~ s/%{$key}/$value/g;
     }
