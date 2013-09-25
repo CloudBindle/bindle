@@ -110,6 +110,9 @@ if (!$skip_launch) {
 
 # uses Vagrant to find the IP and local IP address of the launched machines
 sub find_node_info {
+
+  my ($cluster_configs) = @_;
+
   my $d = {};
 
   my $node_list = `cd $work_dir && vagrant status`;
@@ -125,8 +128,13 @@ sub find_node_info {
       # aws 
       $host_id = $1;
     }
-    if ($host_id ne "") {
-      my $host_id = $1;
+
+    print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
+
+    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
+
+      print "MATCHED HOST ID: $host_id\n";
+
       my $host_info = `cd $work_dir && vagrant ssh-config $host_id`;
       my @h = split /\n/, $host_info;
       my $ip = "";
@@ -152,7 +160,7 @@ sub find_node_info {
 # this finds all the host IP addresses and then runs the second provisioning on them
 sub provision_instances {
   # first, find all the hosts and get their info
-  my $hosts = find_node_info();
+  my $hosts = find_node_info($cluster_configs);
   print Dumper($hosts);
 
   # this runs over all hosts and calls the provision scripts in the correct order
@@ -184,13 +192,14 @@ sub run_provision_script_list {
 
   while($cont) {
     foreach my $host_name (sort keys %{$hosts}) {
-      my @scripts = $cluster_configs->{$host_name}{second_pass_scripts};
-      my $host = $cluster_configs->{$host_name};
-      if ($curr_cell >= scalar(@scripts)) { $cont = 0; }    
+      print "  PROVISIONING HOST $host_name\n";
+      my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
+      my $host = $hosts->{$host_name};
+      if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
       else {
-        my @curr_scripts = $scripts[$curr_cell];
+        my $curr_scripts = $scripts->[$curr_cell];
         # now run each of these scripts on this host
-        foreach my $script (@curr_scripts) {
+        foreach my $script (@{$curr_scripts}) {
           print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
           $script =~ /\/([^\/]+)$/;
           my $script_name = $1;
