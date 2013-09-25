@@ -207,6 +207,8 @@ sub run_provision_script_list {
           $script =~ /\/([^\/]+)$/;
           my $script_name = $1;
           system("rm /tmp/config_script.sh");
+          # set the current host before processing file
+          $configs->{'HOST'} = $host_name;
           setup_os_config_scripts_list($script, "/tmp/config_script.sh");
           run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
         }

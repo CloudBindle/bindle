@@ -3,7 +3,7 @@
 # setup hosts
 # NOTE: the hostname seems to already be set at least on BioNimubs OS
 echo '%{HOSTS}' >> /etc/hosts
-hostname worker1
+hostname %{HOST}
 
 # general apt-get
 apt-get update
