@@ -140,18 +140,18 @@ sub find_node_info {
       my $ip = "";
       my $user = "";
       my $key = "";
-	  my $port = "";
+      my $port = "";
       foreach my $hl (@h) {
         chomp $hl;
         if ($hl =~ /HostName\s+(\S+)/) { $ip = $1; }
         if ($hl =~ /User\s+(\S+)/) { $user = $1; }
         if ($hl =~ /IdentityFile\s+(\S+)/) { $key = $1; }
-		if ($hl =~ /Port\s+(\S+)/) { $port = $1; }
+        if ($hl =~ /Port\s+(\S+)/) { $port = $1; }
       }
       $d->{$host_id}{ip} = $ip;
       $d->{$host_id}{user} = $user;
       $d->{$host_id}{key} = $key;
-	  $d->{$host_id}{port} = $port;
+      $d->{$host_id}{port} = $port;
       my $pip = `cd $work_dir && ssh -p $port -o StrictHostKeyChecking=no -i $key $user\@$ip "/sbin/ifconfig | grep -A 1 eth0 | grep inet"`;
       if ($pip =~ /addr:(\S+)/) { $d->{$host_id}{pip} = $1; }
     }
