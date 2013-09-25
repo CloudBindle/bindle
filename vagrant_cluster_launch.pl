@@ -19,6 +19,7 @@ use JSON;
 # * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 # * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
+# * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';

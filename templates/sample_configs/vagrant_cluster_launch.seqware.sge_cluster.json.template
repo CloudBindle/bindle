@@ -1,3 +1,7 @@
+# TODO: 
+# * Alex, need your help on this one
+# * I think the current SGE script assumes one node, will need to be generalized
+#
 # ABOUT
 # the general section contains variables used throughout templates
 # the node_config section defines the nodes of the cluster

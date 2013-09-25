@@ -64,102 +64,201 @@ configured in the code.
 
 ## Configuration
 
-Copy one of the files in templates/sample_configs/vagrant_launch.conf.template to the root dir of this
-project (seqware-vagrant) and rename it vagrant_launch.conf.  Next, fill in
-your various settings.  You can keep distinct settings for each of the backend
-types which allows you to launch both AWS and OpenStack-based machines with
-slightly tweaked differences.
+Since this Vagrant wrapper can be used for many different projects based on the
+Bash shell scripts used to configure the hosts, we included several example
+configuration templates in:
+
+    templates/sample_configs/
+
+Copy one of the files (for example
+templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
+to the root dir of this project (seqware-vagrant) and rename it
+to vagrant_cluster_launch.json:
+
+    cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+
+By using this destination filename and location the .gitignore file will
+prevent you from accidently checking in this file (it will contain sensitive
+information like your Amazon key).
+
+Next, fill in your various settings depending on what cloud provider you use
+(VirtualBox, Amazon, or OpenStack).  You can keep distinct settings for each of
+the backend types which allows you to launch both AWS and OpenStack-based
+machines with the same config file.
+
+At this point you will also want to examine the sections describing each of the
+nodes. Please use "master" as the name of the master node (we have assumptions
+in our code/config templates). Feel free to add or remove worker nodes (min 0,
+max recommended 10) and alter the list of "secondary" Bash shell config scripts
+that are run after the node is launched.
+
+If you use the template recommended above you will have a 1 node Hadoop cluster
+(with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
+software stack installed.  This environment should be ready for use with out
+Getting Started Guides for this project. You can also choose another template,
+such as "templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template",
+that will give you a 4 node cluster.
 
 ## Running with the Wrapper
 
-NOTE: this is out of date, see the "OICR Examples" section for current, cluster-launching examples.
-
-We provide a wrapper script (vagrant_launch.pl) that helps to lauch an instance
-in different cloud environments. It makes sure sensitive information is not
-stored in files that will be checked in and also collects various files from
-other parts of the SeqWare build.
+The wrapper script that controls the system described above is called "vagrant_cluster_launch.pl".
+Examples of launching in different environments (assuming you have a
+"vagrant_cluster_launch.json" file in the current directory) include:
 
     # for AWS
-    perl vagrant_launch.pl --use-aws
+    perl vagrant_cluster_launch.pl --use-aws
     # for OpenStack
-    perl vagrant_launch.pl --use-openstack
+    perl vagrant_cluster_launch.pl --use-openstack
     # for VirtualBox
-    perl vagrant_launch.pl --use-virtualbox
+    perl vagrant_cluster_launch.pl --use-virtualbox
 
 This script also lets you point to the config file explicitly, change the
-working directory (which defaults to target, it's the location where Vagrant
-puts all of its runtime files), point to different OS-specific setup script(s),
-and skip the integration tests if desired:
+working Vagrant directory (which defaults to target, it's the location where
+Vagrant puts all of its runtime files), and skip the integration tests (for
+SeqWare) if desired (the full integration tests take 1 hour!):
 
-    # example
-    perl vagrant_launch.pl --use-aws --working-dir target-aws --config-files templates/server_setup_scripts/ubuntu_12.04_base_script.sh,templates/server_setup_scripts/ubuntu_12.04_database_script.sh,templates/server_setup_scripts/ubuntu_12.04_portal_script.sh --skip-it-tests
+    # example, see source for all args
+    perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws --config-file vagrant_cluster_launch.json --skip-it-tests
 
-## OICR Examples
+## SeqWare Examples
 
-These are in flux right now but I'll try to keep the following up to date.  We're using this seqware-vagrant process for the following projects:
+These sections show specific examples taken from our templates. These cover
+single-node SeqWare, SeqWare clusters, and other OICR projects as well.  The
+config JSON templates and provisioning Bash shell scripts should provide ample
+examples of how to use vagrant_cluster_launch.pl with other tools. Using these
+examples, you will need to modify the configuration template and copy them to
+vagrant_cluster_launch.json (or another file, using the --config-file option).
 
-* ICGC DCC Portal
-* SeqWare 
+### SeqWare - Single Node
 
-Keep in mind you will want to take a look at the Vagrant template (templates/Vagrantfile.template) and modify as needed for your backend (AWS, OpenStack, Virtualbox) since some params (like floating IP address) are not yet parameters.
+This will launch a single node that's a self-contained SeqWare box. This is
+suitable for snapshoting for redistribution as a machine image (e.g. AMI on
+Amazon's cloud, VirtualBox snapshot, etc).
 
-### Setup
-
-Make sure you setup your vagrant_launch.conf file as described in "Configuration".  See Brian for OICR-specific settings which are described in more detail here: https://wiki.oicr.on.ca/display/SEQWARE/Cluster+or+Node+Launching+with+Vagrant
-
-### Single Node - All Projects
-
-This is currently broken since I've refactored for cluster launching.  The plan is to generalize this vagrant_launch.pl script so you can choose single or cluster mode and you can choose how many worker nodes to launch.  In the mean time use the develop branch instead if you need to launch a single node otherwise use the sample commands below to launch 2 node clusters for testing.
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you 
+    perl vagrant_cluster_launch.pl --use-openstack
 
 ### SeqWare - Cluster
 
-This will launch a 2 node cluster with a worker and master node. It's designed to use Oozie-Hadoop (not Oozie-SGE but Alex did create config shell scripts for this too).
+This will launch a 4 node cluster with 3 workers and one master node. You can
+reduce or increase the number of worker nodes depending on your requirements.
+Keep in mind the nodes are provisioned sequentially so adding nodes will increase
+the runtime.
 
-    perl vagrant_launch.pl --use-openstack --skip-it-tests --os-master-config-scripts templates/server_setup_scripts/ubuntu_12.04_master_script.sh --os-worker-config-scripts templates/server_setup_scripts/ubuntu_12.04_worker_script.sh --os-initial-config-scripts templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh
+#### Oozie Hadoop
 
-The only issue with this right now is I don't think HBase is configured to work in HDFS/distributed mode.  Also, see the note above about hard-coded values in the Vagrantfile.template.
+This is the default engine that the vast majority of people will want to use:
 
-### ICGC DCC Portal - Cluster
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you 
+    perl vagrant_cluster_launch.pl --use-openstack
 
-This will spin up a standard, 2 node SeqWare cluster (using Oozie-Hadoop), will setup elasticsearch, will download a dump of the (small) elasticsearch DCC index, load the dump into elasticsearch, and launch the DCC Portal web app on port 8998.
+#### Oozie SGE
 
-Keep in mind you should look at the templates/Vagrantfile.template before you launch to make sure your floating IP addresses are correct.  Also, the specific index dump file and DCC Portal jar file are hard coded in the ubuntu_12.04_master_dcc_portal_script.sh script so you will want to change these if there's an update.  Also, take a look at templates/DCC/settings.yml which has the index name embedded and will need to change if the index is updated.
+This is really just for SeqWare's own internal testing. We support a workflow engine that talks to SGE via an Oozie plugin and this configruation will let you spin up an SGE cluster configured to work with SeqWare:
 
-    perl vagrant_launch.pl --use-openstack --skip-it-tests --os-master-config-scripts templates/server_setup_scripts/ubuntu_12.04_master_script.sh,templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh,templates/server_setup_scripts/ubuntu_12.04_master_dcc_portal_script.sh --os-worker-config-scripts templates/server_setup_scripts/ubuntu_12.04_worker_script.sh,templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh --os-initial-config-scripts templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh
+TODO: the SGE scripts need to be generalized for a cluster
+
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you 
+    perl vagrant_cluster_launch.pl --use-openstack
+
+## OICR Examples
+
+SeqWare isn't the only project using this Vagrant wrapper.  We're using the
+same infrastructure for running the ICGC DCC data portal on OpenStack and
+Amazon. In the future we will add additional ICGC DCC software project
+profiles. These are not ready for outside users at this time but we expect
+other users in the future to launch DCC Portals and Validation systems using
+something similar to the below.
+
+### General OICR Settings
+
+The templates below do
+not include our OpenStack settings but you can see Brian for OICR-specific
+settings which are also described in more detail here:
+https://wiki.oicr.on.ca/display/SEQWARE/Cluster+or+Node+Launching+with+Vagrant
+
+### ICGC DCC Portal - Small Cluster
+
+This will spin up a standard, 2 node SeqWare cluster (using Oozie-Hadoop), will
+setup elasticsearch, will download a dump of the (small) elasticsearch DCC
+index, load the dump into elasticsearch, and launch the DCC Portal web app on
+port 8998.
+
+Keep in mind you should edit the json below before you launch to make sure your
+floating IP addresses and other settings are correct.  Also, the specific index
+dump file and DCC Portal jar file are hard coded in the provision scripts
+referenced inside the JSON so you will want to change these if there's an
+update.  Also, take a look at templates/DCC/settings.yml which has the index
+name embedded and will need to change if the index is updated.
+
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you
+    perl vagrant_cluster_launch.pl --use-openstack
 
 Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
 
-Updated on 20130923:
+### ICGC DCC Portal - Large Cluster
 
-    # setup your vagrant_cluster_launch.json config file, see templates/vagrant_cluster_launch.json.template
-    perl vagrant_cluster_launch.pl --use-openstack --config-file vagrant_cluster_launch.json --skip-it-tests
+This is the same as the previous example but defaults to an 8 node cluster (one
+master, 7 workers). It also calls scripts that reference the large
+Elasticsearch DCC Portal index dumps. In the future we will increase this
+number, optimize the configuration to better take advantage of the node number,
+and explore HA options.
 
-The above is the next version which should be much nicer for dealing with flexible numbers of worker nodes. In testing.
-
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you
+    perl vagrant_cluster_launch.pl --use-openstack
 
 ## Debugging
 
 If you need to debug a problem set the VAGRANT_LOG variable e.g.:
 
-    VAGRANT_LOG=DEBUG perl vagrant_launch.pl --use-aws
+    VAGRANT_LOG=DEBUG perl vagrant_cluster_launch.pl --use-aws
 
 Also you can use the "--skip-launch" option to just create the various launch
 files not actually trigger a VM.
 
-Vagrant will often report an error of the form ""Expected(200) <=> Actual(400 Bad Request)"." with no details.
-See the following patch for a fix
+Vagrant will often report an error (when using AWS of OpenStack) of the form
+""Expected(200) <=> Actual(400 Bad Request)"." with no details.  See the
+following patch for a fix to get more information:
+
 https://github.com/jeremyharris/vagrant-aws/commit/1473c3a45570fdebed2f2b28585244e53345eb1d
 
 ## Shutting Down
 
 You can terminate your instance via the provider interface (Open Stack, AWS, or VirtualBox).
 
-## Manual Running Vagrant
+You can also use Vagrant to terminate your instances, simply cd into the target directory (or whatever directory you specified with --working-dir) and issue:
+
+    vagrant status
+
+This will show you what's currently running.  You can then terminate them using:
+
+    vagrant destroy
+
+That will terminate all your instances associated with this particular working directory.  Please double-check the provider-specific console to ensure your instances shut down properly.
+
+*Do not forget to shut down your instances!*
+
+## Manual Running Vagrant (Out of Date)
+
+The following directions will not work reliably since the
+vagrant_cluster_launch.pl script actually performs multiple passes of
+configuration. I'm leaving them here for historic reasons since it's still
+useful to see how Vagrant works.
 
 You can use the Vagrantfile created by the launch script to manually start a
-cluster node (note, you would have to run the vagrant_launch.pl at least once
-before to get a target directory).  Change directory into the target dir.  This
-command brings up a SeqWare VM on Amazon:
+cluster node (note, you would have to run the vagrant_cluster_launch.pl at
+least once before to get a target directory).  Change directory into the target
+dir.  This command brings up a SeqWare VM on Amazon:
 
   cd target
   vagrant up --provider=aws
@@ -171,6 +270,9 @@ and want to re-run without restarting the box:
   vagrant provision --provision-with shell
 
 ## TODO
+
+The list of TODO items, some of which are out-of-date.  See the
+vagrant_cluster_launch.pl script for more TODO items too.
 
 * need to setup HBase for the QueryEngine -- done
 * need to edit the landing page to remove mention of Pegasus
@@ -184,3 +286,5 @@ and want to re-run without restarting the box:
 * better integration with our Maven build process, perhaps automatically calling this to setup integration test environment -- done
 * message of the day on login over ssh
 * pass in the particular branch to use with SeqWare -- done
+* would be great to have threading in here so nodes launch in parallel
+
