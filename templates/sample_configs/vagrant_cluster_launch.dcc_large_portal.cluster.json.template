@@ -52,8 +52,6 @@
       ], 
       # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
       "second_pass_scripts": [
-        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
-        [ ],
         [ "templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_master_dcc_portal_script.sh" ]
       ]
@@ -66,8 +64,6 @@
       ], 
       # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
@@ -79,8 +75,6 @@
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
@@ -92,8 +86,6 @@
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
@@ -105,8 +97,6 @@
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
@@ -118,8 +108,6 @@
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
@@ -131,8 +119,6 @@
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
@@ -144,8 +130,6 @@
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ ]
       ]
