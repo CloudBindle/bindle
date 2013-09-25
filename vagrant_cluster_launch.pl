@@ -140,16 +140,19 @@ sub find_node_info {
       my $ip = "";
       my $user = "";
       my $key = "";
+	  my $port = "";
       foreach my $hl (@h) {
         chomp $hl;
         if ($hl =~ /HostName\s+(\S+)/) { $ip = $1; }
         if ($hl =~ /User\s+(\S+)/) { $user = $1; }
         if ($hl =~ /IdentityFile\s+(\S+)/) { $key = $1; }
+		if ($hl =~ /Port\s+(\S+)/) { $port = $1; }
       }
       $d->{$host_id}{ip} = $ip;
       $d->{$host_id}{user} = $user;
       $d->{$host_id}{key} = $key;
-      my $pip = `cd $work_dir && ssh -o StrictHostKeyChecking=no -i $key $user\@$ip "/sbin/ifconfig | grep -A 1 eth0 | grep inet"`;
+	  $d->{$host_id}{port} = $port;
+      my $pip = `cd $work_dir && ssh -p $port -o StrictHostKeyChecking=no -i $key $user\@$ip "/sbin/ifconfig | grep -A 1 eth0 | grep inet"`;
       if ($pip =~ /addr:(\S+)/) { $d->{$host_id}{pip} = $1; }
     }
   }
@@ -205,7 +208,7 @@ sub run_provision_script_list {
           my $script_name = $1;
           system("rm /tmp/config_script.sh");
           setup_os_config_scripts_list($script, "/tmp/config_script.sh");
-          run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+          run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
         }
       }
     }
@@ -229,7 +232,7 @@ sub run_provision_script {
     my $script_name = $1;
     system("rm /tmp/config_script.sh");
     setup_os_config_scripts_list($script, "/tmp/config_script.sh");
-    run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
   }
 }
 
