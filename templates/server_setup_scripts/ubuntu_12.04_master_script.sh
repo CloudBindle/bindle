@@ -24,7 +24,7 @@ apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat6-c
 
 # install Hadoop deps, the master node runs the NameNode, SecondaryNameNode and JobTracker
 # NOTE: shouldn't really use secondary name node on same box for production
-apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven sysv-rc-conf hbase hbase-master hbase-regionserver xfsprogs hbase-thrift
+apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hue hue-server hue-plugins hue-oozie oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven sysv-rc-conf hbase hbase-master hbase-regionserver xfsprogs hbase-thrift
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -68,7 +68,10 @@ sudo -u hdfs hadoop fs -chmod 1777 /var/lib/hadoop-hdfs/cache/mapred/mapred/stag
 sudo -u hdfs hadoop fs -chown -R mapred /var/lib/hadoop-hdfs/cache/mapred
 sudo -u hdfs hadoop fs -mkdir /tmp/mapred/system
 sudo -u hdfs hadoop fs -chown mapred:hadoop /tmp/mapred/system
-sudo -u hdfs hadoop fs -chmod -R a+wr /tmp/hadoop-mapred/mapred
+sudo -u hdfs hadoop fs -chmod -R a+wrx /tmp/hadoop-mapred/mapred
+mkdir -p /tmp/hadoop-mapred
+chown mapred:mapred /tmp/hadoop-mapred
+chmod -R a+rwx /tmp/hadoop-mapred
 
 # start mapred
 for x in `cd /etc/init.d ; ls hadoop-0.20-mapreduce-*` ; do sudo service $x start ; done
