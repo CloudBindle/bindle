@@ -10,11 +10,11 @@ elastic:
 #  indexName: "dcc-release-r--dev-06d-6-20"
 #  indexName: "dcc-release-release5"
 
-# TODO: need to prepare this section and include as a var
+# FIXME: need to prepare this section and include as a var
   nodeAddresses:
-    - host: "10.0.20.213"
+    - host: "10.0.20.202"
       port: 9300
-    - host: "10.0.20.214"
+    - host: "10.0.20.203"
       port: 9300
 
 # Genomemaps

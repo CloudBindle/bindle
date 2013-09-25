@@ -51,7 +51,7 @@
       ], 
       # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
       "second_pass_scripts": [
-        [ "templates/server_setup_scripts/ubuntu_12.04_elasticsearch_node_script.sh" ],
+        [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
         [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_master_dcc_portal_script.sh" ]
       ]
     },
