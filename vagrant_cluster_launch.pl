@@ -155,16 +155,24 @@ sub provision_instances {
   my $hosts = find_node_info();
   print Dumper($hosts);
 
+  # this runs over all hosts and calls the provision scripts in the correct order
+  run_provision_script_list($cluster_configs, $hosts);
+
   foreach my $host (sort keys %{$hosts}) {
     print "PROVISION: $host\n";
-    run_provision_script_list($cluster_configs->{$host}, $hosts->{$host}, $hosts);
   }
 }
 
 # this runs all the "second_pass_scripts" in the json for a given host
 # FIXME: this is hacking on the configs object which is not good
 sub run_provision_script_list {
-  my ($cluster_config, $host, $hosts) = @_;
+  my ($cluster_configs, $hosts) = @_;
+  my $cont = 1;
+  my $curr_cell = 0;
+
+  print Dumper ($cluster_configs);
+
+  # general info
   # this is putting in a variable for the /etc/hosts file
   my $host_str = figure_out_host_str($hosts);
   $configs->{'HOSTS'} = $host_str;
@@ -173,14 +181,26 @@ sub run_provision_script_list {
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
   my $exports = make_exports_str($hosts);
   $configs->{'EXPORTS'} = $exports;
-  print Dumper (@{$cluster_config->{second_pass_scripts}});
-  foreach my $script (@{$cluster_config->{second_pass_scripts}}) {
-    print "SECOND PASS SCRIPT: $script\n";
-    $script =~ /\/([^\/]+)$/;
-    my $script_name = $1;
-    system("rm /tmp/config_script.sh");
-    setup_os_config_scripts_list($script, "/tmp/config_script.sh");
-    run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+
+  while($cont) {
+    foreach my $host_name (sort keys %{$hosts}) {
+      my @scripts = $cluster_configs->{$host_name}{second_pass_scripts};
+      my $host = $cluster_configs->{$host_name};
+      if ($curr_cell >= scalar(@scripts)) { $cont = 0; }    
+      else {
+        my @curr_scripts = $scripts[$curr_cell];
+        # now run each of these scripts on this host
+        foreach my $script (@curr_scripts) {
+          print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
+          $script =~ /\/([^\/]+)$/;
+          my $script_name = $1;
+          system("rm /tmp/config_script.sh");
+          setup_os_config_scripts_list($script, "/tmp/config_script.sh");
+          run("scp -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+        }
+      }
+    }
+    $curr_cell++;
   }
 }
 
