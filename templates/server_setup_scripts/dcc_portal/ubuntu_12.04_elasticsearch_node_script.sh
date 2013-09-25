@@ -15,7 +15,13 @@ elasticsearch - memlock unlimited
 
 # install elasticsearch
 wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.1.deb
-dpkg -i elasticsearch-0.90.1.deb
+dpkg --force-depends -i elasticsearch-0.90.1.deb
+
+# setup java_home
+echo 'JAVA_HOME=/usr/lib/jvm/j2sdk1.6-oracle' >> /etc/default/elasticsearch
+
+# now restart so it picks up the java setting
+/etc/init.d/elasticsearch restart
 
 # for backup/restore
 /usr/share/elasticsearch/bin/plugin -remove knapsack
