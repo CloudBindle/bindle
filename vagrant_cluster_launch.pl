@@ -304,7 +304,7 @@ sub read_config() {
 
 
 sub launch_instances {
-  run("cd $work_dir; $launch_cmd");
+  run("cd $work_dir && $launch_cmd");
 }
 
 sub find_version {
@@ -421,5 +421,5 @@ sub run {
   my ($cmd) = @_;
   print "RUNNING: $cmd\n";
   my $result = system("bash -c '$cmd'");
-  if ($result != 0) { "\nERROR!!! CMD RESULTED IN RETURN VALUE OF $result\n\n"; }
+  if ($result != 0) { die "\nERROR!!! CMD RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
