@@ -80,6 +80,8 @@ for x in `cd /etc/init.d ; ls hadoop-0.20-mapreduce-*` ; do sudo service $x star
 cd /usr/share/hue
 cp desktop/libs/hadoop/java-lib/hue-plugins-*.jar /usr/lib/hadoop-0.20-mapreduce/lib
 cd -
+# for some reason needs to be restarted to register plugins properly
+service hue stop
 service hue start
 
 # setup Oozie
