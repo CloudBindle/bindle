@@ -1,9 +1,9 @@
 #!/bin/bash -vx
 
 # prepare a location for the DCC portal
-mkdir -p /usr/local/dcc-portal
-cp /vagrant/settings.yml /usr/local/dcc-portal/
-cd /usr/local/dcc-portal
+mkdir -p /mnt/dcc-portal
+cp /vagrant/settings.yml /mnt/dcc-portal/
+cd /mnt/dcc-portal
 # get the web app
 wget %{DCC_PORTAL_JAR_URL}
 # get the index
