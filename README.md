@@ -1,5 +1,6 @@
 ## About
 
+
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
 nodes configured with one or more Bash shell scripts.  The big difference
