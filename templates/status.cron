@@ -2,6 +2,6 @@
 
 source /home/seqware/.bash_profile
 
-seqware workflow-run launch-scheduled
-seqware workflow-run propagate-statuses --threads 10
+seqware workflow-run launch-scheduled --host `hostname --long`
+seqware workflow-run propagate-statuses --host `hostname --long` --threads 10
 
