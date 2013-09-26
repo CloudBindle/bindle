@@ -28,8 +28,9 @@ echo 'JAVA_HOME=/usr/lib/jvm/j2sdk1.6-oracle' >> /etc/default/elasticsearch
 /usr/share/elasticsearch/bin/plugin -url http://dl.bintray.com/jprante/elasticsearch-plugins/org/xbib/elasticsearch/plugin/elasticsearch-knapsack/2.0.0/elasticsearch-knapsack-2.0.0.zip?direct -install knapsack
 
 # display
-/usr/share/elasticsearch/bin/plugin -remove mobz/elasticsearch-head
-/usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
+# fails saying already installed!?!
+#/usr/share/elasticsearch/bin/plugin -remove mobz/elasticsearch-head
+#/usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
 
 # fix memory TODO: need to make this an option!
 perl -pi -e 's/\#ES_HEAP_SIZE=2g/ES_HEAP_SIZE=%{DCC_ES_HEAP_SIZE_GB}g/' /etc/init.d/elasticsearch
@@ -39,7 +40,7 @@ perl -pi -e 's/\# discovery.zen.minimum_master_nodes: 1/discovery.zen.minimum_ma
 # setup local dirs for elasticsearch
 # TODO: should setup other ephemeral disks with my perl script and stripe across them
 mkdir -p /mnt/es/data
-perl -pi -e 's/\# path.data: \/path\/to\/data/path.data: \/mnt\/es\/data/' /etc/elasticsearch/elasticsearch.yml
+perl -pi -e 's/^\# path.data: \/path\/to\/data$/path.data: \/mnt\/es\/data/' /etc/elasticsearch/elasticsearch.yml
 mkdir -p /mnt/es/work
 perl -pi -e 's/\# path.work: \/path\/to\/work/path.work: \/mnt\/es\/work/' /etc/elasticsearch/elasticsearch.yml
 chown -R elasticsearch:elasticsearch /mnt/es
