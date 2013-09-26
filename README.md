@@ -1,5 +1,7 @@
 ## About
 
+Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
+working branch is "develop".
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
