@@ -23,7 +23,6 @@ use JSON;
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
-my $seqware_version = 'UNKNOWN';
 my $aws_key = '';
 my $aws_secret_key = '';
 my $launch_aws = 0;
@@ -54,9 +53,6 @@ GetOptions (
 
 # MAIN
 
-# figure out the current seqware version based on the most-recently built jar
-$seqware_version = find_version();
-
 # make the target dir
 run("mkdir $work_dir");
 
@@ -67,7 +63,7 @@ my $cluster_configs = {};
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
-$configs->{'SEQWARE_VERSION'} = $seqware_version;
+
 # for jenkins, override the branch command if required
 if ($git_commit){
   $configs->{'SEQWARE_BRANCH_CMD'} = "git checkout $git_commit";
@@ -307,17 +303,6 @@ sub read_config() {
 
 sub launch_instances {
   run("cd $work_dir && $launch_cmd");
-}
-
-sub find_version {
-  my $file = `ls ../seqware-distribution/target/seqware-distribution-*-full.jar | grep -v qe-full`;
-  chomp $file;
-  if ($file =~ /seqware-distribution-(\S+)-full.jar/) {
-   print "SEQWARE VERSION: $1\n";
-   return($1);
-  } else { 
-    die "ERROR: CAN'T FIGURE OUT VERSION FROM FILE: $file\n";
-  }
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
