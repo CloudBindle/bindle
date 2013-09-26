@@ -68,6 +68,7 @@ sudo -u hdfs hadoop fs -chmod 1777 /var/lib/hadoop-hdfs/cache/mapred/mapred/stag
 sudo -u hdfs hadoop fs -chown -R mapred /var/lib/hadoop-hdfs/cache/mapred
 sudo -u hdfs hadoop fs -mkdir /tmp/mapred/system
 sudo -u hdfs hadoop fs -chown mapred:hadoop /tmp/mapred/system
+sudo -u hdfs hadoop fs -mkdir -p /tmp/hadoop-mapred/mapred
 sudo -u hdfs hadoop fs -chmod -R a+wrx /tmp/hadoop-mapred/mapred
 mkdir -p /tmp/hadoop-mapred
 chown mapred:mapred /tmp/hadoop-mapred
@@ -98,6 +99,8 @@ sudo -u hdfs hadoop fs -mkdir /hbase
 sudo -u hdfs hadoop fs -chown hbase /hbase
 service hbase-master start
 service hbase-regionserver start
+
+service hue restart
 
 # setup daemons to start on boot
 for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done

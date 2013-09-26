@@ -112,6 +112,7 @@ su - seqware -c 'cd /home/seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee 
 
 # setup cronjobs after testing to avoid WorkflowStatusChecker or Launcher clashes
 cp /vagrant/status.cron /home/seqware/crons/
+chown -R seqware:seqware /home/seqware/crons
 chmod a+x /home/seqware/crons/status.cron
 su - seqware -c '(echo "* * * * * /home/seqware/crons/status.cron >> /home/seqware/logs/status.log") | crontab -'
 
