@@ -35,7 +35,14 @@
     "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
     "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
     # NOTE: you can checkout whatever branch you like, see our GitHub site
-    "SEQWARE_BRANCH_CMD": "git checkout develop"
+    "SEQWARE_BRANCH_CMD": "git checkout develop",
+    # DCC-specific
+    "DCC_ES_HEAP_SIZE_GB": "8",
+    "DCC_ES_MIN_MASTER_NODES": "2",
+    "DCC_PORTAL_JAR_URL": "http://ca.on.oicr.icgc.s3.amazonaws.com/lib/dcc-portal-api-1.11-20130924.184611-237.jar",
+    "DCC_PORTAL_JAR_NAME": "dcc-portal-api-1.11-20130924.184611-237.jar",
+    "DCC_INDEX_NAME": "dcc-release-load-dev-06e-6-38",
+    "DCC_INDEX_TAR_URL": "http://ca.on.oicr.icgc.s3.amazonaws.com/index_dumps/dcc-release-load-dev-06e-6-38.tar.gz"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
