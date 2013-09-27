@@ -23,7 +23,7 @@ cd gitflow
 
 # checkout seqware
 cd /home/seqware/gitroot
-git clone git@github.com:SeqWare/queryengine.git seqware
+git clone https://github.com/SeqWare/queryengine.git seqware
 
 # setup bash_profile for seqware
 echo "export MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" >> /home/seqware/.bash_profile
