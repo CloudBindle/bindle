@@ -28,9 +28,8 @@ echo 'JAVA_HOME=/usr/lib/jvm/j2sdk1.6-oracle' >> /etc/default/elasticsearch
 /usr/share/elasticsearch/bin/plugin -url http://dl.bintray.com/jprante/elasticsearch-plugins/org/xbib/elasticsearch/plugin/elasticsearch-knapsack/2.0.0/elasticsearch-knapsack-2.0.0.zip?direct -install knapsack
 
 # display
-# fails saying already installed!?!
-#/usr/share/elasticsearch/bin/plugin -remove mobz/elasticsearch-head
-#/usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
+/usr/share/elasticsearch/bin/plugin -remove head
+/usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
 
 # fix memory TODO: need to make this an option!
 perl -pi -e 's/\#ES_HEAP_SIZE=2g/ES_HEAP_SIZE=%{DCC_ES_HEAP_SIZE_GB}g/' /etc/init.d/elasticsearch
