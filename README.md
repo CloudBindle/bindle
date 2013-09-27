@@ -152,6 +152,18 @@ Amazon's cloud, VirtualBox snapshot, etc).
     # launch, use the correct command line args for you 
     perl vagrant_cluster_launch.pl --use-openstack
 
+### SeqWare Query Engine - Single Node
+
+This will launch a single node that's a self-contained SeqWare Query Engine box. This is
+suitable for snapshoting for redistribution as a machine image (e.g. AMI on
+Amazon's cloud, VirtualBox snapshot, etc).
+
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you 
+    perl vagrant_cluster_launch.pl --use-openstack
+
+
 ### SeqWare - Cluster
 
 This will launch a 4 node cluster with 3 workers and one master node. You can
