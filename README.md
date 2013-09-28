@@ -50,6 +50,15 @@ provider is available out of the box with Vagrant.
   vagrant plugin install vagrant-aws
   vagrant plugin install vagrant-openstack-plugin
 
+The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
+few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
+your distribution's package management system:
+
+* Getopt::Long: should be installed by default with Perl
+* Data::Dumper: should be installed by default with Perl
+* JSON: eg "sudo apt-get install libjson-perl"
+* Template: eg "sudo apt-get install libtemplate-perl"
+
 ## Getting "Boxes"
 
 If you are running using VirtualBox you need to pre-download boxes which are

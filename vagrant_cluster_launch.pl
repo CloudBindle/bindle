@@ -2,6 +2,7 @@ use strict;
 use Getopt::Long;
 use Data::Dumper;
 use JSON;
+use Template;
 #use Config;
 #$Config{useithreads} or die('Recompile Perl with threads to run this program.');
 
@@ -321,7 +322,7 @@ sub figure_out_host_str {
 
 
 # this basically cats files together after doing an autoreplace
-sub setup_os_config_scripts_list() {
+sub setup_os_config_scripts_list {
   my ($config_scripts, $output) = @_;
   my @scripts = split /,/, $config_scripts;
   foreach my $script (@scripts) {
