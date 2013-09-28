@@ -98,6 +98,10 @@ if (!$skip_launch) {
   # this launches and does first round setup
   launch_instances();
   # this finds IP addresses and does second round of setup
+  # FIXME: need a place to process settings files with info taken after launch (e.g. IPs)
+  # and this should run via template toolkit since it's much easier to deal with for loops and other complex substitutions
+  # TODO: find_cluster_info();
+  # TODO: process_and_send_config_template();
   provision_instances();
 }
 
@@ -156,29 +160,15 @@ sub find_node_info {
   return($d);
 }
 
+# FIXME: method needs to be broken into individual steps
+# FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them
 sub provision_instances {
   # first, find all the hosts and get their info
   my $hosts = find_node_info($cluster_configs);
   print Dumper($hosts);
 
-  # this runs over all hosts and calls the provision scripts in the correct order
-  run_provision_script_list($cluster_configs, $hosts);
-
-  foreach my $host (sort keys %{$hosts}) {
-    print "PROVISION: $host\n";
-  }
-}
-
-# this runs all the "second_pass_scripts" in the json for a given host
-# FIXME: this is hacking on the configs object which is not good
-sub run_provision_script_list {
-  my ($cluster_configs, $hosts) = @_;
-  my $cont = 1;
-  my $curr_cell = 0;
-
-  print Dumper ($cluster_configs);
-
+  # FIXME: this should be better organized and it's own subroutine 
   # general info
   # this is putting in a variable for the /etc/hosts file
   my $host_str = figure_out_host_str($hosts);
@@ -188,6 +178,74 @@ sub run_provision_script_list {
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
   my $exports = make_exports_str($hosts);
   $configs->{'EXPORTS'} = $exports;
+  # DCC specific stuff
+  # for the settings.yml
+  $configs->{'DCC_PORTAL_SETTINGS_HOST_STR'} = make_dcc_portal_host_string($hosts);
+  # for the elasticsearch.yml
+  $configs->{'DCC_ES_HOSTS_STR'} = make_dcc_es_host_string($hosts); 
+
+  # now process templates to remote destinations
+  run_provision_files($cluster_configs, $hosts);
+
+  # this runs over all hosts and calls the provision scripts in the correct order
+  run_provision_script_list($cluster_configs, $hosts);
+
+}
+
+sub make_dcc_es_host_string {
+  my ($hosts) = @_;
+  my $host_str = "";
+  my $first = 1;
+  foreach my $host (keys %{$hosts}) {
+    my $pip = $hosts->{$host}{pip};
+    if ($first) { $first = 0; $host_str .= "\"$pip\""; }
+    else { $host_str .= ", \"$pip\""; }
+  }
+  return($host_str);
+}
+
+sub make_dcc_portal_host_string {
+  my ($hosts) = @_;
+  my $host_str = "";
+  foreach my $host (keys %{$hosts}) {
+    my $pip = $hosts->{$host}{pip};
+    $host_str .= "
+    - host: \"$pip\"
+      port: 9300";
+  }
+  return($host_str);
+}
+
+# processes and copies files to the specific hosts
+sub run_provision_files {
+  my ($cluster_configs, $hosts) = @_;
+
+  foreach my $host_name (sort keys %{$hosts}) {
+    print "  PROVISIONING FILES TO HOST $host_name\n";
+    my $scripts = $cluster_configs->{$host_name}{provision_files};
+    my $host = $hosts->{$host_name};
+    # now run each of these scripts on this host
+    foreach my $script (keys %{$scripts}) {
+      print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
+      $script =~ /\/([^\/]+)$/;
+      my $script_name = $1;
+      system("rm /tmp/tmp_$script_name");
+      # set the current host before processing file
+      setup_os_config_scripts_list($script, "/tmp/tmp_$script_name");
+      run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/tmp_$script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
+      system("rm /tmp/tmp_$script_name");
+    }
+  }
+}
+
+
+# this runs all the "second_pass_scripts" in the json for a given host
+sub run_provision_script_list {
+  my ($cluster_configs, $hosts) = @_;
+  my $cont = 1;
+  my $curr_cell = 0;
+
+  print Dumper ($cluster_configs);
 
   while($cont) {
     foreach my $host_name (sort keys %{$hosts}) {
@@ -324,7 +382,7 @@ sub prepare_files {
   copy("templates/conf.master.tar.gz", "$work_dir/conf.master.tar.gz");
   # DCC
   # FIXME: break out into config driven provisioner
-  copy("templates/DCC/settings.yml", "$work_dir/settings.yml");
+  autoreplace("templates/DCC/settings.yml", "$work_dir/settings.yml");
 }
 
 # this assumes the first pass script was created per host by setup_os_config_scripts

@@ -31,17 +31,22 @@ echo 'JAVA_HOME=/usr/lib/jvm/j2sdk1.6-oracle' >> /etc/default/elasticsearch
 /usr/share/elasticsearch/bin/plugin -remove head
 /usr/share/elasticsearch/bin/plugin -install mobz/elasticsearch-head
 
-# fix memory TODO: need to make this an option!
+# FIXME: this script should not do this, instead the config file should be a template
 perl -pi -e 's/\#ES_HEAP_SIZE=2g/ES_HEAP_SIZE=%{DCC_ES_HEAP_SIZE_GB}g/' /etc/init.d/elasticsearch
 perl -pi -e 's/\# bootstrap.mlockall: true/bootstrap.mlockall: true/' /etc/elasticsearch/elasticsearch.yml
 perl -pi -e 's/\# discovery.zen.minimum_master_nodes: 1/discovery.zen.minimum_master_nodes: %{DCC_ES_MIN_MASTER_NODES}/' /etc/elasticsearch/elasticsearch.yml
-
 # setup local dirs for elasticsearch
 # TODO: should setup other ephemeral disks with my perl script and stripe across them
 mkdir -p /mnt/es/data
 perl -pi -e 's/^\# path.data: \/path\/to\/data$/path.data: \/mnt\/es\/data/' /etc/elasticsearch/elasticsearch.yml
 mkdir -p /mnt/es/work
 perl -pi -e 's/\# path.work: \/path\/to\/work/path.work: \/mnt\/es\/work/' /etc/elasticsearch/elasticsearch.yml
+# now setup the hosts
+perl -pi -e 's/# discovery.zen.ping.unicast.hosts: ["host1", "host2:port", "host3[portX-portY]"]/discovery.zen.ping.unicast.hosts: [%{DCC_ES_HOSTS_STR}]/' /etc/elasticsearch/elasticsearch.yml
+# now turnoff automatic discovery
+perl -pi -e 's/\# discovery.zen.ping.multicast.enabled/discovery.zen.ping.multicast.enabled/' /etc/elasticsearch/elasticsearch.yml
+
+# owned by ES
 chown -R elasticsearch:elasticsearch /mnt/es
 
 # now restart to pickup changes above
