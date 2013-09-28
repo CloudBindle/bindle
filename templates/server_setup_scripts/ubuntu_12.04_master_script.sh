@@ -14,17 +14,23 @@ hostname master
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
 
+# common installs for master and workers
+apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
+apt-get -q -y --force-yes install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
+
+usermod -a -G seqware mapred
+
 # setup zookeeper
 apt-get -q -y --force-yes install zookeeper zookeeper-server
 service zookeeper-server init
 service zookeeper-server start
 
-# the repos have been setup in the minimal script
-apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven sysv-rc-conf xfsprogs
-
 # install Hadoop deps, the master node runs the NameNode, SecondaryNameNode and JobTracker
 # NOTE: shouldn't really use secondary name node on same box for production
-apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hue hue-server hue-plugins hue-oozie oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven sysv-rc-conf hbase hbase-master hbase-regionserver xfsprogs hbase-thrift
+apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
+
+# the repos have been setup in the minimal script
+apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list

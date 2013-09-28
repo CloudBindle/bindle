@@ -9,8 +9,11 @@ hostname %{HOST}
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
 
-# install hadoop
-apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
+# common installs for master and workers
+apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
+apt-get -q -y --force-yes install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
+
+usermod -a -G seqware mapred
 
 # setup the HDFS drives
 # TODO
