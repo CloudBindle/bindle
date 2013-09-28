@@ -36,7 +36,7 @@ echo "export MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" >> /home/seqware/.bash
 chown -R seqware:seqware /home/seqware
 
 # correct permissions
-su - seqware -c 'chmod 600 /home/seqware/.seqware/*'
+su - seqware -c 'chmod 640 /home/seqware/.seqware/settings'
 
 # configure hubflow
 su - seqware -c 'cd /home/seqware/gitroot/seqware; git hf init; git hf update'
