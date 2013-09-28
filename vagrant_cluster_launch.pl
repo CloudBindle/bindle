@@ -2,7 +2,7 @@ use strict;
 use Getopt::Long;
 use Data::Dumper;
 use JSON;
-use Template;
+#use Template;
 #use Config;
 #$Config{useithreads} or die('Recompile Perl with threads to run this program.');
 
