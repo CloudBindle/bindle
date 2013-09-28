@@ -72,14 +72,6 @@ chmod a+rwx /datastore
 # seems duplicated from minimal script
 # useradd -d /home/seqware -m seqware -s /bin/bash
 
-# required for running oozie jobs
-mkdir /usr/lib/hadoop-0.20-mapreduce/.seqware
-mkdir /var/lib/hadoop-mapreduce/.seqware
-cp /home/seqware/.seqware/settings /usr/lib/hadoop-0.20-mapreduce/.seqware/settings
-cp /home/seqware/.seqware/settings /var/lib/hadoop-mapreduce/.seqware/settings
-chown -R mapred:mapred /usr/lib/hadoop-0.20-mapreduce/.seqware
-chown -R mapred:mapred /var/lib/hadoop-mapreduce/.seqware
-
 # not sure if this is required
 mkdir -p /tmp/hadoop-mapred
 chown mapred:mapred /tmp/hadoop-mapred

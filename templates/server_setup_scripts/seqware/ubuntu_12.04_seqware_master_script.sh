@@ -98,15 +98,6 @@ perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat6/Catalina/loc
 # seqware landing page
 cp -r /home/seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
 
-# seqware tutorials
-# required for running oozie jobs
-mkdir /usr/lib/hadoop-0.20-mapreduce/.seqware
-mkdir /var/lib/hadoop-mapreduce/.seqware
-cp /home/seqware/.seqware/settings /usr/lib/hadoop-0.20-mapreduce/.seqware/settings
-cp /home/seqware/.seqware/settings /var/lib/hadoop-mapreduce/.seqware/settings
-chown -R mapred:mapred /usr/lib/hadoop-0.20-mapreduce/.seqware
-chown -R mapred:mapred /var/lib/hadoop-mapreduce/.seqware
-
 # run full integration testing
 su - seqware -c 'cd /home/seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
 
