@@ -333,6 +333,7 @@ sub setup_os_config_scripts_list {
 }
 
 # this basically cats files together after doing an autoreplace
+# that fills in variables from the config part of the JSON
 sub setup_os_config_scripts() {
   my ($configs, $output_dir, $output_file) = @_;
   foreach my $host (sort keys %{$configs}) {
@@ -365,6 +366,7 @@ sub launch_instances {
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
+# FIXME: should remove the non-generic files processed below if possible
 sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
