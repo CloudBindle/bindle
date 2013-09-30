@@ -48,7 +48,10 @@
       ], 
       # NOTE: this is an array of arrays, since this is a single box there's only one inner array. 
       "second_pass_scripts": [
-        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh", "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh" ]
+        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh",
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh",
+          "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
+        ]
       ]
     }
   }
