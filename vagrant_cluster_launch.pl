@@ -55,7 +55,7 @@ GetOptions (
 # MAIN
 
 # make the target dir
-run("mkdir $work_dir");
+run("mkdir -p $work_dir");
 
 # config object used for find and replace
 my $configs = {};
