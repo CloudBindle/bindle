@@ -53,9 +53,14 @@
 	os.floating_ip = "%{OS_FLOATING_IP}"
     end
 
+    %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
     %{custom_hostname}.vm.network :forwarded_port, host: 8080, guest: 8080
     %{custom_hostname}.vm.network :forwarded_port, host: 8888, guest: 8888
     %{custom_hostname}.vm.network :forwarded_port, host: 11000, guest: 11000
+    %{custom_hostname}.vm.network :forwarded_port, host: 50030, guest: 50030
+    %{custom_hostname}.vm.network :forwarded_port, host: 50070, guest: 50070
+    %{custom_hostname}.vm.network :forwarded_port, host: 60010, guest: 60010
+    %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
     %{custom_hostname}.vm.hostname = "%{custom_hostname}"
     %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
