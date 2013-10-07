@@ -3,7 +3,7 @@
 # first, fix the /etc/hosts file since SGE wants reverse lookup to work
 cp /etc/hosts /tmp/hosts
 echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
-cat /tmp/hosts >> /etc/hosts
+cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
 
 # setup hosts
 # NOTE: the hostname seems to already be set at least on BioNimubs OS
@@ -19,6 +19,7 @@ apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 usermod -a -G seqware mapred
+usermod -a -G mapred seqware
 
 # setup zookeeper
 apt-get -q -y --force-yes install zookeeper zookeeper-server

@@ -14,6 +14,7 @@ apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 usermod -a -G seqware mapred
+usermod -a -G mapred seqware
 
 # setup the HDFS drives
 # TODO
