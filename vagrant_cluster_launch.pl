@@ -3,8 +3,10 @@ use Getopt::Long;
 use Data::Dumper;
 use JSON;
 #use Template;
-#use Config;
-#$Config{useithreads} or die('Recompile Perl with threads to run this program.');
+use Config;
+$Config{useithreads} or die('Recompile Perl with threads to run this program.');
+use threads;
+use Storable 'dclone';
 
 # VARS
 
@@ -104,6 +106,7 @@ if (!$skip_launch) {
   # TODO: find_cluster_info();
   # TODO: process_and_send_config_template();
   provision_instances();
+  print "FINISHED!\n";
 }
 
 
@@ -115,9 +118,13 @@ sub find_node_info {
   my ($cluster_configs) = @_;
 
   my $d = {};
+  my $node_list = "";
 
-  my $node_list = `cd $work_dir && vagrant status`;
+  foreach my $node (sort keys %{$cluster_configs}){
+    $node_list .= `cd $work_dir/$node && vagrant status`."\n";
+  }
   print "$node_list\n";
+
   my @t = split /\n/, $node_list;
   foreach my $l (@t) {
     chomp $l;
@@ -136,7 +143,7 @@ sub find_node_info {
 
       print "MATCHED HOST ID: $host_id\n";
 
-      my $host_info = `cd $work_dir && vagrant ssh-config $host_id`;
+      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config $host_id`;
       my @h = split /\n/, $host_info;
       my $ip = "";
       my $user = "";
@@ -153,7 +160,7 @@ sub find_node_info {
       $d->{$host_id}{user} = $user;
       $d->{$host_id}{key} = $key;
       $d->{$host_id}{port} = $port;
-      my $pip = `cd $work_dir && ssh -p $port -o StrictHostKeyChecking=no -i $key $user\@$ip "/sbin/ifconfig | grep -A 1 eth0 | grep inet"`;
+      my $pip = `cd $work_dir/$host_id && ssh -p $port -o StrictHostKeyChecking=no -i $key $user\@$ip "/sbin/ifconfig | grep -A 1 eth0 | grep inet"`;
       if ($pip =~ /addr:(\S+)/) { $d->{$host_id}{pip} = $1; }
     }
   }
@@ -220,22 +227,34 @@ sub make_dcc_portal_host_string {
 # processes and copies files to the specific hosts
 sub run_provision_files {
   my ($cluster_configs, $hosts) = @_;
-
+  my @all_threads;
   foreach my $host_name (sort keys %{$hosts}) {
-    print "  PROVISIONING FILES TO HOST $host_name\n";
     my $scripts = $cluster_configs->{$host_name}{provision_files};
     my $host = $hosts->{$host_name};
-    # now run each of these scripts on this host
-    foreach my $script (keys %{$scripts}) {
-      print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
-      $script =~ /\/([^\/]+)$/;
-      my $script_name = $1;
-      system("rm /tmp/tmp_$script_name");
-      # set the current host before processing file
-      setup_os_config_scripts_list($script, "/tmp/tmp_$script_name");
-      run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/tmp_$script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
-      system("rm /tmp/tmp_$script_name");
-    }
+    print "  PROVISIONING FILES TO HOST $host_name\n";
+    my $thr = threads->create(\&provision_files_thread, $host_name, $scripts, $host);
+    print "  LAUNCHED THREAD PROVISION FILES TO $host_name\n";
+    push (@all_threads, $thr);
+  }
+  # Now wait for the threads to finish; this will block if the thread isn't terminated
+  foreach my $thr (@all_threads){
+    $thr->join();
+  }
+}
+
+sub provision_files_thread {
+  my ($host_name, $scripts, $host) = @_;
+  print "    STARTING THREAD TO PROVISION FILES TO HOST $host_name\n";
+  # now run each of these scripts on this host
+  foreach my $script (keys %{$scripts}) {
+    print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
+    $script =~ /\/([^\/]+)$/;
+    my $script_name = $1;
+    system("rm /tmp/tmp_$script_name");
+    # set the current host before processing file
+    setup_os_config_scripts_list($script, "/tmp/tmp_$script_name");
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/tmp_$script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
+    system("rm /tmp/tmp_$script_name");
   }
 }
 
@@ -249,6 +268,7 @@ sub run_provision_script_list {
   print Dumper ($cluster_configs);
 
   while($cont) {
+    my @all_threads = ();
     foreach my $host_name (sort keys %{$hosts}) {
       print "  PROVISIONING HOST $host_name\n";
       my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
@@ -256,39 +276,29 @@ sub run_provision_script_list {
       if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
       else {
         my $curr_scripts = $scripts->[$curr_cell];
-        # now run each of these scripts on this host
-        foreach my $script (@{$curr_scripts}) {
-          print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
-          $script =~ /\/([^\/]+)$/;
-          my $script_name = $1;
-          system("rm /tmp/config_script.sh");
-          # set the current host before processing file
-          $configs->{'HOST'} = $host_name;
-          setup_os_config_scripts_list($script, "/tmp/config_script.sh");
-          run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
-        }
+        my $thr = threads->create(\&provision_script_list_thread, $host_name, $host, $curr_scripts, $curr_cell);
+        push(@all_threads, $thr);
       }
+    }
+    foreach my $thr (@all_threads){
+      $thr->join();
     }
     $curr_cell++;
   }
 }
 
-
-# TODO: don't I need to process the script files before sending them over? I'll need to fill in with host info for sure!
-sub run_provision_script {
-  my ($config_scripts, $host, $hosts) = @_;
-  my $host_str = figure_out_host_str($hosts);
-  $configs->{'HOSTS'} = $host_str;
-  my $master_pip = $hosts->{master}{pip};
-  $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
-  my $exports = make_exports_str($hosts);
-  $configs->{'EXPORTS'} = $exports;
-  my @a = split /,/, $config_scripts;
-  foreach my $script (@a) {
+sub provision_script_list_thread {
+  my ($host_name, $host, $curr_scripts, $curr_cell) = @_;
+  my $local_configs = dclone $configs;
+  # now run each of these scripts on this host
+  foreach my $script (@{$curr_scripts}) {
+    print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
     system("rm /tmp/config_script.sh");
-    setup_os_config_scripts_list($script, "/tmp/config_script.sh");
+    # set the current host before processing file
+    $local_configs->{'HOST'} = $host_name;
+    setup_os_config_scripts_list($script, "/tmp/config_script.sh", $local_configs);
     run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
   }
 }
@@ -323,10 +333,10 @@ sub figure_out_host_str {
 
 # this basically cats files together after doing an autoreplace
 sub setup_os_config_scripts_list {
-  my ($config_scripts, $output) = @_;
+  my ($config_scripts, $output, $configs) = @_;
   my @scripts = split /,/, $config_scripts;
   foreach my $script (@scripts) {
-    autoreplace($script, "$output.temp"); 
+    autoreplace($script, "$output.temp", $configs); 
     run("cat $output.temp >> $output");
     run("rm $output.temp");
   }
@@ -337,9 +347,10 @@ sub setup_os_config_scripts_list {
 sub setup_os_config_scripts() {
   my ($configs, $output_dir, $output_file) = @_;
   foreach my $host (sort keys %{$configs}) {
+    run("mkdir $output_dir/$host");
     foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
       autoreplace($script, "$output_file.temp");
-      run("cat $output_file.temp >> $output_dir/$host\_$output_file");
+      run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
       run("rm $output_file.temp");
     }
   }
@@ -362,7 +373,23 @@ sub read_config() {
 
 
 sub launch_instances {
-  run("cd $work_dir && $launch_cmd");
+  my @all_threads;
+  foreach my $node (sort keys %{$cluster_configs}) {  
+    print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
+    my $thr = threads->create(\&launch_instance, $node);
+    push (@all_threads, $thr);
+  }
+  print "  ALL LAUNCH THREADS STARTED\n";
+  # Now wait for the threads to finish; this will block if the thread isn't terminated
+  foreach my $thr (@all_threads){
+    $thr->join();
+  }
+  print " ALL LAUNCH THREADS COMPLETED\n";
+}
+
+sub launch_instance {
+  my $node = $_[0];
+  run("cd $work_dir/$node && $launch_cmd");
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
@@ -370,38 +397,41 @@ sub launch_instances {
 sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
-  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir/Vagrantfile");
-  # cron for SeqWare
-  autoreplace("templates/status.cron", "$work_dir/status.cron");
-  # settings, user data
-  copy("templates/settings", "$work_dir/settings");
-  copy("templates/user_data.txt", "$work_dir/user_data.txt");
-  # script for setting up hadoop hdfs
-  copy("templates/setup_hdfs_volumes.pl", "$work_dir/setup_hdfs_volumes.pl");
-  # hadoop settings files
-  # FIXME: right now these config files have "master" hardcoded as the master node
-  # FIXME: break out into config driven provisioner
-  copy("templates/conf.worker.tar.gz", "$work_dir/conf.worker.tar.gz");
-  copy("templates/conf.master.tar.gz", "$work_dir/conf.master.tar.gz");
-  # DCC
-  # FIXME: break out into config driven provisioner
-  autoreplace("templates/DCC/settings.yml", "$work_dir/settings.yml");
+  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir");
+  foreach my $node (sort keys %{$cluster_configs}) {
+    # cron for SeqWare
+    autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
+    # settings, user data
+    copy("templates/settings", "$work_dir/$node/settings");
+    copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
+    # script for setting up hadoop hdfs
+    copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
+    # hadoop settings files
+    # FIXME: right now these config files have "master" hardcoded as the master node
+    # FIXME: break out into config driven provisioner
+    copy("templates/conf.worker.tar.gz", "$work_dir/$node/conf.worker.tar.gz");
+    copy("templates/conf.master.tar.gz", "$work_dir/$node/conf.master.tar.gz");
+    # DCC
+    # FIXME: break out into config driven provisioner
+    autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
+  }
 }
 
 # this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
-  my ($start, $part, $end, $cluster_configs, $configs, $output) = @_;
+  my ($start, $part, $end, $cluster_configs, $configs, $work_dir) = @_;
   print Dumper($cluster_configs);
   print Dumper($configs);
-  autoreplace("$start", "$output");
   foreach my $node (sort keys %{$cluster_configs}) {
+    my $node_output = "$work_dir/$node/Vagrantfile";
+    autoreplace("$start", "$node_output");
     $configs->{custom_hostname} = $node;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
-    autoreplace("$part", "$output.temp");
-    run("cat $output.temp >> $output");
-    run("rm $output.temp");
+    autoreplace("$part", "$node_output.temp");
+    run("cat $node_output.temp >> $node_output");
+    run("rm $node_output.temp");
+    run("cat $end >> $node_output");
   } 
-  run("cat $end >> $output");
 }
 
 # reads a JSON-based config
@@ -419,13 +449,16 @@ sub read_json_config {
 }
 
 sub autoreplace {
-  my ($src, $dest) = @_;
+  my ($src, $dest, $localconfigs) = @_;
+  unless (defined $localconfigs) {
+    $localconfigs = $configs;
+  }
   print "AUTOREPLACE: $src $dest\n";
   open IN, "<$src" or die "Can't open input file $src\n";
   open OUT, ">$dest" or die "Can't open output file $dest\n";
   while(<IN>) {
-    foreach my $key (sort keys %{$configs}) {
-      my $value = $configs->{$key};
+    foreach my $key (sort keys %{$localconfigs}) {
+      my $value = $localconfigs->{$key};
       $_ =~ s/%{$key}/$value/g;
     }
     print OUT $_;
