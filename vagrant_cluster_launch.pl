@@ -119,9 +119,13 @@ sub find_node_info {
 
   my $d = {};
   my $node_list = "";
+  my %node_names = ();
 
-  foreach my $node (sort keys %{$cluster_configs}){
-    $node_list .= `cd $work_dir/$node && vagrant status`."\n";
+  foreach my $nodedata (@{$cluster_configs}){
+    foreach my $node (@{$nodedata->{name}}){
+      $node_list .= `cd $work_dir/$node && vagrant status`."\n";
+      $node_names{$node} = 1;
+    }
   }
   print "$node_list\n";
 
@@ -139,7 +143,7 @@ sub find_node_info {
 
     print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
-    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
+    if ($host_id ne "" && exists $node_names{$host_id}) {
 
       print "MATCHED HOST ID: $host_id\n";
 
