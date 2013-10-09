@@ -37,11 +37,12 @@
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
   # you need 1 master and 0..n workers
-  "node_config": {
+  "node_config": [
     # NOTE: the master node is assumed to be called "master" (for now), things will break if named something else
-    "master": {
+    {
+      "name": ["master"],
       "type": "master",
-      "floatip": "<FILLMEIN>",
+      "floatip": ["<FILLMEIN>"],
       # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
       "first_pass_scripts": [
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
@@ -54,5 +55,5 @@
         ]
       ]
     }
-  }
+  ]
 }
