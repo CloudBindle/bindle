@@ -78,4 +78,9 @@ mkdir -p /tmp/hadoop-mapred
 chown mapred:mapred /tmp/hadoop-mapred
 chmod -R a+rwx /tmp/hadoop-mapred
 
+# Add hadoop-init startup script
+cp /vagrant/hadoop-init-worker /etc/init.d/hadoop-init
+chown root:root /etc/init.d/hadoop-init
+chmod 755 /etc/init.d/hadoop-init
+sysv-rc-conf hadoop-init on
 

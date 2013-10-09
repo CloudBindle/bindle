@@ -130,3 +130,8 @@ exportfs -ra
 service portmap restart
 service nfs-kernel-server restart
 
+# Add hadoop-init startup script
+cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
+chown root:root /etc/init.d/hadoop-init
+chmod 755 /etc/init.d/hadoop-init
+sysv-rc-conf hadoop-init on
