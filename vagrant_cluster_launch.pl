@@ -62,7 +62,22 @@ run("mkdir $work_dir");
 # config object used for find and replace
 my $configs = {};
 my $cluster_configs = {};
-($configs, $cluster_configs) = read_json_config($json_config_file);
+# Use this temporary object to reconfigure the worker arrays to the format the original script expects
+my $temp_cluster_configs = ();
+($configs, $temp_cluster_configs) = read_json_config($json_config_file);
+
+foreach my $node_config (@{$temp_cluster_configs}){
+  my @names = @{$node_config->{'name'}};
+  for (0 .. $#names){
+    my $node_config_copy = dclone $node_config;
+    print @{$node_config_copy->{'floatip'}}[$_]."\n";
+    delete $node_config_copy->{'floatip'};
+    $node_config_copy->{'floatip'} = @{$node_config->{'floatip'}}[$_];
+    $cluster_configs->{$names[$_]} = $node_config_copy;
+  }
+}
+
+print Dumper($cluster_configs);
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
@@ -119,13 +134,9 @@ sub find_node_info {
 
   my $d = {};
   my $node_list = "";
-  my %node_names = ();
 
-  foreach my $nodedata (@{$cluster_configs}){
-    foreach my $node (@{$nodedata->{name}}){
-      $node_list .= `cd $work_dir/$node && vagrant status`."\n";
-      $node_names{$node} = 1;
-    }
+  foreach my $node (sort keys %{$cluster_configs}){
+    $node_list .= `cd $work_dir/$node && vagrant status`."\n";
   }
   print "$node_list\n";
 
@@ -143,7 +154,7 @@ sub find_node_info {
 
     print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
-    if ($host_id ne "" && exists $node_names{$host_id}) {
+    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
 
       print "MATCHED HOST ID: $host_id\n";
 
@@ -350,14 +361,12 @@ sub setup_os_config_scripts_list {
 # that fills in variables from the config part of the JSON
 sub setup_os_config_scripts() {
   my ($configs, $output_dir, $output_file) = @_;
-  foreach my $hostdata (@{$configs}) {
-    foreach my $host (@{$hostdata->{name}}){
-      run("mkdir $output_dir/$host");
-      foreach my $script (@{$hostdata->{first_pass_scripts}}) {
-        autoreplace($script, "$output_file.temp");
-        run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
-        run("rm $output_file.temp");
-      }
+  foreach my $host (sort keys %{$configs}) {
+    run("mkdir $output_dir/$host");
+    foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
+      autoreplace($script, "$output_file.temp");
+      run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
+      run("rm $output_file.temp");
     }
   }
 }
@@ -380,12 +389,10 @@ sub read_config() {
 
 sub launch_instances {
   my @all_threads;
-  foreach my $nodedata (@{$cluster_configs}){
-    foreach my $node (@{$nodedata->{name}}){
-      print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
-      my $thr = threads->create(\&launch_instance, $node);
-      push (@all_threads, $thr);
-    }
+  foreach my $node (sort keys %{$cluster_configs}) {  
+    print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
+    my $thr = threads->create(\&launch_instance, $node);
+    push (@all_threads, $thr);
   }
   print "  ALL LAUNCH THREADS STARTED\n";
   # Now wait for the threads to finish; this will block if the thread isn't terminated
@@ -406,24 +413,22 @@ sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
   setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir");
-  foreach my $nodedata (@{$cluster_configs}){
-    foreach my $node (@{$nodedata->{name}}){
-      # cron for SeqWare
-      autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
-      # settings, user data
-      copy("templates/settings", "$work_dir/$node/settings");
-      copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
-      # script for setting up hadoop hdfs
-      copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
-      # hadoop settings files
-      # FIXME: right now these config files have "master" hardcoded as the master node
-      # FIXME: break out into config driven provisioner
-      copy("templates/conf.worker.tar.gz", "$work_dir/$node/conf.worker.tar.gz");
-      copy("templates/conf.master.tar.gz", "$work_dir/$node/conf.master.tar.gz");
-      # DCC
-      # FIXME: break out into config driven provisioner
-      autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
-    }
+  foreach my $node (sort keys %{$cluster_configs}) {
+    # cron for SeqWare
+    autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
+    # settings, user data
+    copy("templates/settings", "$work_dir/$node/settings");
+    copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
+    # script for setting up hadoop hdfs
+    copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
+    # hadoop settings files
+    # FIXME: right now these config files have "master" hardcoded as the master node
+    # FIXME: break out into config driven provisioner
+    copy("templates/conf.worker.tar.gz", "$work_dir/$node/conf.worker.tar.gz");
+    copy("templates/conf.master.tar.gz", "$work_dir/$node/conf.master.tar.gz");
+    # DCC
+    # FIXME: break out into config driven provisioner
+    autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
   }
 }
 
@@ -432,20 +437,16 @@ sub setup_vagrantfile {
   my ($start, $part, $end, $cluster_configs, $configs, $work_dir) = @_;
   print Dumper($cluster_configs);
   print Dumper($configs);
-  foreach my $nodedata (@{$cluster_configs}){
-    for (my $pos = 0; $pos < @{$nodedata->{name}}; $pos++){
-    #foreach my $node (@{$nodedata->{name}}) {
-      my $node = ${$nodedata->{name}}[$pos];
-      my $node_output = "$work_dir/$node/Vagrantfile";
-      autoreplace("$start", "$node_output");
-      $configs->{custom_hostname} = $node;
-      $configs->{OS_FLOATING_IP} = ${$nodedata->{floatip}}[$pos];
-      autoreplace("$part", "$node_output.temp");
-      run("cat $node_output.temp >> $node_output");
-      run("rm $node_output.temp");
-      run("cat $end >> $node_output");
-    } 
-  }
+  foreach my $node (sort keys %{$cluster_configs}) {
+    my $node_output = "$work_dir/$node/Vagrantfile";
+    autoreplace("$start", "$node_output");
+    $configs->{custom_hostname} = $node;
+    $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
+    autoreplace("$part", "$node_output.temp");
+    run("cat $node_output.temp >> $node_output");
+    run("rm $node_output.temp");
+    run("cat $end >> $node_output");
+  } 
 }
 
 # reads a JSON-based config
