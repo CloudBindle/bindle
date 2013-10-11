@@ -40,8 +40,8 @@
     %{custom_hostname}.vm.provider :openstack do |os, override| # e.g. BioNimbus' Sullivan cluster
         os.username = "%{OS_USER}"
         os.api_key  = "%{OS_API_KEY}"
-        os.flavor   = /%{OS_INSTANCE_TYPE}/
-        os.image    = /%{OS_IMAGE}/
+        os.flavor   = "%{OS_INSTANCE_TYPE}"
+        os.image    = "%{OS_IMAGE}"
         os.endpoint = "%{OS_ENDPOINT}"
         os.keypair_name = "%{OS_SSH_KEY_NAME}"
         os.ssh_username = "%{OS_SSH_USERNAME}"
