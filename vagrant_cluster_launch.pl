@@ -421,6 +421,8 @@ sub prepare_files {
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
+    copy("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master");
+    copy("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker");
     # hadoop settings files
     # FIXME: right now these config files have "master" hardcoded as the master node
     # FIXME: break out into config driven provisioner
