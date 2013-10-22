@@ -23,6 +23,7 @@ use Storable 'dclone';
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 # * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
 # * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
+# * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
