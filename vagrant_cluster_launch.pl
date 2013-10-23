@@ -20,6 +20,7 @@ use Storable 'dclone';
 # * there's a lot of hard-coded (but relative) file paths in this code which could cause problems if we move around or rename template files
 # * this is closely tied to SeqWare so we waste some time downloading and building that tool for other projects that use this tool but don't depend on SeqWare
 # * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
+# * or an alternative is just to sync all the config files instead
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 # * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
 # * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
@@ -401,7 +402,7 @@ sub launch_instance {
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
-# FIXME: should remove the non-generic files processed below if possible
+# FIXME: should remove the non-generic files processed below if possible, notice how there are project-specific file copies below!
 sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
@@ -424,6 +425,9 @@ sub prepare_files {
     # DCC
     # FIXME: break out into config driven provisioner
     autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
+    # DCC validator
+    copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
+    copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
   }
 }
 

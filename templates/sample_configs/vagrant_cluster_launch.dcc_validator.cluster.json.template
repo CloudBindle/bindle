@@ -32,7 +32,10 @@
     "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
     "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
     # NOTE: you can checkout whatever branch you like, see our GitHub site
-    "SEQWARE_BRANCH_CMD": "git checkout develop"
+    "SEQWARE_BRANCH_CMD": "git checkout develop",
+    # DCC Validator (these are used in the realm.ini)
+    "DCC_VALIDATOR_USER": "<FILLMEIN>",
+    "DCC_VALIDATOR_PASSWD": "<FILLMEIN>"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -51,7 +54,8 @@
       "second_pass_scripts": [
         [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
         # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
-        [ ]
+        [ ],
+        [ "templates/server_setup_scripts/dcc_validator/ubuntu_12.04_master_dcc_validator_script.sh" ]
       ]
     },
     {
@@ -65,6 +69,7 @@
       "second_pass_scripts": [
         [ ],
         [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
+        [ ]
       ]
     }
   ]
