@@ -8,6 +8,25 @@ apt-get install curl unzip -y
 # add seqware user
 useradd -d /home/seqware -m seqware -s /bin/bash
 
+# ensure locale is set to en-US (and remains so)
+sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config
+sudo locale-gen en_US.UTF-8
+sudo dpkg-reconfigure locales
+export LANGUAGE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+echo "export LANGUAGE=en_US.UTF-8" >> /etc/bash.bashrc
+echo "export LANG=en_US.UTF-8" >> /etc/bash.bashrc
+echo "export LC_ALL=en_US.UTF-8" >> /etc/bash.bashrc
+echo "export LC_CTYPE=en_US.UTF-8" >> /etc/bash.bashrc
+echo 'LANG="en_US.UTF-8"' | sudo tee /etc/default/locale
+echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/default/locale
+echo 'LC_CTYPE="en_US.UTF-8"' | sudo tee -a /etc/default/locale
+echo 'LANG="en_US.UTF-8"' | sudo tee -a /etc/environment
+echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/environment
+echo 'LC_CTYPE="en_US.UTF-8"' | sudo tee -a /etc/environment
+
 # install the hadoop repo
 wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
 dpkg -i cdh4-repository_1.0_all.deb
