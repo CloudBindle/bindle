@@ -15,6 +15,8 @@ echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | 
 apt-get update
 apt-get -q -y --force-yes install mongodb-10gen=2.4.1
 service mongodb restart
+# sleep for 5 minutes to ensure Mongo comes online
+sleep 5m
 
 # now get the DCC app
 wget http://seqwaremaven.oicr.on.ca/artifactory/dcc-release/org/icgc/dcc/dcc-submission-server/2.0.1/dcc-submission-server-2.0.1-dist.tar.gz
