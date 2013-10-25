@@ -33,9 +33,11 @@
     "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
     # NOTE: you can checkout whatever branch you like, see our GitHub site
     "SEQWARE_BRANCH_CMD": "git checkout develop",
-    # DCC Validator (these are used in the realm.ini)
+    # DCC Validator (these are used in the realm.ini and other files)
     "DCC_VALIDATOR_USER": "<FILLMEIN>",
-    "DCC_VALIDATOR_PASSWD": "<FILLMEIN>"
+    "DCC_VALIDATOR_PASSWD": "<FILLMEIN>",
+    "DCC_VALIDATOR_DICTIONARY_SERVER": "<FILLMEIN>",
+    "DCC_VALIDATOR_DICTIONARY_PORT": "<FILLMEIN>"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
