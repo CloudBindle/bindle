@@ -14,7 +14,7 @@ SW_ADMIN_REST_URL=http://localhost:38080/seqware-admin-webservice
 SW_DB_USER=seqware
 SW_DB_PASS=seqware
 SW_DB_SERVER=localhost
-SW_DB=seqware_meta_db 
+SW_DB=seqware_meta_db
 
 # AMAZON CLOUD SETTINGS
 # used by tools reading and writing to S3 buckets (dependency data/software bundles, inputs, outputs, etc)
