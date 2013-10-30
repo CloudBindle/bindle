@@ -20,9 +20,11 @@ use Storable 'dclone';
 # * there's a lot of hard-coded (but relative) file paths in this code which could cause problems if we move around or rename template files
 # * this is closely tied to SeqWare so we waste some time downloading and building that tool for other projects that use this tool but don't depend on SeqWare
 # * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
+# * or an alternative is just to sync all the config files instead
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 # * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
 # * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
+# * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
@@ -34,12 +36,12 @@ my $launch_os = 0;
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
-my $skip_its = 0;
 my $skip_launch = 0;
-# allow the specification of a specific commit to build and use instead of using the latest from develop
-my $git_commit = 0;
 # allow the hostname to be specified
-my $custom_hostname = "master";
+my $help = 0;
+
+# check for help
+if (scalar(@ARGV) == 0) { $help = 1; }
 
 GetOptions (
   "use-aws" => \$launch_aws,
@@ -47,17 +49,18 @@ GetOptions (
   "use-openstack" => \$launch_os,
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
-  "skip-it-tests" => \$skip_its,
   "skip-launch" => \$skip_launch,
-  "git-commit=s" => \$git_commit,
-  "custom-hostname=s" => \$custom_hostname, # FIXME: I think I broke this, it should probably be removed in favor of the json doc but I assume the master is called master!
+  "help" => \$help,
 );
 
 
 # MAIN
+if($help) {
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
+}
 
 # make the target dir
-run("mkdir $work_dir");
+run("mkdir -p $work_dir");
 
 # config object used for find and replace
 my $configs = {};
@@ -82,12 +85,6 @@ print Dumper($cluster_configs);
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
 
-# for jenkins, override the branch command if required
-if ($git_commit){
-  $configs->{'SEQWARE_BRANCH_CMD'} = "git checkout $git_commit";
-}
-$configs->{'custom_hostname'} = $custom_hostname;
-
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
 if ($launch_vb) {
@@ -105,9 +102,6 @@ if ($launch_vb) {
 } else {
   die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
 }
-
-# skip the integration tests if specified --skip-its
-if ($skip_its) { $configs->{'SEQWARE_IT_CMD'} = ""; }
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
@@ -408,7 +402,7 @@ sub launch_instance {
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
-# FIXME: should remove the non-generic files processed below if possible
+# FIXME: should remove the non-generic files processed below if possible, notice how there are project-specific file copies below!
 sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
@@ -431,6 +425,9 @@ sub prepare_files {
     # DCC
     # FIXME: break out into config driven provisioner
     autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
+    # DCC validator
+    copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
+    copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
   }
 }
 
@@ -442,6 +439,7 @@ sub setup_vagrantfile {
   foreach my $node (sort keys %{$cluster_configs}) {
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
+    # FIXME: should change this var to something better
     $configs->{custom_hostname} = $node;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     autoreplace("$part", "$node_output.temp");
