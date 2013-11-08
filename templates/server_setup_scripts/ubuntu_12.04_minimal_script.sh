@@ -28,8 +28,8 @@ echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/environment
 echo 'LC_CTYPE="en_US.UTF-8"' | sudo tee -a /etc/environment
 
 # install the hadoop repo
-wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb
-dpkg -i cdh4-repository_1.0_all.deb
+wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb &> /dev/null
+dpkg -i cdh4-repository_1.0_all.deb &> /dev/null
 curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
 
 # setup cloudera manager repo (not used)
@@ -54,7 +54,7 @@ apt-get update
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 cloudera-manager-server-db cloudera-manager-server cloudera-manager-daemons
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven sysv-rc-conf hbase-master xfsprogs
 # get Java
-apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en
-wget http://archive.cloudera.com/cm4/ubuntu/precise/amd64/cm/pool/contrib/o/oracle-j2sdk1.6/oracle-j2sdk1.6_1.6.0+update31_amd64.deb
-dpkg -i oracle-j2sdk1.6_1.6.0+update31_amd64.deb
+apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en &> /dev/null
+wget http://archive.cloudera.com/cm4/ubuntu/precise/amd64/cm/pool/contrib/o/oracle-j2sdk1.6/oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
+dpkg -i oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
 
