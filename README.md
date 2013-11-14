@@ -43,7 +43,14 @@ you launch a local node or cluster of virtual machine nodes on your desktop or
 local server. If you will *only* launch a node or cluster of nodes on Amazon
 or an OpenStack cloud you can skip this step.
 
-Install Vagrant using the package from their [site](http://www.vagrantup.com/).
+Install Vagrant using the package from their [site](http://downloads.vagrantup.com/).
+For example:
+
+  wget http://files.vagrantup.com/packages/a40522f5fabccb9ddabad03d836e120ff5d14093/vagrant_1.3.5_x86_64.deb
+  sudo dpkg install vagrant_1.3.5_x86_64.deb
+
+Make sure you choose the right package format for your OS, the above is for Ubuntu.
+
 You then need to install plugins to handle AWS and OpenStack. The Virtualbox
 provider is available out of the box with Vagrant.
 
