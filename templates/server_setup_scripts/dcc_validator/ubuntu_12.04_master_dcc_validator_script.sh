@@ -4,8 +4,9 @@
 export DEBIAN_FRONTEND=noninteractive
 
 # prepare a location for the DCC validator
-mkdir -p /mnt/dcc-portal
-mkdir -p /tmp/icgc
+mkdir -p /mnt/dcc-portal/data
+mkdir -p /mnt/dcc-portal/icgc
+mkdir -p /mnt/dcc-portal/dcc_root_dir
 cd /mnt/dcc-portal
 
 # setup Mongo
@@ -29,11 +30,10 @@ cp /vagrant/init.sh /mnt/dcc-portal/dcc-submission-server-2.1.0/
 
 # get the reference genome
 # FIXME: I just drop this off in /tmp?!?!
-wget 
-wget 
-gunzip GRCh37.fasta.gz
-ln -s /mnt/dcc-portal/GRCh37.fasta.fai /tmp/
-ln -s /mnt/dcc-portal/GRCh37.fasta /tmp/
+cd data
+wget http://seqwaremaven.oicr.on.ca/artifactory/simple/dcc-dependencies/org/icgc/dcc/dcc-reference-genome/GRCh37/dcc-reference-genome-GRCh37.tar.gz
+tar zxf dcc-reference-genome-GRCh37.tar.gz
+cd ..
 
 # start the process
 /mnt/dcc-portal/dcc-submission-server-2.1.0/bin/install -s

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # note: initializes the submission system
-# usage: ./init.sh https://submissions.dcc.icgc.org http://localhost:5380 guest 1qw2!QW@ my_initial_release my_project_key [my_project_name] [my_project_alias]
+# usage: ./init.sh https://submissions.dcc.icgc.org http://localhost:5380 guest password my_initial_release my_project_key [my_project_name] [my_project_alias]
 
 # ===========================================================================
 
