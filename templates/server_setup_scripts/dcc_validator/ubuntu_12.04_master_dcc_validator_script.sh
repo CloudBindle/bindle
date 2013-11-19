@@ -33,6 +33,7 @@ cp /vagrant/init.sh /mnt/dcc-portal/dcc-submission-server-2.1.0/
 cd data
 wget http://seqwaremaven.oicr.on.ca/artifactory/simple/dcc-dependencies/org/icgc/dcc/dcc-reference-genome/GRCh37/dcc-reference-genome-GRCh37.tar.gz
 tar zxf dcc-reference-genome-GRCh37.tar.gz
+rm dcc-reference-genome-GRCh37.tar.gz
 cd ..
 
 # start the process
