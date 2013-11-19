@@ -20,11 +20,9 @@ use Storable 'dclone';
 # * there's a lot of hard-coded (but relative) file paths in this code which could cause problems if we move around or rename template files
 # * this is closely tied to SeqWare so we waste some time downloading and building that tool for other projects that use this tool but don't depend on SeqWare
 # * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
-# * or an alternative is just to sync all the config files instead
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 # * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
 # * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
-# * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
@@ -36,12 +34,12 @@ my $launch_os = 0;
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
+my $skip_its = 0;
 my $skip_launch = 0;
+# allow the specification of a specific commit to build and use instead of using the latest from develop
+my $git_commit = 0;
 # allow the hostname to be specified
-my $help = 0;
-
-# check for help
-if (scalar(@ARGV) == 0) { $help = 1; }
+my $custom_hostname = "master";
 
 GetOptions (
   "use-aws" => \$launch_aws,
@@ -49,18 +47,17 @@ GetOptions (
   "use-openstack" => \$launch_os,
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
+  "skip-it-tests" => \$skip_its,
   "skip-launch" => \$skip_launch,
-  "help" => \$help,
+  "git-commit=s" => \$git_commit,
+  "custom-hostname=s" => \$custom_hostname, # FIXME: I think I broke this, it should probably be removed in favor of the json doc but I assume the master is called master!
 );
 
 
 # MAIN
-if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
-}
 
 # make the target dir
-run("mkdir -p $work_dir");
+run("mkdir $work_dir");
 
 # config object used for find and replace
 my $configs = {};
@@ -80,10 +77,16 @@ foreach my $node_config (@{$temp_cluster_configs}){
   }
 }
 
-print Dumper($cluster_configs);
+#print Dumper($cluster_configs);
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
+
+# for jenkins, override the branch command if required
+if ($git_commit){
+  $configs->{'SEQWARE_BRANCH_CMD'} = "git checkout $git_commit";
+}
+$configs->{'custom_hostname'} = $custom_hostname;
 
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
@@ -102,6 +105,9 @@ if ($launch_vb) {
 } else {
   die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
 }
+
+# skip the integration tests if specified --skip-its
+if ($skip_its) { $configs->{'SEQWARE_IT_CMD'} = ""; }
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
@@ -146,7 +152,7 @@ sub find_node_info {
       $host_id = $1;
     }
 
-    print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
+    #print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
     if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
 
@@ -259,11 +265,12 @@ sub provision_files_thread {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/tmp_$script_name");
+    my $tmp_script_name = "/tmp/tmp_$host_name\_$script_name";
+    system("rm $tmp_script_name");
     # set the current host before processing file
-    setup_os_config_scripts_list($script, "/tmp/tmp_$script_name");
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/tmp_$script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
-    system("rm /tmp/tmp_$script_name");
+    setup_os_config_scripts_list($script, $tmp_script_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
+    system("rm $tmp_script_name");
   }
 }
 
@@ -274,12 +281,12 @@ sub run_provision_script_list {
   my $cont = 1;
   my $curr_cell = 0;
 
-  print Dumper ($cluster_configs);
+  #print Dumper ($cluster_configs);
 
   while($cont) {
     my @all_threads = ();
     foreach my $host_name (sort keys %{$hosts}) {
-      print "  PROVISIONING HOST $host_name\n";
+      print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
       my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
       my $host = $hosts->{$host_name};
       if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
@@ -304,11 +311,11 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/config_script.sh");
+    system("rm /tmp/config_script.$host_name.sh");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
-    setup_os_config_scripts_list($script, "/tmp/config_script.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+    setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh");
   }
 }
 
@@ -402,7 +409,7 @@ sub launch_instance {
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
-# FIXME: should remove the non-generic files processed below if possible, notice how there are project-specific file copies below!
+# FIXME: should remove the non-generic files processed below if possible
 sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
@@ -415,8 +422,6 @@ sub prepare_files {
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
-    copy("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master");
-    copy("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker");
     # hadoop settings files
     # FIXME: right now these config files have "master" hardcoded as the master node
     # FIXME: break out into config driven provisioner
@@ -425,21 +430,17 @@ sub prepare_files {
     # DCC
     # FIXME: break out into config driven provisioner
     autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
-    # DCC validator
-    copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
-    copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
   }
 }
 
 # this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
   my ($start, $part, $end, $cluster_configs, $configs, $work_dir) = @_;
-  print Dumper($cluster_configs);
-  print Dumper($configs);
+  #print Dumper($cluster_configs);
+  #print Dumper($configs);
   foreach my $node (sort keys %{$cluster_configs}) {
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
-    # FIXME: should change this var to something better
     $configs->{custom_hostname} = $node;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     autoreplace("$part", "$node_output.temp");
@@ -516,6 +517,6 @@ sub rec_copy {
 sub run {
   my ($cmd) = @_;
   print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd'");
-  if ($result != 0) { die "\nERROR!!! CMD RESULTED IN RETURN VALUE OF $result\n\n"; }
+  my $result = system("bash -c '$cmd' > /dev/null 2> /dev/null");
+  if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
