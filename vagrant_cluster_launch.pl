@@ -269,7 +269,7 @@ sub provision_files_thread {
     system("rm $tmp_script_name");
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script}, $host_name);
     system("rm $tmp_script_name");
   }
 }
@@ -315,7 +315,7 @@ sub provision_script_list_thread {
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
     setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh");
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh", $host_name);
   }
 }
 
@@ -405,7 +405,7 @@ sub launch_instances {
 
 sub launch_instance {
   my $node = $_[0];
-  run("cd $work_dir/$node && $launch_cmd");
+  run("cd $work_dir/$node && $launch_cmd", $node);
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
@@ -515,8 +515,14 @@ sub rec_copy {
 }
 
 sub run {
-  my ($cmd) = @_;
+  my ($cmd, $hostname) = @_;
+  my $outputfile = "";
+  if (defined($hostname)){
+    $outputfile = "$hostname.log";
+  } else {
+    $outputfile = "default.log";
+  }
   print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd' > /dev/null 2> /dev/null");
+  my $result = system("bash -c '$cmd' >> $outputfile 2> $outputfile");
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
