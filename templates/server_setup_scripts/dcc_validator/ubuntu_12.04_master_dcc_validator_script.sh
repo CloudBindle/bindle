@@ -18,7 +18,7 @@ apt-get update
 apt-get -q -y --force-yes install mongodb-10gen=2.4.1
 service mongodb restart
 # sleep for 5 minutes to ensure Mongo comes online
-sleep 5m
+sleep 3m
 
 # now get the DCC app
 ##wget http://seqwaremaven.oicr.on.ca/artifactory/dcc-release/org/icgc/dcc/dcc-submission-server/2.1.0/dcc-submission-server-2.1.0-dist.tar.gz
@@ -51,5 +51,5 @@ service dcc-submission-server start
 
 # run the init process
 ##bash /mnt/dcc-portal/dcc-submission-server-2.1.0/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
-bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+##bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
 
