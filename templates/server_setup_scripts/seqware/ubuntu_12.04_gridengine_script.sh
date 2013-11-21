@@ -71,4 +71,4 @@ done
 
 # change seqware engine to oozie-sge
 perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie-sge/' /vagrant/settings 
-perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial ${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings 
+perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings 
