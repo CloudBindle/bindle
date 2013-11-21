@@ -40,11 +40,15 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
             perl -pi -e "s/shell-action-/sge-action-1.0.xsd,shell-action-/;" oozie-site.xml
 
             if [ ! -z "$OOZIE_ACTION_RECHECK_PERIOD" ]; then
-                perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>${OOZIE_ACTION_RECHECK_PERIOD}<\/value><\/property>/;" oozie-site.xml
+               perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>${OOZIE_ACTION_RECHECK_PERIOD}<\/value><\/property>/;" oozie-site.xml
+            else
+               perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>10<\/value><\/property>/;" oozie-site.xml
             fi
 
             if [ ! -z "$OOZIE_CHECK_SERVICE_PERIOD" ]; then
                 perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.interval<\/name><value>${OOZIE_CHECK_SERVICE_PERIOD}<\/value><\/property>/;" oozie-site.xml
+            else
+                perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.interval<\/name><value>5<\/value><\/property>/;" oozie-site.xml
             fi
 
             if $OOZIE_SGE_DEBUG_LOG; then
@@ -53,6 +57,9 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
 
             echo '# Allow oozie user to qsub as other users:' >> /etc/sudoers
             echo "oozie ALL=(ALL) NOPASSWD: $QSUB" >> /etc/sudoers
+            # not sure why I needed this
+	    echo "oozie ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+	    echo "seqware ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
             /etc/init.d/oozie restart
 
