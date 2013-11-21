@@ -28,30 +28,8 @@ echo master >> /var/lib/gridengine/default/common/act_qmaster
 /etc/init.d/gridengine-exec stop
 /etc/init.d/gridengine-exec start
 
-# configure
-#sudo -u sgeadmin qconf -am seqware
-#qconf -au seqware users
-#
-#qconf -ah $HOST 
-#
-#qconf -ahgrp @allhosts
-## might need to do this instead
-#qconf -mhgrp @allhosts
-#
-## config
-#qconf -aattr hostgroup hostlist $HOST @allhosts
-#
-## interactive
-## uses the same editor as above
-#qconf -aq main.q
-## same as above, may need to modify the queue instead
-#qconf -mq main.q
-#
-#qconf -aattr queue hostlist @allhosts main.q
-#
-#qconf -aattr queue slots "[$HOST=1]" main.q
-
-# restart
-#/etc/init.d/gridengine-exec stop
-#/etc/init.d/gridengine-exec start
+# Not sure why, but the NFS mounts don't survive up to this point, try to remount them
+mount %{MASTER_PIP}:/home /home
+mount %{MASTER_PIP}:/usr/tmp/seqware-oozie /usr/tmp/seqware-oozie
+mount %{MASTER_PIP}:/datastore /datastore
 
