@@ -429,6 +429,7 @@ sub prepare_files {
     # DCC validator
     copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
     copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
+    copy("templates/dcc_validator/realm.ini", "$work_dir/$node/realm.ini");
   }
 }
 

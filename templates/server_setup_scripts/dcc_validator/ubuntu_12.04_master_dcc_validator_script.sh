@@ -30,10 +30,10 @@ tar zxf dcc-submission-server-2.0.1-dist.tar.gz
 ##cp /vagrant/application.conf /mnt/dcc-portal/dcc-submission-server-2.1.0/conf/
 ##cp /vagrant/init.sh /mnt/dcc-portal/dcc-submission-server-2.1.0/
 cp /vagrant/application.conf /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/
+cp /vagrant/realm.ini /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/
 cp /vagrant/init.sh /mnt/dcc-portal/dcc-submission-server-2.0.1/
 
 # get the reference genome
-# FIXME: I just drop this off in /tmp?!?!
 cd data
 wget http://seqwaremaven.oicr.on.ca/artifactory/simple/dcc-dependencies/org/icgc/dcc/dcc-reference-genome/GRCh37/dcc-reference-genome-GRCh37.tar.gz
 tar zxf dcc-reference-genome-GRCh37.tar.gz
@@ -45,11 +45,28 @@ cd ..
 ##/mnt/dcc-portal/dcc-submission-server-2.1.0/bin/install -s
 ##/bin/sh /mnt/dcc-portal/dcc-submission-server-2.1.0/bin/dcc-submission-server install -s
 /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -s
+service dcc-submission-server stop
 /bin/sh /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/dcc-submission-server install -s
-
-service dcc-submission-server start
+service dcc-submission-server restart 
 
 # run the init process
+# NOTE: make sure your password is single quoted if it contains characters like @ which are interpreted by Bash
 ##bash /mnt/dcc-portal/dcc-submission-server-2.1.0/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
-##bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+
+# now make sure the above will happen on reboot
+echo "
+service dcc-submission-server stop
+/mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -s
+service dcc-submission-server stop
+/bin/sh /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/dcc-submission-server install -s
+service dcc-submission-server restart 
+bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+exit 0
+" > /etc/rc.local
+ 
+
+
+
+
 
