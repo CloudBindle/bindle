@@ -44,10 +44,14 @@ function extract_version() {
 # Drop database, if it exists
 echo "dropping mongo icgc-dev database"
 /usr/bin/mongo icgc-dev --eval "db.dropDatabase()"
+#/usr/bin/mongo --verbose icgc-dev --eval "db.Project.drop()"
+#/usr/bin/mongo --verbose icgc-dev --eval "db.Release.drop()"
+#/usr/bin/mongo --verbose icgc-dev --eval "db.User.drop()"
 
 # Clean file system, if it exists
-echo "removing /tmp/dcc_root_dir/*"
-rm -rf /tmp/dcc_root_dir/*
+echo "removing /mnt/dcc-portal/dcc_root_dir/*"
+rm -rvf /mnt/dcc-portal/dcc_root_dir/*
+#rm -rvf /tmp/dcc_root_dir/*
 
 # download origin dictionary and ensure state is OPENED
 echo "getting dictionary"
@@ -59,8 +63,29 @@ curl ${origin_host?}/ws/codeLists                -H "Accept: application/json" >
 
 # extract dictionary version (needed for initial release later)
 echo "extracting dictionary version"
-dictionary_version=$(cat ${dictionary_file?} | extract_version) && [ -n "${dictionary_version?}" ] || { echo "ERROR: could not find a version in dictionary"; exit 1; }
+dictionary_version=$(cat ${dictionary_file?} | extract_version) && [ -n "${dictionary_version?}" ] || { echo "ERROR: could not find a version in dictionary"; }
 echo "dictionary_version=${dictionary_version?}"
+
+
+# Check that server api is indeed available
+curl_state=0
+for idx in {1..8}
+do
+   echo "Checking submission server is ready..."
+   curl --silent --write-out %{http_code} -H "Accept: application/json" -H "Authorization: X-DCC-Auth $(echo -n ${username?}:${passwd?} | base64)" ${destination_host?}/ws/systems/sftp -o /tmp/foo > /tmp/curl_state
+   curl_state=$(</tmp/curl_state)
+   if [ ${curl_state} = "200" ]; then
+      break
+   fi
+   echo "return code is {$curl_state}, waiting for submission system to come up...sleeping 5"
+   sleep 5
+done
+
+if [ ${curl_state} != "200" ]; then
+   echo "There is an error with the submission server! Exiting..."
+   exit 1
+fi
+
 
 # upload codelists to destination
 echo "uploading codelists"
@@ -82,14 +107,21 @@ echo "adding project"
 curl -H "Accept: application/json" -XPOST ${destination_host?}/ws/projects     -H "Authorization: X-DCC-Auth $(echo -n ${username?}:${passwd?} | base64)" -H "Content-Type: application/json" \
  --data "{\"key\": \"${project_key?}\", \"name\": \"${project_name?}\", \"alias\": \"${project_alias?}\", \"users\": [\"guest\"], \"groups\": []}" && echo "OK" || echo "KO"
 
+
+
 # ===========================================================================
 
 echo "cleaning up"
-rm ${tmp_dir?}/*
-rmdir ${tmp_dir?}
+rm -v ${tmp_dir?}/*
+rmdir -v ${tmp_dir?}
 
 echo "done"
 
+# Signal error if there is no dictionary detected
+if [ "${dictionary_version}" = "" ]; then
+   exit 1
+fi
+exit 0
 # ===========================================================================
 
 

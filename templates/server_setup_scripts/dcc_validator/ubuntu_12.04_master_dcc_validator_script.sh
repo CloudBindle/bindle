@@ -26,12 +26,17 @@ sleep 3m
 wget http://seqwaremaven.oicr.on.ca/artifactory/dcc-release/org/icgc/dcc/dcc-submission-server/2.0.1/dcc-submission-server-2.0.1-dist.tar.gz
 tar zxf dcc-submission-server-2.0.1-dist.tar.gz
 
+# Patch max memory usage - overwrite either absolute or percentage attrs
+sudo cp /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/wrapper.conf /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/wrapper.conf_orig
+sudo sed 's/wrapper.java.maxmemory=.*$/wrapper.java.maxmemory.percent=80/g' wrapper.conf_orig > /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/wrapper.conf
+
 # copy the correct config that has been customized for DCC
 ##cp /vagrant/application.conf /mnt/dcc-portal/dcc-submission-server-2.1.0/conf/
 ##cp /vagrant/init.sh /mnt/dcc-portal/dcc-submission-server-2.1.0/
-cp /vagrant/application.conf /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/
+cp /vagrant/application.conf /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/application.conf
 cp /vagrant/realm.ini /mnt/dcc-portal/dcc-submission-server-2.0.1/conf/
 cp /vagrant/init.sh /mnt/dcc-portal/dcc-submission-server-2.0.1/
+cp /vagrant/error.html /mnt/dcc-portal/dcc-submission-server-2.0.1/
 
 # get the reference genome
 cd data
@@ -44,10 +49,9 @@ cd ..
 # FIXME: are these redundant!?!?
 ##/mnt/dcc-portal/dcc-submission-server-2.1.0/bin/install -s
 ##/bin/sh /mnt/dcc-portal/dcc-submission-server-2.1.0/bin/dcc-submission-server install -s
-/mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -s
-service dcc-submission-server stop
-/bin/sh /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/dcc-submission-server install -s
-service dcc-submission-server restart 
+#/mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -l
+sudo /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -l
+sleep 10
 
 # run the init process
 # NOTE: make sure your password is single quoted if it contains characters like @ which are interpreted by Bash
@@ -56,15 +60,15 @@ bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_
 
 # now make sure the above will happen on reboot
 echo "
-service dcc-submission-server stop
-/mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -s
-service dcc-submission-server stop
-/bin/sh /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/dcc-submission-server install -s
-service dcc-submission-server restart 
-bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_DICTIONARY_SERVER}:%{DCC_VALIDATOR_DICTIONARY_PORT} http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+/mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -l
+sleep 10
+bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh https://submissions2.dcc.icgc.org http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+if [ "\"\$?\"" != 0 ]; then
+   cp -v /mnt/dcc-portal/dcc-submission-server-2.0.1/error.html /mnt/dcc-portal/dcc-submission-server-2.0.1/www/public/index.html
+fi
 exit 0
 " > /etc/rc.local
- 
+
 
 
 
