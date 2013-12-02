@@ -93,7 +93,8 @@ $configs->{'custom_hostname'} = $custom_hostname;
 if ($launch_vb) {
   $launch_cmd = "vagrant up";
   $configs->{'BOX'} = "Ubuntu_12.04";
-  $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
+  $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/vagrant/quantal/current/quantal-server-cloudimg-amd64-vagrant-disk1.box";
+  #####$configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
 } elsif ($launch_os) {
   $launch_cmd = "vagrant up --provider=openstack";
   $configs->{'BOX'} = "dummy";
