@@ -62,7 +62,7 @@ bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh http://%{DCC_VALIDATOR_
 echo "
 /mnt/dcc-portal/dcc-submission-server-2.0.1/bin/install -l
 sleep 10
-bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh https://submissions2.dcc.icgc.org http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
+bash /mnt/dcc-portal/dcc-submission-server-2.0.1/init.sh https://submissions.dcc.icgc.org http://localhost:5380 %{DCC_VALIDATOR_USER} %{DCC_VALIDATOR_PASSWD} Release1 project1 Project1 Project1
 if [ "\"\$?\"" != 0 ]; then
    cp -v /mnt/dcc-portal/dcc-submission-server-2.0.1/error.html /mnt/dcc-portal/dcc-submission-server-2.0.1/www/public/index.html
 fi
