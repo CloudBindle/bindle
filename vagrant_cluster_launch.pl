@@ -37,7 +37,7 @@ my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
-# allow the hostname to be specified
+
 my $help = 0;
 
 # check for help
@@ -80,10 +80,16 @@ foreach my $node_config (@{$temp_cluster_configs}){
   }
 }
 
-print Dumper($cluster_configs);
+#print Dumper($cluster_configs);
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
+
+# for jenkins, override the branch command if required
+if ($git_commit){
+  $configs->{'SEQWARE_BRANCH_CMD'} = "git checkout $git_commit";
+}
+$configs->{'custom_hostname'} = $custom_hostname;
 
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
@@ -103,6 +109,9 @@ if ($launch_vb) {
 } else {
   die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
 }
+
+# skip the integration tests if specified --skip-its
+if ($skip_its) { $configs->{'SEQWARE_IT_CMD'} = ""; }
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
@@ -147,7 +156,7 @@ sub find_node_info {
       $host_id = $1;
     }
 
-    print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
+    #print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
     if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
 
@@ -260,11 +269,12 @@ sub provision_files_thread {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/tmp_$script_name");
+    my $tmp_script_name = "/tmp/tmp_$host_name\_$script_name";
+    system("rm $tmp_script_name");
     # set the current host before processing file
-    setup_os_config_scripts_list($script, "/tmp/tmp_$script_name");
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/tmp_$script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
-    system("rm /tmp/tmp_$script_name");
+    setup_os_config_scripts_list($script, $tmp_script_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
+    system("rm $tmp_script_name");
   }
 }
 
@@ -275,12 +285,12 @@ sub run_provision_script_list {
   my $cont = 1;
   my $curr_cell = 0;
 
-  print Dumper ($cluster_configs);
+  #print Dumper ($cluster_configs);
 
   while($cont) {
     my @all_threads = ();
     foreach my $host_name (sort keys %{$hosts}) {
-      print "  PROVISIONING HOST $host_name\n";
+      print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
       my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
       my $host = $hosts->{$host_name};
       if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
@@ -305,11 +315,11 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/config_script.sh");
+    system("rm /tmp/config_script.$host_name.sh");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
-    setup_os_config_scripts_list($script, "/tmp/config_script.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.sh");
+    setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh");
   }
 }
 
@@ -435,8 +445,8 @@ sub prepare_files {
 # this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
   my ($start, $part, $end, $cluster_configs, $configs, $work_dir) = @_;
-  print Dumper($cluster_configs);
-  print Dumper($configs);
+  #print Dumper($cluster_configs);
+  #print Dumper($configs);
   foreach my $node (sort keys %{$cluster_configs}) {
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
@@ -517,6 +527,6 @@ sub rec_copy {
 sub run {
   my ($cmd) = @_;
   print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd'");
-  if ($result != 0) { die "\nERROR!!! CMD RESULTED IN RETURN VALUE OF $result\n\n"; }
+  my $result = system("bash -c '$cmd' > /dev/null 2> /dev/null");
+  if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
