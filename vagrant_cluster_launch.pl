@@ -85,12 +85,6 @@ foreach my $node_config (@{$temp_cluster_configs}){
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
 
-# for jenkins, override the branch command if required
-if ($git_commit){
-  $configs->{'SEQWARE_BRANCH_CMD'} = "git checkout $git_commit";
-}
-$configs->{'custom_hostname'} = $custom_hostname;
-
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
 if ($launch_vb) {
@@ -109,9 +103,6 @@ if ($launch_vb) {
 } else {
   die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
 }
-
-# skip the integration tests if specified --skip-its
-if ($skip_its) { $configs->{'SEQWARE_IT_CMD'} = ""; }
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
