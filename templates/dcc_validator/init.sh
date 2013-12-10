@@ -62,15 +62,15 @@ echo "extracting dictionary version"
 dictionary_version=$(cat ${dictionary_file?} | extract_version) && [ -n "${dictionary_version?}" ] || { echo "ERROR: could not find a version in dictionary"; exit 1; }
 echo "dictionary_version=${dictionary_version?}"
 
-# upload dictionary to destination
-echo "uploading dictionary"
-curl -XPOST ${destination_host?}/ws/dictionaries -H "Accept: application/json" -H "Authorization: X-DCC-Auth $(echo -n ${username?}:${passwd?} | base64)" -H "Content-Type: application/json" \
- --data @${dictionary_file?} && echo "OK" || echo "KO"
-
 # upload codelists to destination
 echo "uploading codelists"
 curl -XPOST ${destination_host?}/ws/codeLists    -H "Accept: application/json" -H "Authorization: X-DCC-Auth $(echo -n ${username?}:${passwd?} | base64)" -H "Content-Type: application/json" \
  --data @${codelists_file?} && echo "OK" || echo "KO"
+
+# upload dictionary to destination
+echo "uploading dictionary"
+curl -XPOST ${destination_host?}/ws/dictionaries -H "Accept: application/json" -H "Authorization: X-DCC-Auth $(echo -n ${username?}:${passwd?} | base64)" -H "Content-Type: application/json" \
+ --data @${dictionary_file?} && echo "OK" || echo "KO"
 
 # upload an initial release (should probably be a POST rather...)
 echo "creating initial release"
