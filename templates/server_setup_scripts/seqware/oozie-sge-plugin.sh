@@ -39,6 +39,12 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
             perl -pi -e "s/org.apache.oozie.action.email.EmailActionExecutor/io.seqware.oozie.action.sge.SgeActionExecutor,org.apache.oozie.action.email.EmailActionExecutor/;" oozie-site.xml
             perl -pi -e "s/shell-action-/sge-action-1.0.xsd,shell-action-/;" oozie-site.xml
 
+	    # set appropriate default for maximum workflow length 
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.WorkflowAppService.WorkflowDefinitionMaxLength<\/name><value>10000000<\/value><\/property>/;" oozie-site.xml
+	    # set appropriate default for oozie retries max
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.action.retries.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
+
+
             if [ ! -z "$OOZIE_ACTION_RECHECK_PERIOD" ]; then
                perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>${OOZIE_ACTION_RECHECK_PERIOD}<\/value><\/property>/;" oozie-site.xml
             else
