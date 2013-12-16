@@ -89,8 +89,10 @@ if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'}
 # TODO: these are hardcoded and may change
 if ($launch_vb) {
   $launch_cmd = "vagrant up";
-  $configs->{'BOX'} = "Ubuntu_12.04";
-  $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/vagrant/quantal/current/quantal-server-cloudimg-amd64-vagrant-disk1.box";
+
+  # Allow a custom box to be specified
+  if (!defined($configs->{'BOX'})) { $configs->{'BOX'} = "Ubuntu_12.04"; }
+  if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/vagrant/quantal/current/quantal-server-cloudimg-amd64-vagrant-disk1.box"; }
   #####$configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
 } elsif ($launch_os) {
   $launch_cmd = "vagrant up --provider=openstack";
