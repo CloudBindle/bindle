@@ -43,6 +43,8 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
             perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.WorkflowAppService.WorkflowDefinitionMaxLength<\/name><value>10000000<\/value><\/property>/;" oozie-site.xml
 	    # set appropriate default for oozie retries max
             perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.action.retries.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
+	    # set appropriate default for oozie user-level retries max
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
 
 
             if [ ! -z "$OOZIE_ACTION_RECHECK_PERIOD" ]; then
