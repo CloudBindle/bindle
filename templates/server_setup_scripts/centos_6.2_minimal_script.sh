@@ -1,7 +1,7 @@
 #!/bin/bash -vx
 
 #yum update
-yum install curl unzip
+yum install curl unzip -y
 
 # add seqware user
 useradd -d /home/seqware -m seqware -s /bin/bash
