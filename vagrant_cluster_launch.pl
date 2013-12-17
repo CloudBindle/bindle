@@ -149,13 +149,13 @@ sub find_node_info {
       $host_id = $1;
     }
 
-    print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
-
     if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
+
+      print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
       print "MATCHED HOST ID: $host_id\n";
 
-      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config $host_id`;
+      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config :$host_id`;
       my @h = split /\n/, $host_info;
       my $ip = "";
       my $user = "";
