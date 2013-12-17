@@ -141,11 +141,11 @@ sub find_node_info {
   foreach my $l (@t) {
     chomp $l;
     my $host_id = "";
-    if ($l =~ /(\S+)\s+active/) {
+    if ($l =~ /:?([a-zA-Z]+)\s{2,}active/) {
       # openstack
       $host_id = $1;
-    } if ($l =~ /(\S+)\s+running/) {
-      # aws 
+    } elsif ($l =~ /:?([a-zA-Z]+)\s{2,}running/) {
+      # aws
       $host_id = $1;
     }
 
