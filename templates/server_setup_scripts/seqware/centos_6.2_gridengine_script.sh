@@ -7,9 +7,7 @@
 # you should then see your job run and also see STDIN.* files get created with the hostname in them
 
 # get packages
-apt-get update
-export DEBIAN_FRONTEND=noninteractive
-apt-get -q -y --force-yes install gridengine-client gridengine-common gridengine-exec gridengine-master
+yum -y install gridengine-client gridengine-common gridengine-exec gridengine-master
 
 # restart
 /etc/init.d/gridengine-exec stop

@@ -14,14 +14,14 @@ hostname master
 #yum update
 
 # common installs for master and workers
-yum -y install git maven sysv-rc-conf xfsprogs
+yum -y install git maven xfsprogs
 yum -y install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 usermod -a -G seqware mapred
 usermod -a -G mapred seqware
 
 # setup zookeeper
-yum -q -y --force-yes install zookeeper zookeeper-server
+yum -y install zookeeper zookeeper-server
 service zookeeper-server init
 service zookeeper-server start
 
@@ -36,7 +36,7 @@ yum -y install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apach
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
 #mv cloudera.list /etc/apt/sources.list.d/gplextras.list
 #yum update
-#yum -q -y --force-yes install hadoop-lzo-cdh4
+#yum -y install hadoop-lzo-cdh4
 
 # configuration for hadoop
 cp /vagrant/conf.master.tar.gz /etc/hadoop/
@@ -122,7 +122,7 @@ sudo chmod 774 /datastore
 
 ## Setup NFS before seqware
 # see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
-yum -y --force-yes install rpcbind nfs-kernel-server
+yum -y install rpcbind nfs-kernel-server
 echo '%{EXPORTS}' >> /etc/exports
 exportfs -ra
 # TODO: get rid of portmap localhost setting maybe... don't see the file they refer to
@@ -133,4 +133,4 @@ service nfs-kernel-server restart
 cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
 chown root:root /etc/init.d/hadoop-init
 chmod 755 /etc/init.d/hadoop-init
-sysv-rc-conf hadoop-init on
+chkconfig hadoop-init on
