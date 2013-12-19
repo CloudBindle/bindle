@@ -35,7 +35,7 @@
     "SEQWARE_BRANCH_CMD": "git checkout develop",
     # Box definition for VirtualBox:
     "BOX": "CentOS-6.2-64bit",
-    "BOX_URL": "https://kopila.garvan.unsw.edu.au/data/public/c6ab40.php?dl=true"
+    "BOX_URL": "https://129.94.136.21/data/public/c6ab40.php?dl=true"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
