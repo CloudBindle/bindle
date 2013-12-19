@@ -520,6 +520,6 @@ sub rec_copy {
 sub run {
   my ($cmd) = @_;
   print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd' > /dev/null 2> /dev/null");
+  my $result = system("bash -c '$cmd'");
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
