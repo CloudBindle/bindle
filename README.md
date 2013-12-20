@@ -10,32 +10,37 @@ This branch is for development of features relating to CentOS support. It includ
 ### Veewee Installation and Usage Instructions (Mac)
 
 1. Get veewee from here, as follows:
-  git clone https://github.com/jedi4ever/veewee.git
+    `git clone https://github.com/jedi4ever/veewee.git`
 
 2. Install RVM as follows:
-  mkdir -p ~/.rvm/src && cd ~/.rvm/src && rm -rf ./rvm && \
-  git clone --depth 1 git://github.com/wayneeseguin/rvm.git && \
-  cd rvm && ./install
+    ```Shell
+    mkdir -p ~/.rvm/src && cd ~/.rvm/src && rm -rf ./rvm && \
+    git clone --depth 1 git://github.com/wayneeseguin/rvm.git && \
+    cd rvm && ./install
+    ```
 
 3. Add an RVM invocation and veewee alias to the end of your .profile or .bash_profile, .bashrc or .zshrc file, as follows:
-  if [[ -s $HOME/.rvm/scripts/rvm ]]; then
-    source $HOME/.rvm/scripts/rvm;
-  fi
-  alias veewee='bundle exec veewee'
+    ```Shell
+    if [[ -s $HOME/.rvm/scripts/rvm ]]; then
+      source $HOME/.rvm/scripts/rvm;
+    fi
+    alias veewee='bundle exec veewee'
+    ```
 
 4. Install the appropriate version of Ruby:
-  rvm install ruby-1.9.2-p320
+    `rvm install ruby-1.9.2-p320`
  
 5. Navigate to the veewee directory. This should automatically invoke RVM.
 
-  cd veewee
+    `cd veewee`
 
-*NOTE:* If asked to upgrade from using an .rvmc file to a .ruby-version file, do *not* do this.
+    *NOTE:* If asked to upgrade from using an .rvmc file to a .ruby-version file, do *not* do this.
 
 6. Copy or symlink the Seqware-veewee folder from SeqWare/vagrant into the veewee directory:
-  ln -s *[PATH TO SEQWARE-VAGRANT]*/SeqWare-veewee ./definitions/SeqWare-veewee
+    `ln -s *[PATH TO SEQWARE-VAGRANT]*/SeqWare-veewee ./definitions/SeqWare-veewee`
  
-Edit veewee's "definition.rb" file, and comment out the following three scripts: chef.sh, puppet.sh, ruby.sh
+7. Edit veewee's "definition.rb" file, and comment out the following three scripts:
+    chef.sh, puppet.sh, ruby.sh
 
 ## About SeqWare Vagrant
 
