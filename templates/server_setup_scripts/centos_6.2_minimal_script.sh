@@ -26,7 +26,7 @@ echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/environment
 echo 'LC_CTYPE="en_US.UTF-8"' | sudo tee -a /etc/environment
 
 # install the hadoop repo
-wget -q -O /etc/yum.repos.d/cloudera-cdh4.repo http://archive.cloudera.com/cdh4/redhat/6/i386/cdh/cloudera-cdh4.repo &> /dev/null
+wget -q -O /etc/yum.repos.d/cloudera-cdh4.repo http://archive.cloudera.com/cdh4/redhat/6/x86_64/cdh/cloudera-cdh4.repo &> /dev/null
 sudo rpm --import http://archive.cloudera.com/cdh4/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
 
 # get packages

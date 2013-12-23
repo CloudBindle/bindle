@@ -15,7 +15,7 @@ hostname master
 
 # common installs for master and workers
 yum -y install git maven xfsprogs
-yum -y install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
+yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 usermod -a -G seqware mapred
 usermod -a -G mapred seqware
@@ -27,10 +27,10 @@ service zookeeper-server start
 
 # install Hadoop deps, the master node runs the NameNode, SecondaryNameNode and JobTracker
 # NOTE: shouldn't really use secondary name node on same box for production
-yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
+yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-yum -y install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2
+yum -y install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 httpd
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -109,7 +109,7 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
 
 # configure dirs for seqware
 mkdir -p /usr/tmp/seqware-oozie 
@@ -121,16 +121,18 @@ sudo chown seqware:seqware /datastore
 sudo chmod 774 /datastore
 
 ## Setup NFS before seqware
-# see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
-yum -y install rpcbind nfs-kernel-server
+# see http://www.howtoforge.com/setting-up-an-nfs-server-and-client-on-centos-6.3
+yum -y install rpcbind nfs-utils nfs-utils-lib
 echo '%{EXPORTS}' >> /etc/exports
 exportfs -ra
 # TODO: get rid of portmap localhost setting maybe... don't see the file they refer to
 service portmap restart
-service nfs-kernel-server restart
+/etc/init.d/nfs restart
+chkconfig --levels 235 nfs on 
 
 # Add hadoop-init startup script
-cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
-chown root:root /etc/init.d/hadoop-init
-chmod 755 /etc/init.d/hadoop-init
-chkconfig hadoop-init on
+# NOTE: This was removed, because it should not be possible at present to run this script on an AWS instance of SeqWare. -Liv
+#cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
+#chown root:root /etc/init.d/hadoop-init
+#chmod 755 /etc/init.d/hadoop-init
+#chkconfig hadoop-init on
