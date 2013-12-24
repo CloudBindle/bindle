@@ -1,7 +1,7 @@
 #!/bin/bash -vx
 
 # add seqware user
-useradd -d /home/seqware -m seqware -s /bin/bash
+#useradd -d /home/seqware -m seqware -s /bin/bash
 
 # various seqware dirs
 mkdir -p /home/seqware/bin
