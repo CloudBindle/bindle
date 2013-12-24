@@ -42,3 +42,4 @@ rpm -Uhv rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm
 
 yum -y install java-1.6.0-openjdk.x86_64 -y
 export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.0.x86_64/jre
+yum -y install java-1.6.0-openjdk-devel
