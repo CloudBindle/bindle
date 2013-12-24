@@ -14,8 +14,21 @@ hostname master
 #yum update
 
 # common installs for master and workers
-yum -y install git maven xfsprogs
+yum -y install git xfsprogs
 yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
+
+# install maven (for CentOS)
+wget http://mirrors.gigenet.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz
+tar -zxvf apache-maven-3.0.5-bin.tar.gz -C /opt/
+if [ -f /etc/profile.d/maven.sh ];
+then
+	echo '#!/bin/bash' > /etc/profile.d/maven.sh
+fi
+echo 'export M2_HOME=/opt/apache-maven-3.0.5' >> /etc/profile.d/maven.sh
+echo 'export M2=$M2_HOME/bin' >> /etc/profile.d/maven.sh
+echo 'PATH=$M2:$PATH' >> /etc/profile.d/maven.sh
+chmod a+x /etc/profile.d/maven.sh
+source /etc/profile.d/maven.sh
 
 usermod -a -G seqware mapred
 usermod -a -G mapred seqware
@@ -30,7 +43,15 @@ service zookeeper-server start
 yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-yum -y install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 httpd
+yum -y install tomcat6-common tomcat6 httpd
+
+# install postgresql
+sudo sed -i 's/- Base$/- Base\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
+sudo sed -i 's/- Updates$/- Updates\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
+cd /tmp
+curl -O http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+rpm -ivh pgdg-centos93-9.3-1.noarch.rpm
+yum -y install postgresql93.x86_64
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
