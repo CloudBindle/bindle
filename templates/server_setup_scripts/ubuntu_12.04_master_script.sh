@@ -99,7 +99,7 @@ unzip ext-2.2.zip
 mv ext-2.2 /var/lib/oozie/
 
 # setup oozie with postgres if this is the database server
-if [ "master" -eq "%{SEQWARE_DB_SERVER}"]
+if [ "master" = "%{SEQWARE_DB_SERVER}" ]
 then 
    echo "Starting Oozie DB setup"
    sudo -u postgres psql --command "CREATE ROLE oozie LOGIN ENCRYPTED PASSWORD 'oozie' NOSUPERUSER INHERIT CREATEDB NOCREATEROLE;"
