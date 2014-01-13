@@ -57,4 +57,5 @@ apt-get update
 apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en &> /dev/null
 wget http://archive.cloudera.com/cm4/ubuntu/precise/amd64/cm/pool/contrib/o/oracle-j2sdk1.6/oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
 dpkg -i oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
-
+# set default java version
+update-alternatives --set java /usr/lib/jvm/j2sdk1.6-oracle/jre/bin/java

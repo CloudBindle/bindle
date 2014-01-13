@@ -58,23 +58,30 @@ echo 'export PATH=$PATH:/home/seqware/bin' >> /home/seqware/.bash_profile
 # make everything owned by seqware
 chown -R seqware:seqware /home/seqware
 
-# seqware database
-/etc/init.d/postgresql start
-sudo -u postgres psql -c "CREATE USER seqware WITH PASSWORD 'seqware' CREATEDB;"
-sudo -u postgres psql --command "ALTER USER seqware WITH superuser;"
-# expose sql scripts
-cp /home/seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db.sql /tmp/seqware_meta_db.sql
-cp /home/seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db_data.sql /tmp/seqware_meta_db_data.sql
-chmod a+rx /tmp/seqware_meta_db.sql
-chmod a+rx /tmp/seqware_meta_db_data.sql
-# this is the DB actually used by people
-sudo -u postgres psql --command "CREATE DATABASE seqware_meta_db WITH OWNER = seqware;"
-sudo -u postgres psql seqware_meta_db < /tmp/seqware_meta_db.sql
-sudo -u postgres psql seqware_meta_db < /tmp/seqware_meta_db_data.sql
-# the testing DB
-sudo -u postgres psql --command "CREATE DATABASE test_seqware_meta_db WITH OWNER = seqware;"
-sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db.sql
-sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db_data.sql
+# setup oozie with postgres if this is the database server
+if [ "master" = "%{SEQWARE_DB_SERVER}" ]
+   echo "DB setup"
+then 
+   # seqware database
+   /etc/init.d/postgresql start
+   sudo -u postgres psql -c "CREATE USER seqware WITH PASSWORD 'seqware' CREATEDB;"
+   sudo -u postgres psql --command "ALTER USER seqware WITH superuser;"
+   # expose sql scripts
+   cp /home/seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db.sql /tmp/seqware_meta_db.sql
+   cp /home/seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db_data.sql /tmp/seqware_meta_db_data.sql
+   chmod a+rx /tmp/seqware_meta_db.sql
+   chmod a+rx /tmp/seqware_meta_db_data.sql
+   # this is the DB actually used by people
+   sudo -u postgres psql --command "CREATE DATABASE seqware_meta_db WITH OWNER = seqware;"
+   sudo -u postgres psql seqware_meta_db < /tmp/seqware_meta_db.sql
+   sudo -u postgres psql seqware_meta_db < /tmp/seqware_meta_db_data.sql
+   # the testing DB
+   sudo -u postgres psql --command "CREATE DATABASE test_seqware_meta_db WITH OWNER = seqware;"
+   sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db.sql
+   sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db_data.sql
+else 
+   echo "Skipping DB setup, DB is on a different server"
+fi 
 
 # stop tomcat6
 /etc/init.d/tomcat6 stop
@@ -86,11 +93,13 @@ rm -rf /var/lib/tomcat6/webapps/ROOT
 cp /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /var/lib/tomcat6/webapps/SeqWareWebService.war
 cp /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml /etc/tomcat6/Catalina/localhost/SeqWareWebService.xml
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat6/Catalina/localhost/SeqWareWebService.xml
+perl -pi -e "s/localhost/%{SEQWARE_DB_SERVER}/;" /etc/tomcat6/Catalina/localhost/SeqWareWebService.xml
 
 # seqware portal
 cp /home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war /var/lib/tomcat6/webapps/SeqWarePortal.war
 cp /home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml /etc/tomcat6/Catalina/localhost/SeqWarePortal.xml
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat6/Catalina/localhost/SeqWarePortal.xml
+perl -pi -e "s/localhost/%{SEQWARE_DB_SERVER}/;" /etc/tomcat6/Catalina/localhost/SeqWarePortal.xml
 
 # restart tomcat6
 /etc/init.d/tomcat6 start

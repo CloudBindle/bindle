@@ -40,6 +40,10 @@ my $skip_launch = 0;
 
 my $help = 0;
 
+# seqware settings, allow database server and ws server to default to 'master' 
+my $default_seqware_db_server = "master"
+my $default_seqware_ws_server = "master"
+
 # check for help
 if (scalar(@ARGV) == 0) { $help = 1; }
 
@@ -84,6 +88,10 @@ foreach my $node_config (@{$temp_cluster_configs}){
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
+if (!defined($configs->{'SEQWARE_WS_SERVER'})) { $configs->{'SEQWARE_WS_SERVER'} = $default_seqware_ws_server; }
+if (!defined($configs->{'SEQWARE_DB_SERVER'})) { $configs->{'SEQWARE_DB_SERVER'} = $default_seqware_db_server; }
+
+
 
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
