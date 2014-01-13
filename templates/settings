@@ -4,16 +4,16 @@ SW_BUNDLE_DIR=/home/seqware/provisioned-bundles
 SW_BUNDLE_REPO_DIR=/home/seqware/released-bundles
 # API
 # the base URL for the RESTful SeqWare API
-SW_REST_URL=http://master:8080/SeqWareWebService
+SW_REST_URL=http://%{SEQWARE_WS_SERVER}:8080/SeqWareWebService
 # the username and password to connect to the REST API used by SeqWare Pipeline to write back processing info to the DB 
 SW_REST_USER=admin@admin.com
 SW_REST_PASS=admin
 # the base URL for the admin web service
-SW_ADMIN_REST_URL=http://localhost:38080/seqware-admin-webservice
+SW_ADMIN_REST_URL=http://%{SEQWARE_WS_SERVER}:38080/seqware-admin-webservice
 # used for direct database connection by admin tools
 SW_DB_USER=seqware
 SW_DB_PASS=seqware
-SW_DB_SERVER=localhost
+SW_DB_SERVER=%{SEQWARE_DB_SERVER}
 SW_DB=seqware_meta_db
 
 # AMAZON CLOUD SETTINGS
@@ -52,12 +52,12 @@ MAPRED.JOB.TRACKER=master:8021
 FS.DEFAULTFS=hdfs://master:8020
 FS.HDFS.IMPL=org.apache.hadoop.hdfs.DistributedFileSystem
 
-BASIC_TEST_DB_HOST=localhost
+BASIC_TEST_DB_HOST=%{SEQWARE_DB_SERVER}
 BASIC_TEST_DB_NAME=seqware_meta_db
 BASIC_TEST_DB_USER=seqware
 BASIC_TEST_DB_PASSWORD=seqware
 
-EXTENDED_TEST_DB_HOST=localhost
+EXTENDED_TEST_DB_HOST=%{SEQWARE_DB_SERVER}
 EXTENDED_TEST_DB_NAME=seqware_meta_db
 EXTENDED_TEST_DB_USER=seqware
 EXTENDED_TEST_DB_PASSWORD=seqware
