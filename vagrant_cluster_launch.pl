@@ -41,8 +41,8 @@ my $skip_launch = 0;
 my $help = 0;
 
 # seqware settings, allow database server and ws server to default to 'master' 
-my $default_seqware_db_server = "master"
-my $default_seqware_ws_server = "master"
+my $default_seqware_db_server = "master";
+my $default_seqware_ws_server = "master";
 
 # check for help
 if (scalar(@ARGV) == 0) { $help = 1; }
@@ -435,7 +435,7 @@ sub prepare_files {
     # cron for SeqWare
     autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
     # settings, user data
-    copy("templates/settings", "$work_dir/$node/settings");
+    autoreplace("templates/settings", "$work_dir/$node/settings");
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
