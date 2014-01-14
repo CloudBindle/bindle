@@ -5,6 +5,8 @@
 echo '%{HOSTS}' >> /etc/hosts
 hostname %{HOST}
 
+# common installs for master and workers
+apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
 # the repos have been setup in the minimal script
 apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1
 
