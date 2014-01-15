@@ -1,5 +1,7 @@
 #!/bin/bash -vx
 
+# DEPENDS: dbserver_script
+
 # first, fix the /etc/hosts file since SGE wants reverse lookup to work
 cp /etc/hosts /tmp/hosts
 echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
@@ -98,22 +100,14 @@ wget -q http://extjs.com/deploy/ext-2.2.zip
 unzip ext-2.2.zip
 mv ext-2.2 /var/lib/oozie/
 
-# setup oozie with postgres if this is the database server
-if [ "master" = "%{SEQWARE_DB_SERVER}" ]
-then 
-   echo "Starting Oozie DB setup"
-   sudo -u postgres psql --command "CREATE ROLE oozie LOGIN ENCRYPTED PASSWORD 'oozie' NOSUPERUSER INHERIT CREATEDB NOCREATEROLE;"
-   sudo -u postgres psql --command "CREATE DATABASE oozie WITH OWNER = oozie ENCODING = 'UTF-8' TABLESPACE = pg_default LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8' CONNECTION LIMIT = -1;"
-   echo "host    oozie         oozie         0.0.0.0/0             md5" >> /etc/postgresql/9.1/main/pg_hba.conf
-   sudo -u postgres /usr/lib/postgresql/9.1/bin/pg_ctl reload -s -D /var/lib/postgresql/9.1/main
-else 
-   echo "Skipping oozie DB setup, DB is on a different server"
-fi 
+# we used to setup the postgres database here
+# instead, call the ubuntu_12.04_dbserver_script before this 
 
 perl -pi -e  "s/org.apache.derby.jdbc.EmbeddedDriver/org.postgresql.Driver/;" oozie-site.xml
 perl -pi -e "s/jdbc:derby:.*create=true/jdbc:postgresql:\/\/%{SEQWARE_DB_SERVER}:5432\/oozie/;" oozie-site.xml
 perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.username<\/name>[.\s]*<value>sa<\/value>/<name>oozie.service.JPAService.jdbc.username<\/name><value>oozie<\/value>/;" oozie-site.xml
 perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.password<\/name>[.\s]*<value> <\/value>/<name>oozie.service.JPAService.jdbc.password<\/name><value>oozie<\/value>/;" oozie-site.xml
+# this requires that postgres is running, so the db script needs to run first
 sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
 
 service oozie start
@@ -129,7 +123,8 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
+# this used to also setup tomcat, instead call wserver_script first
+for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
 
 # configure dirs for seqware
 mkdir -p /usr/tmp/seqware-oozie 
