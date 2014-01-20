@@ -1,0 +1,128 @@
+# ABOUT
+# the general section contains variables used throughout templates
+# the node_config section defines the nodes of the cluster
+# comments starting with '#' are removed before parsing
+{
+  # GENERAL CONFIG
+  # will likely make these lower-case in the future
+  "general": {
+    # OPEN STACK
+    "OS_API_KEY": "<FILLMEIN>",
+    "OS_USER": "<FILLMEIN>",
+    "OS_INSTANCE_TYPE": "<FILLMEIN e.g. m1.tiny>",
+    "OS_IMAGE": "<FILLMEIN e.g. Ubuntu-12.04-LTS-v1.2>",
+    "OS_ENDPOINT": "https://<FILLMEIN>/",
+    "OS_SSH_KEY_NAME": "<FILLMEIN e.g. key-1>",
+    "OS_SSH_USERNAME": "<FILLMEIN e.g. ubuntu>",
+    "OS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
+    "OS_TENANT": "<FILLMEIN>",
+    "OS_NETWORK": "<FILLMEIN>",
+    # AMAZON
+    "AWS_KEY": "<FILLMEIN>",
+    "AWS_SECRET_KEY": "<FILLMEIN>",
+    # Amazon Ubuntu 12.04.2 LTS
+    "AWS_IMAGE": "ami-d0f89fb9",
+    # could also use cc1.4xlarge or c1.xlarge or m1.xlarge or m3.xlarge or m1.large
+    # our full integration test work just fine on m1.xlarge
+    "AWS_INSTANCE_TYPE": "m1.large",
+    "AWS_SSH_KEY_NAME": "<FILLMEIN e.g. key-1>",
+    "AWS_SSH_USERNAME": "ubuntu",
+    "AWS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
+    # SEQWARE
+    "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
+    "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
+    # NOTE: you can checkout whatever branch you like, see our GitHub site
+    "SEQWARE_BRANCH_CMD": "git checkout develop"
+    "SEQWARE_DB_SERVER": "dbserver", 
+    "SEQWARE_WS_SERVER": "wserver"
+  },
+ # NODE CONFIG
+  # type=[master|worker], in the future we may have more types
+  # you need 1 master and 0..n workers
+  "node_config": [
+    # NOTE: the master node is assumed to be called "master" (for now), things will break if named something else
+    {
+      "name": ["master"],
+      "type": "master",
+      "floatip": ["<FILLMEIN>"],
+      # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
+      "second_pass_scripts": [
+	[],
+	# master needs to wait one pass so that postgres can get setup
+        # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
+        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh",
+	  "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_script.sh",
+	  "templates/server_setup_scripts/seqware/oozie-sge-plugin.sh",
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_build_script.sh"
+	],
+        [ ],
+	# these tests require that SGE is fully setup on the worker nodes
+        [ 
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_user_script.sh",
+          "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
+        ]
+      ]
+    },
+    {
+      "name": ["dbserver"],
+      "type": "dbserver",
+      "floatip": ["<FILLMEIN>"],
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      "second_pass_scripts": [
+	[ 
+	   "templates/server_setup_scripts/ubuntu_12.04_hostname_script.sh", 
+	   "templates/server_setup_scripts/ubuntu_12.04_dbserver_script.sh", 
+           "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_build_script.sh",
+	   "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_dbserver_script.sh"
+	],
+        [ ],
+        [ ],
+        [ ]
+      ]
+    },
+    {
+      "name": ["wserver"],
+      "type": "wserver",
+      "floatip": ["<FILLMEIN>"],
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      "second_pass_scripts": [
+	[ 
+           "templates/server_setup_scripts/ubuntu_12.04_hostname_script.sh",
+           "templates/server_setup_scripts/ubuntu_12.04_wserver_script.sh", 
+           "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_build_script.sh",
+           "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_wserver_script.sh"
+        ],
+        [ ],
+        [ ],
+        [ ]
+      ]
+    },
+    {
+      "name": ["worker1"],
+      "type": "worker",
+      "floatip": ["<FILLMEIN>"],
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
+      "second_pass_scripts": [
+	[ ],
+        [ 
+           "templates/server_setup_scripts/ubuntu_12.04_hostname_script.sh",
+	   "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh"
+        ],
+	# setup SGE workers when the master is done
+        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_worker_script.sh" ],
+        [ ]
+      ]
+    }
+  ]
+}
