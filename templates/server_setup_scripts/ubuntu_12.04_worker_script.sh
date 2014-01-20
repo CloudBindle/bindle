@@ -62,7 +62,7 @@ echo 'rpcbind : ALL' >> /etc/hosts.deny
 echo 'rpcbind : %{MASTER_PIP}' >> /etc/hosts.allow
 mount %{MASTER_PIP}:/home /home
 mount %{MASTER_PIP}:/usr/tmp/seqware-oozie /usr/tmp/seqware-oozie
-mount %{MASTER_PIP}:/datastore /datastore
+mount %{MASTER_PIP}:/mnt/datastore /datastore
 
 chmod a+rwx /home
 chmod a+rwx /usr/tmp/seqware-oozie
