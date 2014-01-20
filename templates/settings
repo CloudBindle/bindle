@@ -9,7 +9,7 @@ SW_REST_URL=http://%{SEQWARE_WS_SERVER}:8080/SeqWareWebService
 SW_REST_USER=admin@admin.com
 SW_REST_PASS=admin
 # the base URL for the admin web service
-SW_ADMIN_REST_URL=http://%{SEQWARE_WS_SERVER}:38080/seqware-admin-webservice
+SW_ADMIN_REST_URL=http://localhost:38080/seqware-admin-webservice
 # used for direct database connection by admin tools
 SW_DB_USER=seqware
 SW_DB_PASS=seqware

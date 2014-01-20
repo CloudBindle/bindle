@@ -15,6 +15,7 @@ cp -r /home/seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/
 
 # for glassfish database location during tests
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /home/seqware/gitroot/seqware/pom.xml 
+perl -pi -e "s/<seqware_meta_db_host>localhost<\/seqware_meta_db_host>/<seqware_meta_db_host>%{SEQWARE_DB_SERVER}<\/seqware_meta_db_host>/;" /home/seqware/gitroot/seqware/pom.xml 
 # run full integration testing
 su - seqware -c 'cd /home/seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
 
