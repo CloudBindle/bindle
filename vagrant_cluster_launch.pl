@@ -543,7 +543,7 @@ sub run {
   # simple hack for debugging output, replace this with something better
   my ($cmd_stdout, $cmd_stdout_name) = tempfile('cmd_stdoutXXXXX', SUFFIX => '.log', DIR => $tempdir);
   my ($cmd_stderr, $cmd_stderr_name) = tempfile('cmd_stderrXXXXX', SUFFIX => '.log', DIR => $tempdir);
-  print "RUNNING: $cmd with stderr to $cmd_stdout_name and stderr to $cmd_stderr_name\n";
+  print "RUNNING: $cmd with stdout to $cmd_stdout_name and stderr to $cmd_stderr_name\n";
   my $result = system("bash -c '$cmd' > $cmd_stdout_name 2> $cmd_stderr_name");
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
