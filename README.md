@@ -177,7 +177,7 @@ This is the default engine that the vast majority of people will want to use:
 
 #### Oozie SGE
 
-This is really just for SeqWare's own internal testing. We support a workflow engine that talks to SGE via an Oozie plugin and this configruation will let you spin up an SGE cluster configured to work with SeqWare:
+This is really just for SeqWare's own internal testing. We support a workflow engine that talks to SGE via an Oozie plugin and this configuration will let you spin up an SGE cluster configured to work with SeqWare:
 
 TODO: the SGE scripts need to be generalized for a cluster
 
@@ -185,6 +185,18 @@ TODO: the SGE scripts need to be generalized for a cluster
     cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
     perl vagrant_cluster_launch.pl --use-openstack
+
+##### Oozie SGE with dedicated web service and database servers
+
+For increased performance, it is possible to allocate dedicated database and web service servers
+
+
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.seqware.cluster.dedicatedServers.json.template
+    # launch, use the correct command line args for you 
+    perl vagrant_cluster_launch.pl --use-openstack
+
+
 
 ## OICR Examples
 
