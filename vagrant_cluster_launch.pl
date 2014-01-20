@@ -7,6 +7,7 @@ use Config;
 $Config{useithreads} or die('Recompile Perl with threads to run this program.');
 use threads;
 use Storable 'dclone';
+use File::Temp qw/ tempfile tempdir /;
 
 # VARS
 
@@ -37,8 +38,8 @@ my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
-
 my $help = 0;
+my $tempdir = tempdir('vagrant_provision_XXXX');
 
 # seqware settings, allow database server and ws server to default to 'master' 
 my $default_seqware_db_server = "master";
@@ -531,7 +532,7 @@ sub copy {
   close OUT;
 }
 
-sub rec_copy {
+sub rec_copy {tempdir
   my ($src, $dest) = @_;
   print "COPYING REC: $src, $dest\n";
   run("cp -r $src $dest");
@@ -539,7 +540,10 @@ sub rec_copy {
 
 sub run {
   my ($cmd) = @_;
-  print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd' > /dev/null 2> /dev/null");
+  # simple hack for debugging output, replace this with something better
+  my ($cmd_stdout, $cmd_stdout_name) = tempfile('cmd_stdoutXXXXX', SUFFIX => '.log', DIR => $tempdir);
+  my ($cmd_stderr, $cmd_stderr_name) = tempfile('cmd_stderrXXXXX', SUFFIX => '.log', DIR => $tempdir);
+  print "RUNNING: $cmd with stderr to $cmd_stdout_name and stderr to $cmd_stderr_name\n";
+  my $result = system("bash -c '$cmd' > $cmd_stdout_name 2> $cmd_stderr_name");
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
