@@ -532,12 +532,15 @@ sub rec_copy {
 sub run {
   my ($cmd, $hostname) = @_;
   my $outputfile = "";
+  # by default pipe to /dev/null if no hostname is specified, this 
+  # will prevent a default.log file from being a mixture of different thread's output
+  my $final_cmd = "bash -c '$cmd' > /dev/null 2> /dev/null";
+  # only output to host-specific log if defined
   if (defined($hostname)){
-    $outputfile = "$hostname.log";
-  } else {
-    $outputfile = "default.log";
+    $outputfile = "$work_dir/$hostname.log";
+    $final_cmd = "bash -c '$cmd' >> $outputfile 2> $outputfile";
   }
-  print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd' >> $outputfile 2> $outputfile");
+  print "RUNNING: $final_cmd\n";
+  my $result = system($final_cmd);
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
