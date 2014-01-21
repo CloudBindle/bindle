@@ -191,6 +191,8 @@ sub provision_instances {
   # this is putting in a variable for the /etc/hosts file
   my $host_str = figure_out_host_str($hosts);
   $configs->{'HOSTS'} = $host_str;
+  my $sge_host_str = figure_out_sge_host_str($hosts);
+  $configs->{'SGE_HOSTS'} = $sge_host_str;
   # FIXME: notice hard-coded to be "master"
   my $master_pip = $hosts->{master}{pip};
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
@@ -340,6 +342,18 @@ sub figure_out_host_str {
   print "HOSTS: $s\n";
   return($s);
 }
+
+# this creates the sge host list
+sub figure_out_sge_host_str {
+  my ($hosts) = @_;
+  my $s = "";
+  foreach my $host (sort keys %{$hosts}) {
+    $s .= " $host";
+  }
+  print "SGE HOSTS: $s\n";
+  return($s);
+}
+
 
 
 # this basically cats files together after doing an autoreplace
