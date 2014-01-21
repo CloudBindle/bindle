@@ -1,8 +1,9 @@
 #!/bin/bash -vx
 
-# DEPENDS: dbserver_script
+# first, set the hostname
+hostname master
 
-# first, fix the /etc/hosts file since SGE wants reverse lookup to work
+# fix the /etc/hosts file since SGE wants reverse lookup to work
 cp /etc/hosts /tmp/hosts
 echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
 cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
@@ -10,7 +11,6 @@ cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
 # setup hosts
 # NOTE: the hostname seems to already be set at least on BioNimubs OS
 echo '%{HOSTS}' >> /etc/hosts
-hostname master
 
 # general apt-get
 apt-get update
