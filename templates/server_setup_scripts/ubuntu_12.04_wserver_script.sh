@@ -1,5 +1,9 @@
 #!/bin/bash -vx
 
+# Setup tomcat, apache, and possibly glassfish
+# This script should be modular enough to run on both the master or a dedicated server
+
+
 # general apt-get
 apt-get update
 export DEBIAN_FRONTEND=noninteractive

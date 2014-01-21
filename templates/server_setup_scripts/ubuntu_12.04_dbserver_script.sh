@@ -1,5 +1,6 @@
 #!/bin/bash -vx
 
+# Setup for postgres allowing remote access and setup with permissions for oozie
 # This script should remain modular enough that it be run both on the master (if everything is self contained on one VM) or on a dedicated db server
 
 # common installs for master and workers

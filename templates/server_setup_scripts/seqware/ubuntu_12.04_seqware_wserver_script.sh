@@ -1,5 +1,8 @@
 #!/bin/bash -vx
 
+# Setup the various seqware web services
+# This script should be modular enough to run on both the master or a dedicated server
+
 export SEQWARE_VERSION=`ls /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
 
 # stop tomcat6

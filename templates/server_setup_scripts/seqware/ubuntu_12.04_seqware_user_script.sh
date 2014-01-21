@@ -1,5 +1,7 @@
 #!/bin/bash -vx
 
+# Complete setup of all SeqWare user facing components and run testing (if required)
+
 export SEQWARE_VERSION=`ls /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
 
 # setup jar

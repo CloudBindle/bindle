@@ -1,5 +1,7 @@
 #!/bin/bash -vx
 
+# Build seqware from source code
+
 # add seqware user
 useradd -d /home/seqware -m seqware -s /bin/bash
 
