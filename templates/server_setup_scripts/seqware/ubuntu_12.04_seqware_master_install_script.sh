@@ -58,6 +58,7 @@ curl -L http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/se
 curl -L http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-portal/${SEQWARE_VERSION}/seqware-portal-${SEQWARE_VERSION}.war >  /home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war
 curl -L http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-webservice/${SEQWARE_VERSION}/seqware-webservice-${SEQWARE_VERSION}.war > /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war 
 curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/seqware > /home/seqware/gitroot/seqware/seqware-pipeline/target/seqware
+mkdir -p /home/seqware/.m2/
 curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/archetype-catalog.xml > /home/seqware/.m2/archetype-catalog.xml
 # copy the templates to their correct destination
 cp /vagrant/seqware-webservice.xml /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml
