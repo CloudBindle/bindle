@@ -40,7 +40,7 @@
 #    "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
 #    # NOTE: you can checkout whatever branch you like, see our GitHub site
 #    "SEQWARE_BRANCH_CMD": "git checkout develop"
-    # SEQWARE VERSION
+    # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
     "SEQWARE_VERSION": "1.0.9"
   },
   # NODE CONFIG
@@ -64,7 +64,7 @@
 	  "templates/server_setup_scripts/seqware/oozie-sge-plugin.sh"
 	],
 	[],
-        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh",
+        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_install_script.sh",
           "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
         ]
       ]
