@@ -64,9 +64,7 @@
 	  "templates/server_setup_scripts/seqware/oozie-sge-plugin.sh"
 	],
 	[],
-        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_install_script.sh",
-          "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
-        ]
+        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_install_script.sh" ]
       ]
     },
     {
