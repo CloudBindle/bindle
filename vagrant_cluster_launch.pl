@@ -545,6 +545,6 @@ sub run {
   } else {
     $outputfile = "default.log";
   }
-  my $result = system("bash -c '$cmd' >> $outputfile 2> $outputfile");
+  my $result = system("bash -c '$cmd' >> $outputfile 2>&1");
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
