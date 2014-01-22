@@ -1,0 +1,88 @@
+# ABOUT
+# The general section contains variables used throughout templates.
+# The node_config section defines the nodes of the cluster.
+# Comments starting with '#' are removed before parsing.
+#
+# ABOUT 'SEQWARE.INSTALL' TEMPLATE
+# This config template is designed to install SeqWare rather than building it
+# from scratch.  It's a lot faster than the standard template which calls 
+# scripts to build from a source checkout.  But it does a lot less checking
+# since it does not run the full unit/integration tests that are part
+# of the SeqWare build process
+{
+  # GENERAL CONFIG
+  # will likely make these lower-case in the future
+  "general": {
+    # OPEN STACK
+    "OS_API_KEY": "<FILLMEIN>",
+    "OS_USER": "<FILLMEIN>",
+    "OS_INSTANCE_TYPE": "<FILLMEIN e.g. m1.tiny>",
+    "OS_IMAGE": "<FILLMEIN e.g. Ubuntu-12.04-LTS-v1.2>",
+    "OS_ENDPOINT": "https://<FILLMEIN>/",
+    "OS_SSH_KEY_NAME": "<FILLMEIN e.g. key-1>",
+    "OS_SSH_USERNAME": "<FILLMEIN e.g. ubuntu>",
+    "OS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
+    "OS_TENANT": "<FILLMEIN>",
+    "OS_NETWORK": "<FILLMEIN>",
+    # AMAZON
+    "AWS_KEY": "<FILLMEIN>",
+    "AWS_SECRET_KEY": "<FILLMEIN>",
+    # Amazon Ubuntu 12.04.3 LTS
+    "AWS_IMAGE": "ami-a73264ce",
+    # could also use cc1.4xlarge or c1.xlarge or m1.xlarge or m3.xlarge or m1.large
+    # our full integration test work just fine on m1.xlarge so we use that
+    "AWS_INSTANCE_TYPE": "m1.xlarge",
+    "AWS_SSH_KEY_NAME": "<FILLMEIN e.g. key-1>",
+    "AWS_SSH_USERNAME": "ubuntu",
+    "AWS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
+#    # SEQWARE
+#    "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
+#    "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
+#    # NOTE: you can checkout whatever branch you like, see our GitHub site
+#    "SEQWARE_BRANCH_CMD": "git checkout develop"
+    # SEQWARE VERSION
+    "SEQWARE_VERSION": "1.0.9"
+  },
+  # NODE CONFIG
+  # type=[master|worker], in the future we may have more types
+  # you need 1 master and 0..n workers
+  "node_config": [
+    # NOTE: the master node is assumed to be called "master" (for now), things will break if named something else
+    {
+      "name": ["master"],
+      "type": "master",
+      "floatip": ["<FILLMEIN>"],
+      # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
+      "second_pass_scripts": [
+        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
+        # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
+	[ "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_script.sh",
+	  "templates/server_setup_scripts/seqware/oozie-sge-plugin.sh"
+	],
+	[],
+        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh",
+          "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
+        ]
+      ]
+    },
+    {
+      "name": ["worker1", "worker2"],
+      "type": "worker",
+      "floatip": ["<FILLMEIN>", "<FILLMEIN>"],
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+      ], 
+      # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
+      "second_pass_scripts": [
+        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh"],
+        [ ],
+        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_worker_script.sh" ],
+        [ ]
+      ]
+    }
+  ]
+}
