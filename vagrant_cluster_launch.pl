@@ -426,6 +426,10 @@ sub prepare_files {
   foreach my $node (sort keys %{$cluster_configs}) {
     # cron for SeqWare
     autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
+    # various files used for SeqWare when installed and not built from source
+    autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/");
+    autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/");
+    
     # settings, user data
     copy("templates/settings", "$work_dir/$node/settings");
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");

@@ -57,7 +57,10 @@ mkdir -p /home/seqware/gitroot/seqware/seqware-pipeline/target/
 curl http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-distribution/${SEQWARE_VERSION}/seqware-distribution-${SEQWARE_VERSION}-full.jar > /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar
 curl http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-portal/${SEQWARE_VERSION}/seqware-portal-${SEQWARE_VERSION}.war >  /home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war
 curl http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-webservice/${SEQWARE_VERSION}/seqware-webservice-${SEQWARE_VERSION}.war > /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war 
-curl 
+curl https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/seqware > /home/seqware/gitroot/seqware/seqware-pipeline/target/seqware
+# copy the templates to their correct destination
+cp /vagrant/seqware-webservice.xml /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml
+cp /vagrant/seqware-portal.xml /home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml
 
 #export SEQWARE_VERSION=`ls /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
 
@@ -112,10 +115,10 @@ perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat6/Catalina/loc
 # seqware landing page
 cp -r /home/seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
 
-# for glassfish database location during tests
-perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /home/seqware/gitroot/seqware/pom.xml 
-# run full integration testing
-su - seqware -c 'cd /home/seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
+## for glassfish database location during tests
+#perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /home/seqware/gitroot/seqware/pom.xml 
+## run full integration testing
+#su - seqware -c 'cd /home/seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
 
 # setup cronjobs after testing to avoid WorkflowStatusChecker or Launcher clashes
 cp /vagrant/status.cron /home/seqware/crons/
