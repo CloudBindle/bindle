@@ -52,10 +52,12 @@ export SEQWARE_VERSION="%{SEQWARE_VERSION}"
 mkdir -p /home/seqware/gitroot/seqware/seqware-distribution/target/
 mkdir -p /home/seqware/gitroot/seqware/seqware-webservice/target/
 mkdir -p /home/seqware/gitroot/seqware/seqware-portal/target/
+mkdir -p /home/seqware/gitroot/seqware/seqware-pipeline/target/
 # download the released versions
 curl http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-distribution/${SEQWARE_VERSION}/seqware-distribution-${SEQWARE_VERSION}-full.jar > /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar
 curl http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-portal/${SEQWARE_VERSION}/seqware-portal-${SEQWARE_VERSION}.war >  /home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war
 curl http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-webservice/${SEQWARE_VERSION}/seqware-webservice-${SEQWARE_VERSION}.war > /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war 
+curl 
 
 #export SEQWARE_VERSION=`ls /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
 
