@@ -66,6 +66,17 @@ your distribution's package management system:
 * JSON: eg "sudo apt-get install libjson-perl"
 * Template: eg "sudo apt-get install libtemplate-perl"
 
+### Note About Versions
+
+There have been some reports of problems with the latest version of Vagrant and/or Vagrant plugins.  Here is what we currently use on Ubuntu 12.0.4 LTS:
+
+* Vagrant: 1.2.2
+* Vagrant plugins:
+** excon (0.23.0)
+** json (1.8.0)
+** vagrant-aws (0.2.2)
+** vagrant-openstack-plugin (0.2.2)
+
 ## Getting "Boxes"
 
 If you are running using VirtualBox you need to pre-download boxes which are
