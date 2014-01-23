@@ -68,14 +68,25 @@ your distribution's package management system:
 
 ### Note About Versions
 
-There have been some reports of problems with the latest version of Vagrant and/or Vagrant plugins.  Here is what we currently use on Ubuntu 12.0.4 LTS:
+There have been some reports of problems with the latest version of Vagrant
+and Vagrant plugins for OpenStack and/or AWS.  Here is what we currently use on
+Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
 * Vagrant: 1.2.2
 * Vagrant plugins:
-** excon (0.23.0)
-** json (1.8.0)
-** vagrant-aws (0.2.2)
-** vagrant-openstack-plugin (0.2.2)
+    * excon (0.23.0)
+    * json (1.8.0)
+    * vagrant-aws (0.2.2)
+    * vagrant-openstack-plugin (0.2.2)
+
+On the Mac we use the following to launch VMs on VirtualBox:
+
+* Vagrant: 1.3.5
+* Vagrant plugins: NA
+* VirtualBox: 4.2.18 r88780
+
+These work correctly, if you use a different version and run into problems
+please try these versions.
 
 ## Getting "Boxes"
 
