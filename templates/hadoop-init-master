@@ -14,7 +14,7 @@ if [ $? != 0 ]; then
 
 echo `date` 'Begin initializing hadoop filesystems' >> /tmp/hadoop-init.log
 
-HOST=`hostname`
+HOST='%{HOST}'
 
 # remove the old 'master' entry
 cat /etc/hosts | grep -v $HOST > /tmp/hosts
