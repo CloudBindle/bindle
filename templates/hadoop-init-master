@@ -9,9 +9,6 @@
 # sudo sysv-rc-conf hadoop-init on
 
 
-stat /data/1/
-if [ $? != 0 ]; then
-
 echo `date` 'Begin initializing hadoop filesystems' >> /tmp/hadoop-init.log
 
 HOST='%{HOST}'
@@ -33,6 +30,8 @@ service hadoop-0.20-mapreduce-jobtracker stop
 service hadoop-hdfs-datanode stop
 service hadoop-hdfs-namenode stop
 
+stat /data/1/
+if [ $? != 0 ]; then
 
 # initialize ephemeral disk for hadoop
 mkdir -p /data/1/dfs/nn /data/1/dfs/dn
@@ -46,6 +45,8 @@ chmod -R a+rwx /tmp/hadoop-mapred
 
 # initialize HDFS
 sudo -u hdfs hadoop namenode -format -force
+
+fi
 
 service hadoop-hdfs-namenode start
 service hadoop-hdfs-datanode start
@@ -75,5 +76,4 @@ service hbase-thrift start
 service hbase-regionserver start
 
 echo `date` 'Completed initializing hadoop filesystems' >> /tmp/hadoop-init.log
-fi
 
