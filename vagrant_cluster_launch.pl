@@ -262,7 +262,8 @@ sub provision_files_thread {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    my $tmp_script_name = "/tmp/tmp_$host_name\_$script_name";
+    system("mkdir -p $work_dir/scripts/");
+    my $tmp_script_name = "$work_dir/scripts/tmp_$host_name\_$script_name";
     system("rm $tmp_script_name");
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
@@ -308,11 +309,13 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/config_script.$host_name.sh");
+    system("mkdir -p $work_dir/scripts/");
+    system("rm $work_dir/scripts/config_script.$host_name\_$script_name.sh");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
-    setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh", $host_name);
+    setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name.sh", $local_configs);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash mkdir -p /vagrant_scripts", $host_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name.sh ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /vagrant_scripts/config_script.$host_name\_$script_name.sh", $host_name);
   }
 }
 
