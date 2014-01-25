@@ -30,6 +30,26 @@ service hadoop-0.20-mapreduce-jobtracker stop
 service hadoop-hdfs-datanode stop
 service hadoop-hdfs-namenode stop
 
+stat /mnt/seqware-oozie
+if [ $? != 0 ]; then
+mkdir -p /mnt/seqware-oozie
+chmod a+rx /mnt
+chmod a+rwx /mnt/seqware-oozie
+mkdir -p /usr/tmp/
+chmod -R a+rwx /usr/tmp/
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
+fi
+
+stat /mnt/datastore
+if [ $? != 0 ]; then
+mkdir -p /mnt/datastore
+chmod a+rx /mnt
+chmod a+rwx /mnt/datastore
+ln -s /mnt/datastore /datastore
+chown seqware:seqware /mnt/datastore
+fi
+
 stat /data/1/
 if [ $? != 0 ]; then
 

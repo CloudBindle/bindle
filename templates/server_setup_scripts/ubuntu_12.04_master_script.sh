@@ -127,16 +127,20 @@ service hue restart
 for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
 
 # configure dirs for seqware
-mkdir -p /usr/tmp/seqware-oozie 
+# note these are placed on /mnt since that
+# is the ephemeral disk on Amazon instances
+mkdir -p /mnt/seqware-oozie
+chmod a+rx /mnt
+chmod a+rwx /mnt/seqware-oozie
+mkdir -p /usr/tmp/
 chmod -R a+rwx /usr/tmp/
-chown -R seqware:seqware /usr/tmp/seqware-oozie
-
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
 mkdir -p /mnt/datastore
 chmod a+rx /mnt
 chmod a+rwx /mnt/datastore
 ln -s /mnt/datastore /datastore
 chown seqware:seqware /mnt/datastore
-#chmod 774 /mnt/datastore
 
 ## Setup NFS before seqware
 # see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
