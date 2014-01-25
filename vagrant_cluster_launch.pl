@@ -440,6 +440,9 @@ sub prepare_files {
     # these are used for when the box is rebooted, it setups the /etc/hosts file for example
     replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
     replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
+    # this is used for the master SGE node to recover when the system is rebooted
+    # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
+    replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
     # hadoop settings files
     # FIXME: right now these config files have "master" hardcoded as the master node
     # FIXME: break out into config driven provisioner
