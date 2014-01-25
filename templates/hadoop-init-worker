@@ -39,10 +39,10 @@ mkdir -p /tmp/hadoop-mapred
 chown mapred:mapred /tmp/hadoop-mapred
 chmod -R a+rwx /tmp/hadoop-mapred
 
+fi
+
 # initialize HDFS
 service hadoop-hdfs-datanode start
-
-fi
 
 # initialize HDFS for services
 sudo -u hdfs hadoop fs -mkdir /tmp
