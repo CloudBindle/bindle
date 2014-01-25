@@ -76,3 +76,4 @@ service hbase-regionserver start
 
 echo `date` 'Completed initializing hadoop filesystems' >> /tmp/hadoop-init.log
 fi
+
