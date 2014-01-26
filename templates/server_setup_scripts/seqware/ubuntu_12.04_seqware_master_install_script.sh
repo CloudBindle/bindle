@@ -1,5 +1,8 @@
 #!/bin/bash -vx
 
+# TODO:
+# - need to create and install a HelloWorld workflow (optionally?) so SWID 1 is taken and the tutorials can be followed
+
 # add seqware user
 useradd -d /home/seqware -m seqware -s /bin/bash
 
