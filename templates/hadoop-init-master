@@ -37,6 +37,8 @@ chmod a+rx /mnt
 chmod a+rwx /mnt/seqware-oozie
 mkdir -p /usr/tmp/
 chmod -R a+rwx /usr/tmp/
+# remove if there already to prevent circular link
+rm /usr/tmp/seqware-oozie
 ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
 chown -R seqware:seqware /mnt/seqware-oozie
 fi
@@ -46,6 +48,8 @@ if [ $? != 0 ]; then
 mkdir -p /mnt/datastore
 chmod a+rx /mnt
 chmod a+rwx /mnt/datastore
+# remove if there already to prevent circular link
+rm /datastore
 ln -s /mnt/datastore /datastore
 chown seqware:seqware /mnt/datastore
 fi
