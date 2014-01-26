@@ -310,12 +310,13 @@ sub provision_script_list_thread {
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
     system("mkdir -p $work_dir/scripts/");
-    system("rm $work_dir/scripts/config_script.$host_name\_$script_name.sh");
+    system("rm $work_dir/scripts/config_script.$host_name\_$script_name");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
-    setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name.sh", $local_configs);
-    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash mkdir -p /vagrant_scripts", $host_name);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name.sh ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /vagrant_scripts/config_script.$host_name\_$script_name.sh", $host_name);
+    setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo mkdir -p /vagrant_scripts", $host_name);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo chmod a+rwx /vagrant_scripts", $host_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
   }
 }
 
@@ -548,7 +549,7 @@ sub run {
   # only output to host-specific log if defined
   if (defined($hostname)){
     $outputfile = "$work_dir/$hostname.log";
-    $final_cmd = "bash -c '$cmd' >> $outputfile 2> $outputfile";
+    $final_cmd = "bash -c '$cmd' >> $outputfile 2>&1";
   }
   print "RUNNING: $final_cmd\n";
   my $result = system($final_cmd);

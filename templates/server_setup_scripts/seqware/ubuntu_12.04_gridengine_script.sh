@@ -17,7 +17,9 @@ apt-get -q -y --force-yes install gridengine-client gridengine-common gridengine
 /etc/init.d/gridengine-exec start
 
 # configure
-export HOST=`hostname`
+#export HOST=`hostname`
+hostname master
+export HOST=master
 sudo -u sgeadmin qconf -am seqware
 qconf -au seqware users
 qconf -as $HOST
