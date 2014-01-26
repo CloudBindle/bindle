@@ -2,6 +2,7 @@
 
 # TODO:
 # - need to create and install a HelloWorld workflow (optionally?) so SWID 1 is taken and the tutorials can be followed
+# - what about seqware/root password for VirtualBox?
 
 # add seqware user
 useradd -d /home/seqware -m seqware -s /bin/bash
