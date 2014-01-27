@@ -33,6 +33,8 @@
     "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
     # NOTE: you can checkout whatever branch you like, see our GitHub site
     "SEQWARE_BRANCH_CMD": "git checkout develop"
+    "SEQWARE_DB_SERVER": "master", 
+    "SEQWARE_WS_SERVER": "master"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -43,14 +45,28 @@
       "name": ["master"],
       "type": "master",
       "floatip": ["<FILLMEIN>"],
-      # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
+        # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
       "first_pass_scripts": [
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
-      # NOTE: this is an array of arrays, since this is a single box there's only one inner array. 
+      # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
       "second_pass_scripts": [
+	[],
+	# master needs to wait one pass so that postgres can get setup
+        # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
         [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh",
-          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh",
+	  "templates/server_setup_scripts/ubuntu_12.04_dbserver_script.sh", 
+          "templates/server_setup_scripts/ubuntu_12.04_wserver_script.sh", 
+	  "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_script.sh",
+	  "templates/server_setup_scripts/seqware/oozie-sge-plugin.sh",
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_build_script.sh",
+	  "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_dbserver_script.sh",
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_wserver_script.sh"
+	],
+        [ ],
+	# these tests require that SGE is fully setup on the worker nodes
+        [ 
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_user_script.sh",
           "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
         ]
       ]
