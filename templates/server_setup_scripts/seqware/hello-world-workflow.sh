@@ -12,6 +12,7 @@ mvn archetype:generate \
 -Dversion=1.0-SNAPSHOT \
 -DworkflowVersion=1.0-SNAPSHOT \
 -DworkflowDirectoryName=HelloWorld \
+-DworkflowName=HelloWorld \
 -Dworkflow-name=HelloWorld'
 
 su - seqware -c 'cd /home/seqware/workflow-dev/HelloWorld; mvn install'

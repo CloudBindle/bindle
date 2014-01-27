@@ -131,9 +131,12 @@ mkdir -p /usr/tmp/seqware-oozie
 chmod -R a+rwx /usr/tmp/
 chown -R seqware:seqware /usr/tmp/seqware-oozie
 
-sudo mkdir /datastore
-sudo chown seqware:seqware /datastore
-sudo chmod 774 /datastore
+mkdir -p /mnt/datastore
+chmod a+rx /mnt
+chmod a+rwx /mnt/datastore
+ln -s /mnt/datastore /datastore
+chown seqware:seqware /mnt/datastore
+#chmod 774 /mnt/datastore
 
 ## Setup NFS before seqware
 # see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
