@@ -7,7 +7,6 @@ use Config;
 $Config{useithreads} or die('Recompile Perl with threads to run this program.');
 use threads;
 use Storable 'dclone';
-use File::Temp qw/ tempfile tempdir /;
 
 # VARS
 
@@ -39,7 +38,6 @@ my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
 my $help = 0;
-my $tempdir = tempdir('vagrant_provision_XXXX');
 
 # seqware settings, allow database server and ws server to default to 'master' 
 my $default_seqware_db_server = "master";
@@ -531,7 +529,7 @@ sub copy {
   close OUT;
 }
 
-sub rec_copy {tempdir
+sub rec_copy {
   my ($src, $dest) = @_;
   print "COPYING REC: $src, $dest\n";
   run("cp -r $src $dest");
