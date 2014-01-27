@@ -193,6 +193,8 @@ sub provision_instances {
   # this is putting in a variable for the /etc/hosts file
   my $host_str = figure_out_host_str($hosts);
   $configs->{'HOSTS'} = $host_str;
+  my $sge_host_str = figure_out_sge_host_str($hosts);
+  $configs->{'SGE_HOSTS'} = $sge_host_str;
   # FIXME: notice hard-coded to be "master"
   my $master_pip = $hosts->{master}{pip};
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
@@ -266,7 +268,7 @@ sub provision_files_thread {
     system("rm $tmp_script_name");
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script});
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script}, $host_name);
     system("rm $tmp_script_name");
   }
 }
@@ -312,7 +314,7 @@ sub provision_script_list_thread {
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
     setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh");
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh", $host_name);
   }
 }
 
@@ -324,7 +326,7 @@ sub make_exports_str {
     my $pip = $hosts->{$host}{pip};
     $result .= "
 /home $pip(rw,sync,no_root_squash,no_subtree_check)
-/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
 /usr/tmp/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)
 ";
   }
@@ -342,6 +344,18 @@ sub figure_out_host_str {
   print "HOSTS: $s\n";
   return($s);
 }
+
+# this creates the sge host list
+sub figure_out_sge_host_str {
+  my ($hosts) = @_;
+  my $s = "";
+  foreach my $host (sort keys %{$hosts}) {
+    $s .= " $host";
+  }
+  print "SGE HOSTS: $s\n";
+  return($s);
+}
+
 
 
 # this basically cats files together after doing an autoreplace
@@ -402,7 +416,7 @@ sub launch_instances {
 
 sub launch_instance {
   my $node = $_[0];
-  run("cd $work_dir/$node && $launch_cmd");
+  run("cd $work_dir/$node && $launch_cmd", $node);
 }
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
@@ -518,8 +532,17 @@ sub rec_copy {
 }
 
 sub run {
-  my ($cmd) = @_;
-  print "RUNNING: $cmd\n";
-  my $result = system("bash -c '$cmd'");
+  my ($cmd, $hostname) = @_;
+  my $outputfile = "";
+  # by default pipe to /dev/null if no hostname is specified, this 
+  # will prevent a default.log file from being a mixture of different thread's output
+  my $final_cmd = "bash -c '$cmd' > /dev/null 2> /dev/null";
+  # only output to host-specific log if defined
+  if (defined($hostname)){
+    $outputfile = "$work_dir/$hostname.log";
+    $final_cmd = "bash -c '$cmd' >> $outputfile 2> $outputfile";
+  }
+  print "RUNNING: $final_cmd\n";
+  my $result = system($final_cmd);
   if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
 }
