@@ -1,8 +1,5 @@
 ## About
 
-Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
-working branch is "develop".
-
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
 nodes configured with one or more Bash shell scripts.  The big difference
@@ -36,6 +33,14 @@ supplemented) with Puppet scripts which should make it easier to maintain
 different clusters and node types.  We will also improve the seperation between
 SeqWare and the generic functionality of this cluster builder.
 
+## Build & Source Control
+
+Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
+working branch is "develop".  If you need to make changes work on a feature
+branch and make a pull request to another developer when ready to merge with
+develop.  See the HubFlow docs above for a detailed description of this
+process.
+
 ## Installing 
 
 Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let
@@ -51,11 +56,12 @@ For example:
 
 Make sure you choose the right package format for your OS, the above is for Ubuntu.
 
-You then need to install plugins to handle AWS and OpenStack. The Virtualbox
-provider is available out of the box with Vagrant.
+You then need to install plugins to handle AWS, vCloud, and/or OpenStack. The
+Virtualbox provider is available out of the box with Vagrant.
 
   vagrant plugin install vagrant-aws
   vagrant plugin install vagrant-openstack-plugin
+  vagrant plugin install vagrant-vcloud
 
 The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
