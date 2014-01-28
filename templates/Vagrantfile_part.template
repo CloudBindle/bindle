@@ -1,7 +1,8 @@
-  config.vm.define :%{custom_hostname} do |%{custom_hostname}|
+  config.vm.define ":%{custom_hostname}", primary: true do |%{custom_hostname}|
     
     # name it
-    %{custom_hostname}.vm.box = "%{custom_hostname}" 
+    %{custom_hostname}.vm.box = "%{BOX}"
+    %{custom_hostname}.vm.hostname = "%{custom_hostname}"
 
     %{custom_hostname}.vm.provider "vmware_fusion" do |v|
       v.box = "precise64"
