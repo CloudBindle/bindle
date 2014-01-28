@@ -74,15 +74,15 @@ Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
 * Vagrant: 1.2.2
 * Vagrant plugins:
-    * excon (0.23.0)
-    * json (1.8.0)
     * vagrant-aws (0.2.2)
     * vagrant-openstack-plugin (0.2.2)
 
-On the Mac we use the following to launch VMs on VirtualBox:
+On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
 * Vagrant: 1.3.5
-* Vagrant plugins: NA
+* Vagrant plugins:
+    * vagrant-aws (0.4.1)
+    * vagrant-vcloud (0.1.1)
 * VirtualBox: 4.2.18 r88780
 
 These work correctly, if you use a different version and run into problems
