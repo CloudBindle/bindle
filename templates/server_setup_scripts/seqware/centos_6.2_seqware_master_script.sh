@@ -59,7 +59,7 @@ echo 'export PATH=$PATH:/home/seqware/bin' >> /home/seqware/.bash_profile
 chown -R seqware:seqware /home/seqware
 
 # seqware database
-/etc/init.d/postgresql start
+service postgresql-9.3 start
 sudo -u postgres psql -c "CREATE USER seqware WITH PASSWORD 'seqware' CREATEDB;"
 sudo -u postgres psql --command "ALTER USER seqware WITH superuser;"
 # expose sql scripts

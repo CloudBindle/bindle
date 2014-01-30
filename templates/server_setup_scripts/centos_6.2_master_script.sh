@@ -48,10 +48,9 @@ yum -y install tomcat6-common tomcat6 httpd
 # install postgresql
 sudo sed -i 's/- Base$/- Base\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
 sudo sed -i 's/- Updates$/- Updates\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
-cd /tmp
-curl -O http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
-rpm -ivh pgdg-centos93-9.3-1.noarch.rpm
-yum -y install postgresql93.x86_64
+rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+yum -y install postgresql93-server.x86_64
+service postgresql-9.3 initdb
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -130,7 +129,7 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql-9.3 tomcat6 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
 
 # configure dirs for seqware
 mkdir -p /usr/tmp/seqware-oozie 
