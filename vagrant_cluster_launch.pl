@@ -264,7 +264,8 @@ sub provision_files_thread {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    my $tmp_script_name = "/tmp/tmp_$host_name\_$script_name";
+    system("mkdir -p $work_dir/scripts/");
+    my $tmp_script_name = "$work_dir/scripts/tmp_$host_name\_$script_name";
     system("rm $tmp_script_name");
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
@@ -310,11 +311,14 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/config_script.$host_name.sh");
+    system("mkdir -p $work_dir/scripts/");
+    system("rm $work_dir/scripts/config_script.$host_name\_$script_name");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
-    setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh", $host_name);
+    setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo mkdir -p /vagrant_scripts", $host_name);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo chmod a+rwx /vagrant_scripts", $host_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
   }
 }
 
@@ -327,7 +331,7 @@ sub make_exports_str {
     $result .= "
 /home $pip(rw,sync,no_root_squash,no_subtree_check)
 /mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
-/usr/tmp/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)
 ";
   }
   print "EXPORT: $result\n"; 
@@ -428,13 +432,20 @@ sub prepare_files {
   foreach my $node (sort keys %{$cluster_configs}) {
     # cron for SeqWare
     autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
+    # various files used for SeqWare when installed and not built from source
+    autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/seqware-webservice.xml");
+    autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/seqware-portal.xml");
     # settings, user data
     copy("templates/settings", "$work_dir/$node/settings");
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
-    copy("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master");
-    copy("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker");
+    # these are used for when the box is rebooted, it setups the /etc/hosts file for example
+    replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
+    replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
+    # this is used for the master SGE node to recover when the system is rebooted
+    # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
+    replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
     # hadoop settings files
     # FIXME: right now these config files have "master" hardcoded as the master node
     # FIXME: break out into config driven provisioner
@@ -540,7 +551,7 @@ sub run {
   # only output to host-specific log if defined
   if (defined($hostname)){
     $outputfile = "$work_dir/$hostname.log";
-    $final_cmd = "bash -c '$cmd' >> $outputfile 2> $outputfile";
+    $final_cmd = "bash -c '$cmd' >> $outputfile 2>&1";
   }
   print "RUNNING: $final_cmd\n";
   my $result = system($final_cmd);
