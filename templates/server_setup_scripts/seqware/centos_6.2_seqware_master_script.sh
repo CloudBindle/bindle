@@ -98,8 +98,6 @@ perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat6/Catalina/loc
 # seqware landing page
 cp -r /home/seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
 
-# for glassfish database location during tests
-perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /home/seqware/gitroot/seqware/pom.xml 
 # run full integration testing
 su - seqware -c 'cd /home/seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
 
