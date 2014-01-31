@@ -1,4 +1,4 @@
-  config.vm.define "%{custom_hostname}", primary: true do |%{custom_hostname}|
+  config.vm.define ":%{custom_hostname}", primary: true do |%{custom_hostname}|
     
     # name it
     %{custom_hostname}.vm.box = "%{BOX}"
