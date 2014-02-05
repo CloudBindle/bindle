@@ -2,7 +2,6 @@
     
     # name it
     %{custom_hostname}.vm.box = "%{BOX}"
-    %{custom_hostname}.vm.hostname = "%{custom_hostname}"
 
     %{custom_hostname}.vm.provider "vmware_fusion" do |v|
       v.box = "precise64"
@@ -52,6 +51,8 @@
         override.ssh.private_key_path = "%{OS_SSH_PEM_FILE}"
         os.network = "%{OS_NETWORK}"
 	os.floating_ip = "%{OS_FLOATING_IP}"
+	os.server_name = "%{custom_hostname}"
+	os.user_data = "#cloud-config\nmanage_etc_hosts: True"
     end
 
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
@@ -63,6 +64,6 @@
     %{custom_hostname}.vm.network :forwarded_port, host: 60010, guest: 60010
     %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
-    %{custom_hostname}.vm.hostname = "%{custom_hostname}"
+    #%{custom_hostname}.vm.hostname = "%{custom_hostname}"
     %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
   end
