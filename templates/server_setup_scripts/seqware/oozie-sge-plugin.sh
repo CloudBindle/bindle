@@ -31,7 +31,7 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
                 HTTP_CLIENT="wget"
             fi
 
-            $HTTP_CLIENT "http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.0/oozie-sge-1.0.0.jar"
+            $HTTP_CLIENT "http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.0/oozie-sge-1.0.1.jar"
             $HTTP_CLIENT "http://repo1.maven.org/maven2/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar"
             chmod +x *.jar
 
