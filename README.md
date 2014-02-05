@@ -57,7 +57,7 @@ For example:
 Make sure you choose the right package format for your OS, the above is for Ubuntu.
 
 You then need to install plugins to handle AWS, vCloud, and/or OpenStack. The
-Virtualbox provider is available out of the box with Vagrant.
+Virtualbox provider is available out of the box with Vagrant. You do this step as the user that will run Vagrant and the SeqWare Vagrant wrapper.
 
     vagrant plugin install vagrant-aws
     vagrant plugin install vagrant-openstack-plugin
