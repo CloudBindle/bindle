@@ -51,17 +51,17 @@ or an OpenStack cloud you can skip this step.
 Install Vagrant using the package from their [site](http://downloads.vagrantup.com/).
 For example:
 
-  wget http://files.vagrantup.com/packages/a40522f5fabccb9ddabad03d836e120ff5d14093/vagrant_1.3.5_x86_64.deb
-  sudo dpkg --install vagrant_1.3.5_x86_64.deb
+    wget http://files.vagrantup.com/packages/a40522f5fabccb9ddabad03d836e120ff5d14093/vagrant_1.3.5_x86_64.deb
+    sudo dpkg --install vagrant_1.3.5_x86_64.deb
 
 Make sure you choose the right package format for your OS, the above is for Ubuntu.
 
 You then need to install plugins to handle AWS, vCloud, and/or OpenStack. The
 Virtualbox provider is available out of the box with Vagrant.
 
-  vagrant plugin install vagrant-aws
-  vagrant plugin install vagrant-openstack-plugin
-  vagrant plugin install vagrant-vcloud
+    vagrant plugin install vagrant-aws
+    vagrant plugin install vagrant-openstack-plugin
+    vagrant plugin install vagrant-vcloud
 
 The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
