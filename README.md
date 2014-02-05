@@ -72,6 +72,12 @@ your distribution's package management system:
 * JSON: eg "sudo apt-get install libjson-perl"
 * Template: eg "sudo apt-get install libtemplate-perl"
 
+To check to see if you have these you do:
+
+    perl -c vagrant_cluster_launcher.pl
+
+It should exit without an error message.
+
 ### Note About Versions
 
 There have been some reports of problems with the latest version of Vagrant
