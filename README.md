@@ -65,7 +65,7 @@ Virtualbox provider is available out of the box with Vagrant. You do this step a
 
 The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
-your distribution's package management system:
+your distribution's package management system. Google "cpan perl install" for more information if you're unfamiliar with installing Perl packages:
 
 * Getopt::Long: should be installed by default with Perl
 * Data::Dumper: should be installed by default with Perl
