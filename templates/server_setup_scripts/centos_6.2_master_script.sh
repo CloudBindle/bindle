@@ -48,10 +48,11 @@ yum -y install tomcat6-common tomcat6 httpd
 # install postgresql
 sudo sed -i 's/- Base$/- Base\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
 sudo sed -i 's/- Updates$/- Updates\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
-# sudo sed -i 's/\[updates\]\nenabled = 0/[updates]\nenabled = 1/' /etc/yum.repos.d/CentOS-Base.repo
 rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
 yum -y install postgresql93-server.x86_64
 service postgresql-9.3 initdb
+sudo sed -i 's/ident$/md5/' /var/lib/pgsql/9.3/data/pg_hba.conf
+service postgresql-9.3 restart
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
