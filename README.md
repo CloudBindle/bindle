@@ -1,46 +1,6 @@
 ## Branch Information
 
-This branch is for development of features relating to CentOS support. It includes the following updates and fixes:
-
-* A CentOS 6.2 64-bit base box.
-* Compatibility with Vagrant v1.4.0
-* Minimal, Master and SeqWare Master install scripts for CentOS.
-* A veewee definition to create a CentOS base box, for use with [veewee](https://github.com/jedi4ever/veewee).
-
-### Veewee Installation and Usage Instructions (Mac)
-
-1. Get veewee from here, as follows:
-    `git clone https://github.com/jedi4ever/veewee.git`
-
-2. Install RVM as follows:
-    ```Shell
-    mkdir -p ~/.rvm/src && cd ~/.rvm/src && rm -rf ./rvm && \
-    git clone --depth 1 git://github.com/wayneeseguin/rvm.git && \
-    cd rvm && ./install
-    ```
-
-3. Add an RVM invocation and veewee alias to the end of your .profile or .bash_profile, .bashrc or .zshrc file, as follows:
-    ```Shell
-    if [[ -s $HOME/.rvm/scripts/rvm ]]; then
-      source $HOME/.rvm/scripts/rvm;
-    fi
-    alias veewee='bundle exec veewee'
-    ```
-
-4. Install the appropriate version of Ruby:
-    `rvm install ruby-1.9.2-p320`
- 
-5. Navigate to the veewee directory. This should automatically invoke RVM.
-
-    `cd veewee`
-
-    *NOTE:* If asked to upgrade from using an .rvmc file to a .ruby-version file, do *not* do this.
-
-6. Copy or symlink the Seqware-veewee folder from SeqWare/vagrant into the veewee directory:
-    `ln -s *[PATH TO SEQWARE-VAGRANT]*/SeqWare-veewee ./definitions/SeqWare-veewee`
- 
-7. Edit veewee's "definition.rb" file, and comment out the following three scripts:
-    chef.sh, puppet.sh, ruby.sh
+This branch is for development of features relating to CentOS support. (See CentOS Information, below.)
 
 ## About SeqWare Vagrant
 
@@ -91,7 +51,7 @@ Install Vagrant using the package from their [site](http://downloads.vagrantup.c
 For example:
 
   wget http://files.vagrantup.com/packages/a40522f5fabccb9ddabad03d836e120ff5d14093/vagrant_1.3.5_x86_64.deb
-  sudo dpkg install vagrant_1.3.5_x86_64.deb
+  sudo dpkg --install vagrant_1.3.5_x86_64.deb
 
 Make sure you choose the right package format for your OS, the above is for Ubuntu.
 
@@ -203,6 +163,18 @@ Amazon's cloud, VirtualBox snapshot, etc).
     # launch, use the correct command line args for you 
     perl vagrant_cluster_launch.pl --use-openstack
 
+### SeqWare Query Engine - Single Node
+
+This will launch a single node that's a self-contained SeqWare Query Engine box. This is
+suitable for snapshoting for redistribution as a machine image (e.g. AMI on
+Amazon's cloud, VirtualBox snapshot, etc).
+
+    # use this template, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for you 
+    perl vagrant_cluster_launch.pl --use-openstack
+
+
 ### SeqWare - Cluster
 
 This will launch a 4 node cluster with 3 workers and one master node. You can
@@ -279,6 +251,51 @@ and explore HA options.
     cp templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you
     perl vagrant_cluster_launch.pl --use-openstack
+
+### CentOS Information
+
+This build includes support for CentOS. It contains the following updates and fixes:
+
+* A CentOS 6.2 64-bit base box.
+* Compatibility with Vagrant v1.4.0
+* Minimal, Master and SeqWare Master install scripts for CentOS.
+* A veewee definition to create a CentOS base box, for use with [veewee](https://github.com/jedi4ever/veewee).
+
+#### Veewee Installation and Usage Instructions (Mac)
+
+1. Get veewee from here, as follows:
+    `git clone https://github.com/jedi4ever/veewee.git`
+
+2. Install RVM as follows:
+    ```Shell
+    mkdir -p ~/.rvm/src && cd ~/.rvm/src && rm -rf ./rvm && \
+    git clone --depth 1 git://github.com/wayneeseguin/rvm.git && \
+    cd rvm && ./install
+    ```
+
+3. Add an RVM invocation and veewee alias to the end of your .profile or .bash_profile, .bashrc or .zshrc file, as follows:
+    ```Shell
+    if [[ -s $HOME/.rvm/scripts/rvm ]]; then
+      source $HOME/.rvm/scripts/rvm;
+    fi
+    alias veewee='bundle exec veewee'
+    ```
+
+4. Install the appropriate version of Ruby:
+    `rvm install ruby-1.9.2-p320`
+ 
+5. Navigate to the veewee directory. This should automatically invoke RVM.
+
+    `cd veewee`
+
+    *NOTE:* If asked to upgrade from using an .rvmc file to a .ruby-version file, do *not* do this.
+
+6. Copy or symlink the Seqware-veewee folder from SeqWare/vagrant into the veewee directory:
+    `ln -s *[PATH TO SEQWARE-VAGRANT]*/SeqWare-veewee ./definitions/SeqWare-veewee`
+ 
+7. Edit veewee's "definition.rb" file, and comment out the following three scripts:
+    chef.sh, puppet.sh, ruby.sh
+
 
 ## Debugging
 

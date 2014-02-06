@@ -97,6 +97,18 @@ sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
 wget -q http://extjs.com/deploy/ext-2.2.zip
 unzip ext-2.2.zip
 mv ext-2.2 /var/lib/oozie/
+
+# setup oozie with postgres
+sudo -u postgres psql --command "CREATE ROLE oozie LOGIN ENCRYPTED PASSWORD 'oozie' NOSUPERUSER INHERIT CREATEDB NOCREATEROLE;"
+sudo -u postgres psql --command "CREATE DATABASE oozie WITH OWNER = oozie ENCODING = 'UTF-8' TABLESPACE = pg_default LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8' CONNECTION LIMIT = -1;"
+echo "host    oozie         oozie         0.0.0.0/0             md5" >> /etc/postgresql/9.1/main/pg_hba.conf
+sudo -u postgres /usr/lib/postgresql/9.1/bin/pg_ctl reload -s -D /var/lib/postgresql/9.1/main
+perl -pi -e  "s/org.apache.derby.jdbc.EmbeddedDriver/org.postgresql.Driver/;" oozie-site.xml
+perl -pi -e "s/jdbc:derby:.*create=true/jdbc:postgresql:\/\/localhost:5432\/oozie/;" oozie-site.xml
+perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.username<\/name>[.\s]*<value>sa<\/value>/<name>oozie.service.JPAService.jdbc.username<\/name><value>oozie<\/value>/;" oozie-site.xml
+perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.password<\/name>[.\s]*<value> <\/value>/<name>oozie.service.JPAService.jdbc.password<\/name><value>oozie<\/value>/;" oozie-site.xml
+sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
+
 service oozie start
 
 # setup hbase
@@ -117,9 +129,12 @@ mkdir -p /usr/tmp/seqware-oozie
 chmod -R a+rwx /usr/tmp/
 chown -R seqware:seqware /usr/tmp/seqware-oozie
 
-sudo mkdir /datastore
-sudo chown seqware:seqware /datastore
-sudo chmod 774 /datastore
+mkdir -p /mnt/datastore
+chmod a+rx /mnt
+chmod a+rwx /mnt/datastore
+ln -s /mnt/datastore /datastore
+chown seqware:seqware /mnt/datastore
+#chmod 774 /mnt/datastore
 
 ## Setup NFS before seqware
 # see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server

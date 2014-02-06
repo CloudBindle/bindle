@@ -8,6 +8,14 @@ SW_REST_URL=http://master:8080/SeqWareWebService
 # the username and password to connect to the REST API used by SeqWare Pipeline to write back processing info to the DB 
 SW_REST_USER=admin@admin.com
 SW_REST_PASS=admin
+# the base URL for the admin web service
+SW_ADMIN_REST_URL=http://localhost:38080/seqware-admin-webservice
+# used for direct database connection by admin tools
+SW_DB_USER=seqware
+SW_DB_PASS=seqware
+SW_DB_SERVER=localhost
+SW_DB=seqware_meta_db
+
 # AMAZON CLOUD SETTINGS
 # used by tools reading and writing to S3 buckets (dependency data/software bundles, inputs, outputs, etc)
 AWS_ACCESS_KEY=FILLMEIN
@@ -53,9 +61,3 @@ EXTENDED_TEST_DB_HOST=localhost
 EXTENDED_TEST_DB_NAME=seqware_meta_db
 EXTENDED_TEST_DB_USER=seqware
 EXTENDED_TEST_DB_PASSWORD=seqware
-
-SW_ADMIN_REST_URL=http://localhost:38080/seqware-admin-webservice
-SW_DB_USER=seqware
-SW_DB_PASS=seqware
-SW_DB_SERVER=localhost
-SW_DB=seqware_meta_db

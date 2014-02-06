@@ -23,10 +23,13 @@ qconf -au seqware users
 qconf -as $HOST
 
 # this is interactive... how do I load from a file?
+for hostName in %{SGE_HOSTS}; do
+
+#tried to indent the following nicely, but the EOF seemed to kill that idea
 cat >/tmp/qconf-editor.sh <<EOF
 #!/bin/sh
 sleep 1
-perl -pi -e 's/^hostname.*$/hostname $HOST/' \$1
+perl -pi -e 's/^hostname.*$/hostname $hostName/' \$1
 EOF
 chmod +x /tmp/qconf-editor.sh
 export EDITOR=/tmp/qconf-editor.sh
@@ -36,7 +39,7 @@ qconf -ae
 cat >/tmp/qconf-editor.sh <<EOF
 #!/bin/sh
 sleep 1
-perl -pi -e 's/^hostlist.*$/hostlist $HOST/' \$1
+perl -pi -e 's/^hostlist.*$/hostlist %{SGE_HOSTS}/' \$1
 EOF
 chmod +x /tmp/qconf-editor.sh
 export EDITOR=/tmp/qconf-editor.sh
@@ -44,8 +47,9 @@ qconf -ahgrp @allhosts
 # might need to do this instead
 qconf -mhgrp @allhosts
 
+
 # config
-qconf -aattr hostgroup hostlist $HOST @allhosts
+qconf -aattr hostgroup hostlist %{SGE_HOSTS} @allhosts
 
 # interactive
 # uses the same editor as above
@@ -55,10 +59,16 @@ qconf -mq main.q
 
 qconf -aattr queue hostlist @allhosts main.q
 
-qconf -aattr queue slots "[$HOST=1]" main.q
+qconf -aattr queue slots "[$hostName=1]" main.q
+
+done
+# loop ends here!
 
 # restart
 /etc/init.d/gridengine-exec stop
 /etc/init.d/gridengine-master restart
 /etc/init.d/gridengine-exec start
 
+# change seqware engine to oozie-sge
+perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie-sge/' /vagrant/settings 
+perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings 
