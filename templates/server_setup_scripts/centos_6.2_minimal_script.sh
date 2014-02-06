@@ -1,7 +1,11 @@
 #!/bin/bash -vx
 
+# ensure updates repository is available, and we have an appropriate version of openssl
+sudo sed -i '1!N; s/\[updates\]\nenabled\s=\s0/[updates]\nenabled = 1/' /etc/yum.repos.d/CentOS-Base.repo
+yum install -y openssl openssl-devel
+
 #yum update
-yum install curl unzip -y
+yum install -y curl unzip
 
 # add seqware user
 useradd -d /home/seqware -m seqware -s /bin/bash
