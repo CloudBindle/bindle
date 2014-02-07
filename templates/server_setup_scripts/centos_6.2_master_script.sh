@@ -40,7 +40,7 @@ service zookeeper-server start
 
 # install Hadoop deps, the master node runs the NameNode, SecondaryNameNode and JobTracker
 # NOTE: shouldn't really use secondary name node on same box for production
-yum -y install hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
+yum -y install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
 yum -y install tomcat6-common tomcat6 httpd
