@@ -540,7 +540,7 @@ sub run {
   # only output to host-specific log if defined
   if (defined($hostname)){
     $outputfile = "$work_dir/$hostname.log";
-    $final_cmd = "bash -c '$cmd' >> $outputfile 2> $outputfile";
+    $final_cmd = "bash -c '$cmd' 2>&1 | tee -a $outputfile";
   }
   print "RUNNING: $final_cmd\n";
   my $result = system($final_cmd);
