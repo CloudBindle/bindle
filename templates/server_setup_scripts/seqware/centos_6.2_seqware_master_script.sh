@@ -3,7 +3,7 @@
 # add seqware user
 #useradd -d /home/seqware -m seqware -s /bin/bash
 
-# various seqware dirs
+# create various seqware dirs
 mkdir -p /home/seqware/bin
 mkdir -p /home/seqware/jars
 mkdir -p /home/seqware/crons
