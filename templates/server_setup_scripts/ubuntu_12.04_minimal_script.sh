@@ -58,3 +58,8 @@ apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pac
 wget http://archive.cloudera.com/cm4/ubuntu/precise/amd64/cm/pool/contrib/o/oracle-j2sdk1.6/oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
 dpkg -i oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
 
+# if we have a local maven mirror defined, set it up
+if [ -n "%{MAVEN_MIRROR}" ]; then 
+	mkdir /home/seqware/.m2
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\"> <mirrors> <mirror> <id>artifactory</id><mirrorOf>*</mirrorOf> <url> %{MAVEN_MIRROR} </url>            <name>Artifactory</name>        </mirror>    </mirrors></settings>" > /home/seqware/.m2/settings.xml
+fi

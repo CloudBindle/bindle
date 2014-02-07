@@ -6,6 +6,8 @@
   # GENERAL CONFIG
   # will likely make these lower-case in the future
   "general": {
+    # if you have access to a local maven mirror/cache, fill in and uncomment the following
+    # "MAVEN_MIRROR": "http://<FILLMEIN>/artifactory/repo", 
     # OPEN STACK
     "OS_API_KEY": "<FILLMEIN>",
     "OS_USER": "<FILLMEIN>",

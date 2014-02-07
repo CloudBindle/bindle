@@ -84,6 +84,8 @@ foreach my $node_config (@{$temp_cluster_configs}){
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
+if (!defined($configs->{'MAVEN_MIRROR'})) { $configs->{'MAVEN_MIRROR'} = ""; }
+
 
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
