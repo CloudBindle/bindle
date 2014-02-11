@@ -28,9 +28,12 @@ echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/environment
 echo 'LC_CTYPE="en_US.UTF-8"' | sudo tee -a /etc/environment
 
 # install the hadoop repo
-wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb &> /dev/null
-dpkg -i cdh4-repository_1.0_all.deb &> /dev/null
+#wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb &> /dev/null
+#dpkg -i cdh4-repository_1.0_all.deb &> /dev/null
+echo "deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib" | sudo tee -a /etc/apt/sources.list.d/cloudera.list
+echo "deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib" | sudo tee -a /etc/apt/sources.list.d/cloudera.list
 curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
+
 
 # setup cloudera manager repo (not used)
 #REPOCM=${REPOCM:-cm4}
