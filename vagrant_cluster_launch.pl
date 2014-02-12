@@ -89,10 +89,8 @@ if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'}
 # TODO: these are hardcoded and may change
 if ($launch_vb) {
   $launch_cmd = "vagrant up";
-
-  # Allow a custom box to be specified
-  if (!defined($configs->{'BOX'})) { $configs->{'BOX'} = "Ubuntu_12.04"; }
-  if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/vagrant/quantal/current/quantal-server-cloudimg-amd64-vagrant-disk1.box"; }
+  $configs->{'BOX'} = "Ubuntu_12.04";
+  $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/vagrant/quantal/current/quantal-server-cloudimg-amd64-vagrant-disk1.box";
   #####$configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
 } elsif ($launch_os) {
   $launch_cmd = "vagrant up --provider=openstack";
@@ -141,21 +139,21 @@ sub find_node_info {
   foreach my $l (@t) {
     chomp $l;
     my $host_id = "";
-    if ($l =~ /:?([a-zA-Z]+)\s{2,}active/) {
+    if ($l =~ /(\S+)\s+active/) {
       # openstack
       $host_id = $1;
-    } elsif ($l =~ /:?([a-zA-Z]+)\s{2,}running/) {
-      # aws
+    } if ($l =~ /(\S+)\s+running/) {
+      # aws 
       $host_id = $1;
     }
 
-    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
+    #print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
-      print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
+    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
 
       print "MATCHED HOST ID: $host_id\n";
 
-      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config :$host_id`;
+      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config $host_id`;
       my @h = split /\n/, $host_info;
       my $ip = "";
       my $user = "";
