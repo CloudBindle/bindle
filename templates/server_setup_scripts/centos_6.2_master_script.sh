@@ -52,6 +52,7 @@ rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.
 yum -y install postgresql93-server.x86_64
 service postgresql-9.3 initdb
 sudo sed -i 's/ident$/md5/' /var/lib/pgsql/9.3/data/pg_hba.conf
+service postgresql-9.3 start
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list

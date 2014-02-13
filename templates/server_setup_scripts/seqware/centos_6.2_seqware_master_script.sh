@@ -60,7 +60,6 @@ chown -R seqware:seqware /home/seqware
 chmod -R a+rx /home/seqware
 
 # seqware database
-service postgresql-9.3 start
 sudo -u postgres psql -c "CREATE USER seqware WITH PASSWORD 'seqware' CREATEDB;"
 sudo -u postgres psql --command "ALTER USER seqware WITH superuser;"
 # expose sql scripts
