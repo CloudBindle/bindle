@@ -1,5 +1,8 @@
 #!/bin/bash -vx
 
+# disable SELinux
+echo 0 > /selinux/enforce
+
 # ensure updates repository is available, and we have an appropriate version of openssl
 sudo sed -i '1!N; s/\[updates\]\nenabled\s=\s0/[updates]\nenabled = 1/' /etc/yum.repos.d/CentOS-Base.repo
 yum install -y openssl openssl-devel

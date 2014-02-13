@@ -52,7 +52,6 @@ rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.
 yum -y install postgresql93-server.x86_64
 service postgresql-9.3 initdb
 sudo sed -i 's/ident$/md5/' /var/lib/pgsql/9.3/data/pg_hba.conf
-service postgresql-9.3 restart
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -89,7 +88,7 @@ sudo -u hdfs hadoop namenode -format -force
 for x in `cd /etc/init.d ; ls hadoop-hdfs-*` ; do sudo service $x start ; done
 
 # setup various HDFS directories
-sudo -u hdfs hadoop fs -mkdir /tmp 
+sudo -u hdfs hadoop fs -mkdir /tmp
 sudo -u hdfs hadoop fs -chmod -R 1777 /tmp
 sudo -u hdfs hadoop fs -mkdir -p /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
 sudo -u hdfs hadoop fs -chmod 1777 /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
@@ -149,6 +148,7 @@ for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secon
 mkdir -p /usr/tmp/seqware-oozie 
 chmod -R a+rwx /usr/tmp/
 chown -R seqware:seqware /usr/tmp/seqware-oozie
+chmod -R a+rx /home/seqware
 
 mkdir -p /mnt/datastore
 chmod a+rx /mnt

@@ -55,8 +55,9 @@ cp /home/seqware/gitroot/seqware/seqware-pipeline/target/seqware /home/seqware/b
 chmod +x /home/seqware/bin/seqware
 echo 'export PATH=$PATH:/home/seqware/bin' >> /home/seqware/.bash_profile
 
-# make everything owned by seqware
+# make everything owned by seqware, readable by all
 chown -R seqware:seqware /home/seqware
+chmod -R a+rx /home/seqware
 
 # seqware database
 service postgresql-9.3 start
@@ -110,3 +111,5 @@ chown -R seqware:seqware /home/seqware/crons
 chmod a+x /home/seqware/crons/status.cron
 su - seqware -c '(echo "* * * * * /home/seqware/crons/status.cron >> /home/seqware/logs/status.log") | crontab -'
 
+# enable SELinux
+echo 1 > /selinux/enforce
