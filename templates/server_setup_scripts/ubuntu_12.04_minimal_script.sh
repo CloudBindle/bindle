@@ -58,6 +58,11 @@ apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pac
 wget http://archive.cloudera.com/cm5/ubuntu/lucid/amd64/cm/pool/contrib/o/oracle-j2sdk1.7/oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb &> /dev/null
 dpkg -i oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb &> /dev/null
 
+# cloudera 1.7 java package doesn't set up alternatives for some reason
+update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java 2000
+update-alternatives --set java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java
+echo 'JAVA_HOME=/usr/lib/jvm/java-7-oracle-cloudera' | sudo tee -a /etc/environment
+
 # if we have a local maven mirror defined, set it up
 if [ -n "%{MAVEN_MIRROR}" ]; then 
 	mkdir /home/seqware/.m2
