@@ -34,7 +34,7 @@
     "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
     "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
     # NOTE: you can checkout whatever branch you like, see our GitHub site
-    "SEQWARE_BRANCH_CMD": "git checkout develop"
+    "SEQWARE_BRANCH_CMD": "git checkout 1.0.11"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
