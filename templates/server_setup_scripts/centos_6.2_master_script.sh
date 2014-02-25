@@ -43,7 +43,7 @@ service zookeeper-server start
 yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-yum -y install tomcat6-common tomcat6 httpd
+yum -y install tomcat7-common tomcat7 httpd
 
 # install postgresql
 sudo sed -i 's/- Base$/- Base\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
@@ -130,7 +130,7 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
 
 # configure dirs for seqware
 mkdir -p /usr/tmp/seqware-oozie 

@@ -80,7 +80,7 @@ sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db_data.sql
 /etc/init.d/tomcat7 stop
 
 # remove landing page for tomcat
-rm -rf /var/lib/tomcat6/webapps/ROOT
+rm -rf /var/lib/tomcat7/webapps/ROOT
 
 # seqware web service
 cp /home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /var/lib/tomcat7/webapps/SeqWareWebService.war

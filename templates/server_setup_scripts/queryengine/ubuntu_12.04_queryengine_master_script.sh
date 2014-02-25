@@ -49,14 +49,14 @@ cp /home/seqware/gitroot/seqware/seqware-distribution/target/seqware-distributio
 # make everything owned by seqware
 chown -R seqware:seqware /home/seqware
 
-# stop tomcat6
-/etc/init.d/tomcat6 stop
+# stop tomcat7
+/etc/init.d/tomcat7 stop
 
 # remove landing page for tomcat
-rm -rf /var/lib/tomcat6/webapps/ROOT
+rm -rf /var/lib/tomcat7/webapps/ROOT
 
-# restart tomcat6
-/etc/init.d/tomcat6 start
+# restart tomcat7
+/etc/init.d/tomcat7 start
 
 # seqware landing page
 cp -r /home/seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
