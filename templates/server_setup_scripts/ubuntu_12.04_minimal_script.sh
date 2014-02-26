@@ -6,7 +6,8 @@ apt-get update
 apt-get install curl unzip -y
 
 # add seqware user
-useradd -d /home/seqware -m seqware -s /bin/bash
+useradd -d /mnt/home/seqware -m seqware -s /bin/bash
+ln -s /mnt/home/seqware /home/seqware
 
 # ensure locale is set to en-US (and remains so)
 sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config

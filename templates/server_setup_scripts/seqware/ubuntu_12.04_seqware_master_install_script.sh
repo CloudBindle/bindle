@@ -5,7 +5,8 @@
 # - what about seqware/root password for VirtualBox?
 
 # add seqware user
-useradd -d /home/seqware -m seqware -s /bin/bash
+useradd -d /mnt/home/seqware -m seqware -s /bin/bash
+ln -s /mnt/home/seqware /home/seqware
 
 # various seqware dirs
 mkdir -p /home/seqware/bin
