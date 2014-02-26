@@ -1,6 +1,7 @@
 #!/bin/bash -vx
 
 # add seqware user
+mkdir -p /mnt/home
 useradd -d /mnt/home/seqware -m seqware -s /bin/bash
 ln -s /mnt/home/seqware /home/seqware
 
