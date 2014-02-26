@@ -51,8 +51,8 @@ or an OpenStack cloud you can skip this step.
 Install Vagrant using the package from their [site](http://downloads.vagrantup.com/).
 For example:
 
-    wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb 
-    sudo dpkg --install vagrant_1.4.3_x86_64.deb
+    wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
+    sudo dpkg -i vagrant_1.4.3_x86_64.deb
 
 Make sure you choose the right package format for your OS, the above is for Ubuntu.
 
