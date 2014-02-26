@@ -1,0 +1,112 @@
+#####
+
+I am using the image suggested by:
+
+http://docs.openstack.org/image-guide/content/ch_obtaining_images.html
+
+Which can be retrieved by wgetting:
+
+http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img
+
+On korean server has name "ubuntu 12.04 amd64"
+
+
+#####
+First log into openstack:
+ssh -p ## icgc@#
+
+Move pem file onto launcher VM with command similar to:
+scp -i /home/icgc/.ssh/your.pem /home/icgc/.ssh/your.pem  ubuntu@#.#.#.#:/home/ubuntu/.ssh/
+
+######
+
+Log into launcher:
+ssh -i /home/icgc/.ssh/your.pem ubuntu@#.#.#.#
+
+Set permisions to pem file with:
+sudo chmod 600 ~/.ssh/your.pem
+
+Set vagrant to debug:
+in ~/.profile add export VAGRANT_LOG=debug
+
+######
+Install packages:
+sudo apt-get update
+sudo apt-get install make build-essential git libjson-perl libtemplate-perl ruby libopenssl-ruby
+
+install nokogiri:
+sudo gem install nokogiri 
+
+#####
+
+Install vagrant:
+wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
+sudo dpkg --install vagrant_1.4.3_x86_64.deb
+
+Install plugin for openstack:
+sudo vagrant plugin install vagrant-openstack-plugin
+
+Check if vagrant and plugins are installed correctly with:
+vagrant --version
+vagrant plugin list
+
+### 
+Fix a bug in the OpenStack Vagrant plugin
+
+Replace
+~/.vagrant.d/gems/gems/vagrant-openstack-plugin-0.3.0/lib/vagrant-openstack-plugin/action/sync_folders.rb  
+with 
+https://github.com/cloudbau/vagrant-openstack-plugin/blob/48eac2932fa16ccd5fab2e1d2e0d04047f3be7bd/lib/vagrant-openstack-plugin/action/sync_folders.rb
+
+To do this you can use the command:
+sudo wget -O ~/.vagrant.d/gems/gems/vagrant-openstack-plugin-0.3.0/lib/vagrant-openstack-plugin/action/sync_folders.rb https://raw.github.com/cloudbau/vagrant-openstack-plugin/48eac2932fa16ccd5fab2e1d2e0d04047f3be7bd/lib/vagrant-openstack-plugin/action/sync_folders.rb
+
+#####
+Adding SeqWare Vagrant
+
+mkdir git
+cd git
+git clone git://github.com/SeqWare/vagrant.git -b feature/brian_pancan_fixes
+
+cd vagrant
+cp templates/sample_configs/vagrant_cluster_launch.seqware.install.sge_cluster.json.template vagrant_cluster_launch.seqware.install.sge_cluster.json
+
+Set Config parameters for openstack
+
+    "OS_API_KEY": "******",
+    "OS_USER": "icgc",
+    "OS_INSTANCE_TYPE": "m1.xlarge",
+    "OS_IMAGE": "Ubuntu 12.04 amd64",
+    "OS_ENDPOINT": "http://icgc-con.maha:5000/v2.0/tokens",
+    "OS_SSH_KEY_NAME": "your",
+    "OS_SSH_USERNAME": "ubuntu",
+    "OS_SSH_PEM_FILE": "/home/ubuntu/.ssh/your.pem",
+    "OS_TENANT": "",
+
+leave floating IP fields empty!
+
+###### 
+
+If getting error for not being able to find dummy box add this to the folder with the Vagranfile in it:
+
+sudo vagrant box add dummy https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box
+
+
+######
+
+This is supposed to setup all of the nodes and get seqware to the point where it can be run:
+
+perl vagrant_cluster_launch.pl --use-openstack --config-file vagrant_cluster_launch.seqware.install.sge_cluster.json > out.log 2>&1 
+
+#######
+
+In order to get running without the network setup need to go into Vagrant files comment out the following lines
+
+os.network 
+os.floating_ip
+
+Then run:
+
+sudo vagrant up --provider=openstack
+
+
