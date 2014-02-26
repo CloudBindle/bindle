@@ -8,7 +8,7 @@ apt-get install curl unzip -y
 # add seqware user
 mkdir -p /mnt/home
 useradd -d /mnt/home/seqware -m seqware -s /bin/bash
-ln -s /mnt/home/seqware /home/seqware
+ln -s /mnt/home/seqware ~seqware
 
 # ensure locale is set to en-US (and remains so)
 sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config
@@ -70,6 +70,6 @@ echo 'JAVA_HOME=/usr/lib/jvm/java-7-oracle-cloudera' | sudo tee -a /etc/environm
 
 # if we have a local maven mirror defined, set it up
 if [ -n "%{MAVEN_MIRROR}" ]; then 
-	mkdir /home/seqware/.m2
-	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\"> <mirrors> <mirror> <id>artifactory</id><mirrorOf>*</mirrorOf> <url> %{MAVEN_MIRROR} </url>            <name>Artifactory</name>        </mirror>    </mirrors></settings>" > /home/seqware/.m2/settings.xml
+	mkdir ~seqware/.m2
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\"> <mirrors> <mirror> <id>artifactory</id><mirrorOf>*</mirrorOf> <url> %{MAVEN_MIRROR} </url>            <name>Artifactory</name>        </mirror>    </mirrors></settings>" > ~seqware/.m2/settings.xml
 fi

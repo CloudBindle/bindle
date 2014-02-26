@@ -83,7 +83,7 @@ ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
 
 # add seqware user
 # seems duplicated from minimal script
-# useradd -d /home/seqware -m seqware -s /bin/bash
+# useradd -d ~seqware -m seqware -s /bin/bash
 
 # not sure if this is required
 mkdir -p /tmp/hadoop-mapred
