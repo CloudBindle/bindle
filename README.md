@@ -12,17 +12,17 @@ Login to node
 
 ####Using CPAN:
 
-sudo cpan install Net::OpenSSH
-sudo cpan install File::Basename
-sudo cpan install Getopt::Euclid
-sudo cpan install Config::Simple
+   sudo cpan install Net::OpenSSH  
+   sudo cpan install File::Basename  
+   sudo cpan install Getopt::Euclid  
+   sudo cpan install Config::Simple  
 
 ####Using apt repositories:
 
-sudo apt-get install libnet-openssh-perl
-sudo apt-get install libfile-basedir-perl
-sudo apt-get install perl-Getopt-Euclid
-sudo apt-get install libconfig-simple-perl
+   sudo apt-get install libnet-openssh-perl  
+   sudo apt-get install libfile-basedir-perl  
+   sudo apt-get install perl-Getopt-Euclid  
+   sudo apt-get install libconfig-simple-perl  
 
 
 ###Clone from git
