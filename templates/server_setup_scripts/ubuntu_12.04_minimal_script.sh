@@ -1,9 +1,5 @@
 #!/bin/bash -vx
 
-# make sure DNS is set up
-sudo echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-sudo echo "nameserver 8.8.4.4" >> /etc/resolv.conf
-
 # basic tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
