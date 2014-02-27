@@ -32,7 +32,6 @@ my %options = (
 
 my $ssh = launcher->connect( $cfg->param('launcher.ip_address'), \%options);
 
-
 # launcher->add_pem_file($ssh, \%options);
 # install::packages->all($ssh, $cfg->param('seqwarevagrant.vagrant_file_name'));
 # install::vagrant->vagrant($ssh, $cfg->param('seqwarevagramt.vagrant_file_name'));
