@@ -25,8 +25,13 @@ package install::seqwareVagrant;
  }
 
  sub create_template {
-   my ($ssh, $number_of_nodes, $scheduler);
+   my ($ssh, $number_of_nodes, $scheduler) = @_;
 
+
+ }
+
+ sub run {
+   my ($ssh) = @_;
 
  }
 

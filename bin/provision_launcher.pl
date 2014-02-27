@@ -11,7 +11,6 @@ use Net::OpenSSH;
 
 use File::Basename;
 use Getopt::Euclid;
-use Regexp::Common qw/net/;
 use Config::Simple;
 
 use install::packages;
