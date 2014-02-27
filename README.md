@@ -6,7 +6,7 @@ Setting up Gatway
 #################
 
 Create a gateway node on your plaform 
--I would have "gatway" in the name so that you can recognize it.
+-I would have "gateway" in the name so that you can recognize it.
 
 Login to node
 
