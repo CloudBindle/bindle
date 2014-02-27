@@ -15,10 +15,13 @@ package install::packages;
     nokogiri_requirements($ssh);
     nokogiri($ssh);
     download_vagrant($ssh, $vagrant_file_name);
+    vagrant($ssh, $vagrant_file_name);
   }
   
   sub apt_get_update {
     my ($ssh) = @_;
+
+    print "Updating apt-get\n";
 
     $ssh->capture('sudo apt-get update');
     $ssh->error and die "Couldn't apt-get update: ".$ssh->error;                
@@ -70,7 +73,19 @@ package install::packages;
 
     print "downloading vagrant if not newest version\n";
 
-    $ssh->capture( "wget -N  /home/ubuntu/downoloads/ http://dl.bintray.com/mitchellh/vagrant/$vagrant_file_name"); 
+    $ssh->capture( "cd Download; wget -N ~/Download/ http://dl.bintray.com/mitchellh/vagrant/$vagrant_file_name"); 
+  }
+
+  sub vagrant {
+    my ($ssh, $vagrant_file_name) = @_;
+
+    print "Installing Vagrant\n";
+
+
+
+    $ssh->capture("sudo dpkg --install ~/Download/$vagrant_file_name");
+    $ssh->error and die "Couldn't install vagrant: ".$ssh->error;
+
   }
 
 1;

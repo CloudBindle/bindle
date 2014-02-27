@@ -29,7 +29,7 @@ package install::seqwareVagrant;
 
    print "commenting out network\n";
 
-   $ssh->capture("sed -e '/os.network \= \"\%\{OS_NETWORK\}\"/s/^/#/g' -i ~/git/vagrant/templates/Vagrantfile_part.template");
+   $ssh->capture("sed -e '/os.network \= \"\%\{OS_NETWORK\}\"/ s/^#*/#/' -i ~/git/vagrant/templates/Vagrantfile_part.template");
    $ssh->error and die "Couldn't comment out netowrk line in SeqWare Vagrant". $ssh->error;
 
  }
@@ -38,7 +38,7 @@ package install::seqwareVagrant;
    my ($class, $ssh) = @_;
    print "commenting out float ip\n";
 
-   $ssh->capture("sed -e '/os.floating_ip \= \"\%\{OS_FLOATING_IP\}\"/s/^/#/g' -i ~/git/vagrant/templates/Vagrantfile_part.template");
+   $ssh->capture("sed -e '/os.floating_ip \= \"\%\{OS_FLOATING_IP\}\"/ s/^#*/#/' -i ~/git/vagrant/templates/Vagrantfile_part.template");
    $ssh->error and die "Couldn't comment out netowrk line in SeqWare Vagrant". $ssh->error;
 
 
