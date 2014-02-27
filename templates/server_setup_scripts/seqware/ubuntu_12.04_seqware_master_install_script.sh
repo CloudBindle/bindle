@@ -7,7 +7,7 @@
 # add seqware user
 mkdir -p /mnt/home
 useradd -d /mnt/home/seqware -m seqware -s /bin/bash
-ln -s /mnt/home/seqware ~seqware
+ln -s ~seqware /home/seqware
 
 # various seqware dirs
 mkdir -p ~seqware/bin
