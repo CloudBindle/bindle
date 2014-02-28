@@ -5,6 +5,8 @@
 
 Create a gateway node on your plaform 
 -I would have "gateway" in the name so that you can recognize it.
+-Make sure your pem file is added
+-Use ubuntu 12.04
 
 Login to node
 
@@ -33,15 +35,15 @@ sudo apt-get install git
 
 ####Clone PanCancer-Gatway from GitHub:
 
-git clone git://github.com/a8wright/pancan-gatway
+git clone git://github.com/a8wright/pancan-gateway.git
 
 
 
 ##Provisioning Launcher
 
-1. create launcher instance on cloud environment with ubunutu 12.04
+1. Create launcher instance on cloud environment with ubunutu 12.04
 
-2. create config file in config folder for the launcher you ahve created
+2. Create config file in config folder for the launcher you ahve created
 
-3. run provisioner.pl -cluster 'your cluster name'
+3. Run provisioner.pl -cluster 'your cluster name'
 
