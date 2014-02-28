@@ -28,7 +28,7 @@ my %options = (
   master_opts => [-o => "StrictHostKeyChecking=no"]
 );
 
-my $ssh = launcher->connect( $cfg->param('launcher.ip_address'), \%options);
+my $ssh = launcher->connect( $cfg->param('launcher.host'), \%options);
 
 launcher->add_pem_file($ssh, \%options);
 install::packages->all($ssh, $cfg->param('seqwarevagrant.vagrant_file_name'));
