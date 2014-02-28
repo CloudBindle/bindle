@@ -49,5 +49,5 @@ git clone git://github.com/a8wright/pancan-gateway.git
 
 2. Create config file in config folder for the launcher you ahve created
 
-3. Run "perl bin/provisioner.pl -cluster 'your cluster name'"
+3. Run "perl bin/provisioner.pl -config 'your file name'"
 
