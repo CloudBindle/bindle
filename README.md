@@ -4,9 +4,13 @@
 ##Setting up Gatway
 
    Create a gateway node on your plaform  
-1. I would have "gateway" in the name so that you can recognize it.
+
+1. Make sure name of node contains "gateway"
+
 2. Make sure your pem file is added
+
 3. Use ubuntu 12.04
+
 
 Login to node
 
