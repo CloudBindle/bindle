@@ -72,10 +72,12 @@ mkdir -p /mnt/datastore
 echo 'rpcbind : ALL' >> /etc/hosts.deny
 echo 'rpcbind : %{MASTER_PIP}' >> /etc/hosts.allow
 mount %{MASTER_PIP}:/home /home
+mount %{MASTER_PIP}:/mnt/home /mnt/home
 mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
 mount %{MASTER_PIP}:/mnt/datastore /mnt/datastore
 
 chmod a+rwx /home
+chmod a+rwx /mnt/home
 chmod a+rwx /mnt/seqware-oozie
 chmod a+rwx /mnt/datastore
 ln -s /mnt/datastore /datastore
