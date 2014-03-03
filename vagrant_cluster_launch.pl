@@ -333,6 +333,7 @@ sub make_exports_str {
     my $pip = $hosts->{$host}{pip};
     $result .= "
 /home $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/home $pip(rw,sync,no_root_squash,no_subtree_check)
 /mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
 /mnt/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)
 ";
