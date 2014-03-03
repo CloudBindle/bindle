@@ -10,7 +10,7 @@ package install::vagrant::plugin;
   sub openstack {
     my ($class, $ssh) = @_;
     
-    print "installing Vagrant OpenStack plugin\n";    
+    print "Installing Vagrant OpenStack plugin\n";    
 
     $ssh->capture('sudo vagrant plugin install vagrant-openstack-plugin');
     $ssh->error and die "Couldn't install Vagrant OpenStack Plugin";
@@ -21,7 +21,7 @@ package install::vagrant::plugin;
   sub aws {
     my ($class, $ssh) = @_;
     
-    print "installing Vagrant amazon web service plugin\n";    
+    print "Installing Vagrant amazon web service plugin\n";    
 
     $ssh->capture('sudo vagrant plugin install vagrant-aws');
     $ssh->error and die "Couldn't install Vagrant OpenStack Plugin";

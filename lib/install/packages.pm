@@ -9,6 +9,7 @@ package install::packages;
   sub all {
     my ($class, $ssh , $vagrant_file_name) = @_;
 
+    set_environment($ssh);
     apt_get_update($ssh);
     general_packages($ssh);
     developer_packages($ssh);
@@ -18,6 +19,20 @@ package install::packages;
     vagrant($ssh, $vagrant_file_name);
   }
   
+  sub set_environment {
+    my ($ssh) = @_;
+
+    print "Setting apt-get environment\n";
+ 
+    #setting envionment varialbe for this connection
+    $ssh->capture('export "DEBIAN_FRONTEND=noninteractive"');
+    $ssh->error and die "Couldn't set environment variables: ".$ssh->error;
+
+    $ssh->capture("sudo -E bash -c 'echo \$DEBIAN_FRONTEND'");
+    $ssh->error and die "Couldn't set sudo environment variable: ".$ssh->error;
+
+  }
+ 
   sub apt_get_update {
     my ($ssh) = @_;
 
@@ -31,18 +46,18 @@ package install::packages;
   sub general_packages {
     my ($ssh) = @_;
   
-    print "installing general packages\n";
+    print "Installing general packages\n";
   
-    $ssh->capture('sudo apt-get -q -y install dialog make build-essential git libjson-perl libtemplate-perl wget');
+    $ssh->capture('sudo apt-get -y install make build-essential git libjson-perl libtemplate-perl wget');
     $ssh->error and die "Couldn't install apt-get packages: ".$ssh->error; 
   }
   
   sub developer_packages {                                                    
     my ($ssh) =@_;
   
-    print "installing developer packages\n";
+    print "Installing developer packages\n";
   
-    $ssh->capture('sudo apt-get -q -y install ruby1.9.1-dev ruby1.9.1 ri1.9.1 rdoc1.9.1 irb1.9.1 libreadline-ruby1.9.1 libruby1.9.1 libopenssl-ruby libgemplugin-ruby');
+    $ssh->capture('sudo apt-get -y install ruby1.9.1-dev ruby1.9.1 ri1.9.1 rdoc1.9.1 irb1.9.1 libreadline-ruby1.9.1 libruby1.9.1 libopenssl-ruby libgemplugin-ruby');
     $ssh->error and die "Couldn't install ruby developer packages: ".$ssh->error;
   
   }  
@@ -50,30 +65,44 @@ package install::packages;
   sub nokogiri_requirements {
     my ($ssh) = @_;
   
-    print "installing nokogiri requirements\n";
-  
-    $ssh->capture('sudo apt-get -q -y install libxslt-dev libxml2-dev');
+    print "Installing nokogiri requirements\n";
+
+    $ssh->capture('sudo apt-get -y install libxslt-dev libxml2-dev');
     $ssh->error and die "Couldn't install nokogiri requirements: ".$ssh->error; 
   }
   
   sub nokogiri {
     my ($ssh) = @_;
   
-    print "installing nokogiri\n";
+    print "Installing nokogiri\n";
+
+    #create .irbrc file if does not exist
+    $ssh->capture('touch .irbrc || exit');
+    $ssh->error and die "Couldn't create .irbrc file if does not exist: ".$ssh->error;
+ 
+    #that is required to using rubygems
+    $ssh->capture("grep -q 'require \'rubygems\'' .irbrc || echo 'require \'rubygems\'' >> .irbrc");
+    $ssh->error and die "Couldn't add environment variables to .irbrc: ". $ssh->error;
+
   
-    $ssh->capture('sudo gem install nokogiri -v 1.5.3 --quiet');
+    $ssh->capture("sudo ruby -e 'require \"rubygems\"\n
+                                 begin\n
+                                   require \"nokogiri\"\n
+                                 rescue LoadError\n 
+                                   system(\"gem install nokogiri -v 1.5.3 --quiet\")\n
+                                  end\n'");
     $ssh->error and die "Couldn't install nokogiri: ".$ssh->error;
   }
   
   sub download_vagrant {
     my ($ssh, $vagrant_file_name) = @_;
   
-    $ssh->pipe_out("mkdir -p ~/Download/");
-    $ssh->error and die "Couldn't create download folder: ".$ssh->error;
+    $ssh->pipe_out("mkdir -p ~/Downloads/");
+    $ssh->error and die "Couldn't create Downloads folder: ".$ssh->error;
 
-    print "downloading vagrant if not newest version\n";
+    print "Downloading vagrant if not newest version\n";
 
-    $ssh->capture( "cd Download; wget -N ~/Download/ http://dl.bintray.com/mitchellh/vagrant/$vagrant_file_name"); 
+    $ssh->capture( "cd Downloads; wget --quiet -N ~/Downloads/ http://dl.bintray.com/mitchellh/vagrant/$vagrant_file_name"); 
   }
 
   sub vagrant {
@@ -81,66 +110,9 @@ package install::packages;
 
     print "Installing Vagrant\n";
 
-
-
-    $ssh->capture("sudo dpkg --install ~/Download/$vagrant_file_name");
+    $ssh->capture("sudo dpkg -i ~/Downloads/$vagrant_file_name");
     $ssh->error and die "Couldn't install vagrant: ".$ssh->error;
 
   }
 
 1;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -13,13 +13,13 @@ package install::seqwareVagrant;
  sub install {
    my ($class, $ssh, $branch) = @_;
 
-   print "cloning SeqWare Vagrant\n";
+   print "Cloning SeqWare Vagrant\n";
 
    $ssh->capture('mkdir -p ~/git');
    $ssh->error and die "Couldn't make git directory: ".$ssh->error;
 
  
-   $ssh->capture("git clone git://github.com/SeqWare/vagrant.git -b $branch ~/git/vagrant");
+   $ssh->capture("cd git; if [ -d vagrant ]; then (cd vagrant && git pull); else git clone git://github.com/SeqWare/vagrant.git -b $branch ~/git/vagrant;fi");
    $ssh->error and die "Couldn't clone SeqWare Vagrant: ". $ssh->error;
 
  }
@@ -27,7 +27,7 @@ package install::seqwareVagrant;
  sub comment_network {
    my ($class, $ssh) = @_;
 
-   print "commenting out network\n";
+   print "Commenting out network\n";
 
    $ssh->capture("sed -e '/os.network \= \"\%\{OS_NETWORK\}\"/ s/^#*/#/' -i ~/git/vagrant/templates/Vagrantfile_part.template");
    $ssh->error and die "Couldn't comment out netowrk line in SeqWare Vagrant". $ssh->error;
@@ -36,7 +36,7 @@ package install::seqwareVagrant;
 
  sub comment_float_ip {
    my ($class, $ssh) = @_;
-   print "commenting out float ip\n";
+   print "Commenting out float ip\n";
 
    $ssh->capture("sed -e '/os.floating_ip \= \"\%\{OS_FLOATING_IP\}\"/ s/^#*/#/' -i ~/git/vagrant/templates/Vagrantfile_part.template");
    $ssh->error and die "Couldn't comment out netowrk line in SeqWare Vagrant". $ssh->error;
