@@ -33,6 +33,7 @@ my $aws_secret_key = '';
 my $launch_aws = 0;
 my $launch_vb = 0;
 my $launch_os = 0;
+my $launch_vcloud = 0;
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
@@ -47,6 +48,7 @@ GetOptions (
   "use-aws" => \$launch_aws,
   "use-virtualbox" => \$launch_vb,
   "use-openstack" => \$launch_os,
+  "use-vcloud" => \$launch_vcloud,
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
   "skip-launch" => \$skip_launch,
@@ -56,7 +58,7 @@ GetOptions (
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
@@ -105,8 +107,12 @@ if ($launch_vb) {
   $launch_cmd = "vagrant up --provider=aws";
   $configs->{'BOX'} = "dummy";
   $configs->{'BOX_URL'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
+} elsif ($launch_vcloud) {
+  $launch_cmd = "vagrant up --provider=vcloud";
+  $configs->{'BOX'} = "richtest4";
+  $configs->{'BOX_URL'} = "https://github.com/SeqWare/vagrant/blob/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box";
 } else {
-  die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
+  die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
 }
 
 # process server scripts into single bash script
@@ -470,11 +476,11 @@ sub setup_vagrantfile {
   #print Dumper($cluster_configs);
   #print Dumper($configs);
   foreach my $node (sort keys %{$cluster_configs}) {
+    $configs->{custom_hostname} = $node;
+    $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better
-    $configs->{custom_hostname} = $node;
-    $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     autoreplace("$part", "$node_output.temp");
     run("cat $node_output.temp >> $node_output");
     run("rm $node_output.temp");
