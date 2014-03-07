@@ -33,7 +33,16 @@ supplemented) with Puppet scripts which should make it easier to maintain
 different clusters and node types.  We will also improve the seperation between
 SeqWare and the generic functionality of this cluster builder.
 
-## Build & Source Control
+The script has been tested to work by provisioning a cluster and running the HelloWorld workflow on the following configurations and platforms:
+
+| *Configuration name*                                              | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) |
+|-------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|
+|*vagrant_cluster_launch.seqware.install.sge_cluster.json.template* | &#x2713;         | &#x2713; |                      |
+|*vagrant_cluster_launch.seqware.install.sge_node.json.template*    | &#x2713;         | &#x2713; | &#x2713;             |
+|*vagrant_cluster_launch.seqware.sge_cluster.json.template*         | &#x2713;         | &#x2713; |                      |
+|*vagrant_cluster_launch.seqware.sge_node.json.template*            | &#x2713;         | &#x2713; | &#x2713;             |
+
+## Build & Source Control   
 
 Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
 working branch is "develop".  If you need to make changes work on a feature
@@ -97,7 +106,7 @@ Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
-* Vagrant: 1.3.5
+* Vagrant: 1.4.3
 * Vagrant plugins:
     * vagrant-aws (0.4.1)
     * vagrant-vcloud (0.1.1)
