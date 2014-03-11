@@ -1,8 +1,7 @@
-  config.vm.define ":%{custom_hostname}", primary: true do |%{custom_hostname}|
+  config.vm.define :%{custom_hostname} do |%{custom_hostname}|
     
     # name it
     %{custom_hostname}.vm.box = "%{BOX}"
-    %{custom_hostname}.vm.hostname = "%{custom_hostname}"
 
     %{custom_hostname}.vm.provider "vmware_fusion" do |v|
       v.box = "precise64"
@@ -18,7 +17,7 @@
       vb.gui = true
    
       # Use VBoxManage to customize the VM. For example to change memory:
-      vb.customize ["modifyvm", :id, "--memory", "6096", "--cpus", "2", "--nictype1", "Am79C970A", "--vram", "32"]
+      vb.customize ["modifyvm", :id, "--memory", "4096"]
   
     end
  
@@ -39,19 +38,37 @@
     end
 
     %{custom_hostname}.vm.provider :openstack do |os, override| # e.g. BioNimbus' Sullivan cluster
-        os.username = "%{OS_USER}"
-        os.api_key  = "%{OS_API_KEY}"
-        os.flavor   = "%{OS_INSTANCE_TYPE}"
-        os.image    = "%{OS_IMAGE}"
-        os.endpoint = "%{OS_ENDPOINT}"
-        os.keypair_name = "%{OS_SSH_KEY_NAME}"
-        os.ssh_username = "%{OS_SSH_USERNAME}"
-        os.tenant = "%{OS_TENANT}"
-        # TODO: this is hardcoded!
-        override.ssh.username = "%{OS_SSH_USERNAME}"
-        override.ssh.private_key_path = "%{OS_SSH_PEM_FILE}"
-        os.network = "%{OS_NETWORK}"
-	os.floating_ip = "%{OS_FLOATING_IP}"
+      os.username = "%{OS_USER}"
+      os.api_key  = "%{OS_API_KEY}"
+      os.flavor   = "%{OS_INSTANCE_TYPE}"
+      os.image    = "%{OS_IMAGE}"
+      os.endpoint = "%{OS_ENDPOINT}"
+      os.keypair_name = "%{OS_SSH_KEY_NAME}"
+      os.ssh_username = "%{OS_SSH_USERNAME}"
+      os.tenant = "%{OS_TENANT}"
+      # TODO: this is hardcoded!
+      override.ssh.username = "%{OS_SSH_USERNAME}"
+      override.ssh.private_key_path = "%{OS_SSH_PEM_FILE}"
+      os.network = "%{OS_NETWORK}"
+      os.floating_ip = "%{OS_FLOATING_IP}"
+      os.server_name = "%{custom_hostname}"
+      os.user_data = "#cloud-config\nmanage_etc_hosts: True"
+    end
+    
+    %{custom_hostname}.vm.provider :vcloud do |vcloud|
+      vcloud.hostname = "%{VCLOUD_HOSTNAME}"
+      vcloud.username = "%{VCLOUD_USERNAME}"
+      vcloud.password = "%{VCLOUD_PASSWORD}"
+
+      vcloud.org_name = "%{VCLOUD_ORG_NAME}"
+      vcloud.vdc_name = "%{VCLOUD_VDC_NAME}"
+
+      vcloud.catalog_name = "%{VCLOUD_CATALOG_NAME}"
+      vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
+      vcloud.vdc_network_name = "%{VCLOUD_VDC_NETWORK_NAME}"
+
+#      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
+#      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
     end
 
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
@@ -63,6 +80,6 @@
     %{custom_hostname}.vm.network :forwarded_port, host: 60010, guest: 60010
     %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
-    %{custom_hostname}.vm.hostname = "%{custom_hostname}"
+    #%{custom_hostname}.vm.hostname = "%{custom_hostname}"
     %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
   end

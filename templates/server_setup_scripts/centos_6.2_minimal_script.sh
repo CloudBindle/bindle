@@ -4,7 +4,7 @@
 yum install curl unzip -y
 
 # add seqware user
-useradd -d /home/seqware -m seqware -s /bin/bash
+useradd -d ~seqware -m seqware -s /bin/bash
 
 # ensure locale is set to en-US (and remains so)
 sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config
@@ -32,7 +32,7 @@ sudo rpm --import http://archive.cloudera.com/cdh4/redhat/6/x86_64/cdh/RPM-GPG-K
 # get packages
 #yum update
 #yum -y install oracle-j2sdk1.6 cloudera-manager-server-db cloudera-manager-server cloudera-manager-daemons
-#yum -y install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven hbase-master xfsprogs
+#yum -y install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2 git maven hbase-master xfsprogs
 
 # get Java
 cd /usr/local/src

@@ -30,5 +30,7 @@ echo master >> /var/lib/gridengine/default/common/act_qmaster
 
 # Not sure why, but the NFS mounts don't survive up to this point, try to remount them but don't fail if already present
 mount %{MASTER_PIP}:/home /home || true
+mount %{MASTER_PIP}:/mnt/home /mnt/home || true
 mount %{MASTER_PIP}:/usr/tmp/seqware-oozie /usr/tmp/seqware-oozie || true
 mount %{MASTER_PIP}:/datastore /datastore || true
+

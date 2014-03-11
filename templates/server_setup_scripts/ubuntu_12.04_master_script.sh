@@ -1,21 +1,24 @@
 #!/bin/bash -vx
 
-# first, fix the /etc/hosts file since SGE wants reverse lookup to work
+# first, set the hostname
+hostname master
+
+# fix the /etc/hosts file since SGE wants reverse lookup to work
 cp /etc/hosts /tmp/hosts
-echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
-cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
+echo '127.0.0.1 localhost' > /etc/hosts
+echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
+cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
 
 # setup hosts
 # NOTE: the hostname seems to already be set at least on BioNimubs OS
 echo '%{HOSTS}' >> /etc/hosts
-hostname master
 
 # general apt-get
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
 
 # common installs for master and workers
-apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
+apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs curl
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 usermod -a -G seqware mapred
@@ -31,7 +34,7 @@ service zookeeper-server start
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2
+apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -122,19 +125,23 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
+for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
 
 # configure dirs for seqware
-mkdir -p /usr/tmp/seqware-oozie 
+# note these are placed on /mnt since that
+# is the ephemeral disk on Amazon instances
+mkdir -p /mnt/seqware-oozie
+chmod a+rx /mnt
+chmod a+rwx /mnt/seqware-oozie
+mkdir -p /usr/tmp/
 chmod -R a+rwx /usr/tmp/
-chown -R seqware:seqware /usr/tmp/seqware-oozie
-
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
 mkdir -p /mnt/datastore
 chmod a+rx /mnt
 chmod a+rwx /mnt/datastore
 ln -s /mnt/datastore /datastore
 chown seqware:seqware /mnt/datastore
-#chmod 774 /mnt/datastore
 
 ## Setup NFS before seqware
 # see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
@@ -150,3 +157,4 @@ cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
 chown root:root /etc/init.d/hadoop-init
 chmod 755 /etc/init.d/hadoop-init
 sysv-rc-conf hadoop-init on
+

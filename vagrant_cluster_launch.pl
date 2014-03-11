@@ -33,6 +33,7 @@ my $aws_secret_key = '';
 my $launch_aws = 0;
 my $launch_vb = 0;
 my $launch_os = 0;
+my $launch_vcloud = 0;
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
@@ -47,6 +48,7 @@ GetOptions (
   "use-aws" => \$launch_aws,
   "use-virtualbox" => \$launch_vb,
   "use-openstack" => \$launch_os,
+  "use-vcloud" => \$launch_vcloud,
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
   "skip-launch" => \$skip_launch,
@@ -56,7 +58,7 @@ GetOptions (
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
@@ -84,16 +86,19 @@ foreach my $node_config (@{$temp_cluster_configs}){
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
+if (!defined($configs->{'MAVEN_MIRROR'})) { $configs->{'MAVEN_MIRROR'} = ""; }
+
 
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
+# you can override for VirtualBox only via the json config
+# you can find boxes listed at http://www.vagrantbox.es/
 if ($launch_vb) {
   $launch_cmd = "vagrant up";
 
   # Allow a custom box to be specified
   if (!defined($configs->{'BOX'})) { $configs->{'BOX'} = "Ubuntu_12.04"; }
-  if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/vagrant/quantal/current/quantal-server-cloudimg-amd64-vagrant-disk1.box"; }
-  #####$configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
+  if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"; }
 } elsif ($launch_os) {
   $launch_cmd = "vagrant up --provider=openstack";
   $configs->{'BOX'} = "dummy";
@@ -102,8 +107,12 @@ if ($launch_vb) {
   $launch_cmd = "vagrant up --provider=aws";
   $configs->{'BOX'} = "dummy";
   $configs->{'BOX_URL'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
+} elsif ($launch_vcloud) {
+  $launch_cmd = "vagrant up --provider=vcloud";
+  $configs->{'BOX'} = "pancancer_1";
+  $configs->{'BOX_URL'} = "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
 } else {
-  die "Don't understand the launcher type to use: AWS, OpenStack, or VirtualBox. Please specify with a --use-* param\n";
+  die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
 }
 
 # process server scripts into single bash script
@@ -141,21 +150,21 @@ sub find_node_info {
   foreach my $l (@t) {
     chomp $l;
     my $host_id = "";
-    if ($l =~ /:?([a-zA-Z]+)\s{2,}active/) {
+    if ($l =~ /(\S+)\s+active/) {
       # openstack
       $host_id = $1;
-    } elsif ($l =~ /:?([a-zA-Z]+)\s{2,}running/) {
-      # aws
+    } if ($l =~ /(\S+)\s+running/) {
+      # aws 
       $host_id = $1;
     }
 
-    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
+    #print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
 
-      print "CLUSTER CONFIG: ".Dumper($cluster_configs)."\n";
+    if ($host_id ne "" && defined($cluster_configs->{$host_id})) {
 
       print "MATCHED HOST ID: $host_id\n";
 
-      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config :$host_id`;
+      my $host_info = `cd $work_dir/$host_id && vagrant ssh-config $host_id`;
       my @h = split /\n/, $host_info;
       my $ip = "";
       my $user = "";
@@ -264,7 +273,8 @@ sub provision_files_thread {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    my $tmp_script_name = "/tmp/tmp_$host_name\_$script_name";
+    system("mkdir -p $work_dir/scripts/");
+    my $tmp_script_name = "$work_dir/scripts/tmp_$host_name\_$script_name";
     system("rm $tmp_script_name");
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
@@ -310,11 +320,14 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("rm /tmp/config_script.$host_name.sh");
+    system("mkdir -p $work_dir/scripts/");
+    system("rm $work_dir/scripts/config_script.$host_name\_$script_name");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
-    setup_os_config_scripts_list($script, "/tmp/config_script.$host_name.sh", $local_configs);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." /tmp/config_script.$host_name.sh ".$host->{user}."@".$host->{ip}.":/tmp/config_script.$host_name.sh && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /tmp/config_script.$host_name.sh", $host_name);
+    setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo mkdir -p /vagrant_scripts", $host_name);
+    run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo chmod a+rwx /vagrant_scripts", $host_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
   }
 }
 
@@ -326,8 +339,9 @@ sub make_exports_str {
     my $pip = $hosts->{$host}{pip};
     $result .= "
 /home $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/home $pip(rw,sync,no_root_squash,no_subtree_check)
 /mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
-/usr/tmp/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)
 ";
   }
   print "EXPORT: $result\n"; 
@@ -428,13 +442,20 @@ sub prepare_files {
   foreach my $node (sort keys %{$cluster_configs}) {
     # cron for SeqWare
     autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
+    # various files used for SeqWare when installed and not built from source
+    autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/seqware-webservice.xml");
+    autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/seqware-portal.xml");
     # settings, user data
     copy("templates/settings", "$work_dir/$node/settings");
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
-    copy("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master");
-    copy("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker");
+    # these are used for when the box is rebooted, it setups the /etc/hosts file for example
+    replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
+    replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
+    # this is used for the master SGE node to recover when the system is rebooted
+    # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
+    replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
     # hadoop settings files
     # FIXME: right now these config files have "master" hardcoded as the master node
     # FIXME: break out into config driven provisioner
@@ -455,11 +476,11 @@ sub setup_vagrantfile {
   #print Dumper($cluster_configs);
   #print Dumper($configs);
   foreach my $node (sort keys %{$cluster_configs}) {
+    $configs->{custom_hostname} = $node;
+    $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better
-    $configs->{custom_hostname} = $node;
-    $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     autoreplace("$part", "$node_output.temp");
     run("cat $node_output.temp >> $node_output");
     run("rm $node_output.temp");
@@ -540,7 +561,7 @@ sub run {
   # only output to host-specific log if defined
   if (defined($hostname)){
     $outputfile = "$work_dir/$hostname.log";
-    $final_cmd = "bash -c '$cmd' >> $outputfile 2> $outputfile";
+    $final_cmd = "bash -c '$cmd' >> $outputfile 2>&1";
   }
   print "RUNNING: $final_cmd\n";
   my $result = system($final_cmd);

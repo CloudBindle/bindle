@@ -1,9 +1,18 @@
 #!/bin/bash -vx
 
+# setup hostname
+hostname %{HOST}
+
+# setup /etc/hosts
+# fix the /etc/hosts file since SGE wants reverse lookup to work
+cp /etc/hosts /tmp/hosts
+echo '127.0.0.1 localhost' > /etc/hosts
+echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
+cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
+
 # setup hosts
 # NOTE: the hostname seems to already be set at least on BioNimubs OS
 echo '%{HOSTS}' >> /etc/hosts
-hostname %{HOST}
 
 # general apt-get
 apt-get update
@@ -56,22 +65,27 @@ for i in cron hadoop-hdfs-datanode hadoop-0.20-mapreduce-tasktracker; do echo $i
 # setup NFS
 # seqware tutorials
 apt-get -q -y --force-yes install rpcbind nfs-common
-mkdir -p /usr/tmp/seqware-oozie
+# make dir
+mkdir -p /usr/tmp/
+mkdir -p /mnt/seqware-oozie
 mkdir -p /mnt/datastore
 echo 'rpcbind : ALL' >> /etc/hosts.deny
 echo 'rpcbind : %{MASTER_PIP}' >> /etc/hosts.allow
 mount %{MASTER_PIP}:/home /home
-mount %{MASTER_PIP}:/usr/tmp/seqware-oozie /usr/tmp/seqware-oozie
+mount %{MASTER_PIP}:/mnt/home /mnt/home
+mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
 mount %{MASTER_PIP}:/mnt/datastore /mnt/datastore
 
 chmod a+rwx /home
-chmod a+rwx /usr/tmp/seqware-oozie
+chmod a+rwx /mnt/home
+chmod a+rwx /mnt/seqware-oozie
 chmod a+rwx /mnt/datastore
 ln -s /mnt/datastore /datastore
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
 
 # add seqware user
 # seems duplicated from minimal script
-# useradd -d /home/seqware -m seqware -s /bin/bash
+# useradd -d ~seqware -m seqware -s /bin/bash
 
 # not sure if this is required
 mkdir -p /tmp/hadoop-mapred

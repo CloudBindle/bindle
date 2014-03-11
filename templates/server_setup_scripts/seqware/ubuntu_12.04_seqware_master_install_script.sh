@@ -1,7 +1,13 @@
 #!/bin/bash -vx
 
+# TODO:
+# - need to create and install a HelloWorld workflow (optionally?) so SWID 1 is taken and the tutorials can be followed
+# - what about seqware/root password for VirtualBox?
+
 # add seqware user
-#useradd -d ~seqware -m seqware -s /bin/bash
+mkdir -p /mnt/home
+useradd -d /mnt/home/seqware -m seqware -s /bin/bash
+ln -s ~seqware /home/seqware
 
 # various seqware dirs
 mkdir -p ~seqware/bin
@@ -25,6 +31,7 @@ git clone https://github.com/datasift/gitflow
 cd gitflow
 ./install.sh
 
+# I'm still checking out since I will need the SQL schema file for example
 # checkout seqware
 cd ~seqware/gitroot
 git clone https://github.com/SeqWare/seqware.git
@@ -41,11 +48,29 @@ su - seqware -c 'chmod 640 ~seqware/.seqware/settings'
 # configure hubflow
 su - seqware -c 'cd ~seqware/gitroot/seqware; git hf init; git hf update'
 
-# build with develop
-su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BRANCH_CMD}'
-su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BUILD_CMD} 2>&1 | tee build.log'
+## build with develop
+#su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BRANCH_CMD}'
+#su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BUILD_CMD} 2>&1 | tee build.log'
 
-export SEQWARE_VERSION=`ls ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
+# download various SeqWare components
+export SEQWARE_VERSION="%{SEQWARE_VERSION}"
+# since we're not building, go ahead and setup these dirs as the place to download jars
+mkdir -p ~seqware/gitroot/seqware/seqware-distribution/target/
+mkdir -p ~seqware/gitroot/seqware/seqware-webservice/target/
+mkdir -p ~seqware/gitroot/seqware/seqware-portal/target/
+mkdir -p ~seqware/gitroot/seqware/seqware-pipeline/target/
+# download the released versions
+curl -L http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-distribution/${SEQWARE_VERSION}/seqware-distribution-${SEQWARE_VERSION}-full.jar > ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar
+curl -L http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-portal/${SEQWARE_VERSION}/seqware-portal-${SEQWARE_VERSION}.war >  ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war
+curl -L http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-webservice/${SEQWARE_VERSION}/seqware-webservice-${SEQWARE_VERSION}.war > ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war 
+curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/seqware > ~seqware/gitroot/seqware/seqware-pipeline/target/seqware
+mkdir -p ~seqware/.m2/
+curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/archetype-catalog.xml > ~seqware/.m2/archetype-catalog.xml
+# copy the templates to their correct destination
+cp /vagrant/seqware-webservice.xml ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml
+cp /vagrant/seqware-portal.xml ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml
+
+#export SEQWARE_VERSION=`ls ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
 
 # setup jar
 cp ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~seqware/jars/
@@ -98,10 +123,10 @@ perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat7/Catalina/loc
 # seqware landing page
 cp -r ~seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
 
-# for glassfish database location during tests
-perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" ~seqware/gitroot/seqware/pom.xml 
-# run full integration testing
-su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
+## for glassfish database location during tests
+#perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" ~seqware/gitroot/seqware/pom.xml 
+## run full integration testing
+#su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
 
 # setup cronjobs after testing to avoid WorkflowStatusChecker or Launcher clashes
 cp /vagrant/status.cron ~seqware/crons/

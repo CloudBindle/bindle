@@ -17,7 +17,9 @@ apt-get -q -y --force-yes install gridengine-client gridengine-common gridengine
 /etc/init.d/gridengine-exec start
 
 # configure
-export HOST=`hostname`
+#export HOST=`hostname`
+hostname master
+export HOST=master
 sudo -u sgeadmin qconf -am seqware
 qconf -au seqware users
 qconf -as $HOST
@@ -72,3 +74,10 @@ done
 # change seqware engine to oozie-sge
 perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie-sge/' /vagrant/settings 
 perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings 
+
+# Add sge-init-master startup script
+cp /vagrant/sge-init-master /etc/init.d/sge-init
+chown root:root /etc/init.d/sge-init
+chmod 755 /etc/init.d/sge-init
+sysv-rc-conf sge-init on
+
