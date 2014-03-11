@@ -55,7 +55,7 @@
       os.user_data = "#cloud-config\nmanage_etc_hosts: True"
     end
     
-    config.vm.provider :vcloud do |vcloud|
+    %{custom_hostname}.vm.provider :vcloud do |vcloud|
       vcloud.hostname = "%{VCLOUD_HOSTNAME}"
       vcloud.username = "%{VCLOUD_USERNAME}"
       vcloud.password = "%{VCLOUD_PASSWORD}"
@@ -67,8 +67,8 @@
       vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
       vcloud.vdc_network_name = "%{VCLOUD_VDC_NETWORK_NAME}"
 
-      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
-      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
+#      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
+#      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
     end
 
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
