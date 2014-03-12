@@ -5,7 +5,7 @@
 
     %{custom_hostname}.vm.provider "vmware_fusion" do |v|
       v.box = "precise64"
-      v.vmx["memsize"]  = "5096"
+      v.vmx["memsize"]  = "4096"
     end
     # Provider-specific configuration so you can fine-tune various
     # backing providers for Vagrant. These expose provider-specific options.
@@ -17,7 +17,7 @@
       vb.gui = true
    
       # Use VBoxManage to customize the VM. For example to change memory:
-      vb.customize ["modifyvm", :id, "--memory", "4096"]
+      vb.customize ["modifyvm", :id, "--memory", "4096", "--cpus", "2", "--nictype1", "Am79C970A", "--vram", "32", "--natdnshostresolver1", "on"]
   
     end
  
