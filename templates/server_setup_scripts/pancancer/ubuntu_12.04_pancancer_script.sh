@@ -5,7 +5,7 @@ apt-get update
 export DEBIAN_FRONTEND=noninteractive
 
 # general items needed for bwa workflow
-apt-get -q -y --force-yes install liblz-dev zlib1g-dev libxml-dom-perl samtools
+apt-get -q -y --force-yes install liblz-dev zlib1g-dev libxml-dom-perl samtools libossp-uuid-perl libjson-perl libxml-libxml-perl
 
 # dependencies for genetorrent 
 apt-get -q -y --force-yes install libboost-filesystem1.48.0 libboost-program-options1.48.0 libboost-regex1.48.0 libboost-system1.48.0 libicu48 libxerces-c3.1 libxqilla6
