@@ -24,6 +24,13 @@ sudo -u sgeadmin qconf -am seqware
 qconf -au seqware users
 qconf -as $HOST
 
+# Set up memory as a consumable resource
+TMPSC=/tmp/sc.tmp
+qconf -sc | grep -v 'h_vmem' > $TMPSC
+echo "h_vmem              h_vmem     MEMORY      <=    YES         YES        0        0" >> $TMPSC
+qconf -Mc $TMPSC
+rm $TMPSC
+
 # this is interactive... how do I load from a file?
 for hostName in %{SGE_HOSTS}; do
 
@@ -61,7 +68,12 @@ qconf -mq main.q
 
 qconf -aattr queue hostlist @allhosts main.q
 
-qconf -aattr queue slots "[$hostName=1]" main.q
+qconf -aattr queue slots "[$hostName=`nproc`]" main.q
+
+qconf -mattr queue load_thresholds "np_load_avg=`nproc`" main.q
+
+# Set the amount of memory as the total memory on the system
+qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` $hostName
 
 done
 # loop ends here!
