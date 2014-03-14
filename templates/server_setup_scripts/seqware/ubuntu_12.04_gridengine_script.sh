@@ -81,12 +81,12 @@ done
 # Create profile for "serial" parallel environment
 TMPPROFILE=/tmp/serial.profile
 echo "pe_name           serial
-slots             `nproc`
+slots             9999
 user_lists        NONE
 xuser_lists       NONE
 start_proc_args   /bin/true
 stop_proc_args    /bin/true
-allocation_rule   \$fill_up
+allocation_rule   \$pe_slots
 control_slaves    FALSE
 job_is_first_task TRUE
 urgency_slots     min
