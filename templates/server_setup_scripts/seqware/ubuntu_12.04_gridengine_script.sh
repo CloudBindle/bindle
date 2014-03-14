@@ -78,6 +78,23 @@ qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` 
 done
 # loop ends here!
 
+# Create profile for "serial" parallel environment
+TMPPROFILE=/tmp/serial.profile
+echo "pe_name           serial
+slots             `nproc`
+user_lists        NONE
+xuser_lists       NONE
+start_proc_args   /bin/true
+stop_proc_args    /bin/true
+allocation_rule   \$fill_up
+control_slaves    FALSE
+job_is_first_task TRUE
+urgency_slots     min
+accounting_summary FALSE" > $TMPPROFILE
+qconf -Ap $TMPPROFILE
+qconf -aattr queue pe_list serial main.q
+rm $TMPPROFILE
+
 # restart
 /etc/init.d/gridengine-exec stop
 /etc/init.d/gridengine-master restart
@@ -85,7 +102,7 @@ done
 
 # change seqware engine to oozie-sge
 perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie-sge/' /vagrant/settings 
-perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings 
+#perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings 
 
 # Add sge-init-master startup script
 cp /vagrant/sge-init-master /etc/init.d/sge-init
