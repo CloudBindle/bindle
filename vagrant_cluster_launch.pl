@@ -38,7 +38,7 @@ my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
-my $vb_ram = 12;
+my $vb_ram = 12000;
 my $vb_cores = 2;
 
 my $help = 0;
