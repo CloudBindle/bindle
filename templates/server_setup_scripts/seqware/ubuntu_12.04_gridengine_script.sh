@@ -97,8 +97,14 @@ rm $TMPPROFILE
 
 # restart
 /etc/init.d/gridengine-exec stop
+sleep 4
+/etc/init.d/gridengine-master stop
+sleep 4
+pkill -9 sge_execd
+pkill -9 sge_qmaster
+sleep 4
 /etc/init.d/gridengine-master restart
-/etc/init.d/gridengine-exec start
+/etc/init.d/gridengine-exec restart
 
 # change seqware engine to oozie-sge
 perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie-sge/' /vagrant/settings 

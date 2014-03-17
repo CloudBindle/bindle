@@ -55,6 +55,7 @@
         # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
         [ ],
         [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh",
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_vagrant_user_script.sh",
           "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
         ]
       ]

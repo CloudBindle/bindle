@@ -167,6 +167,12 @@ Getting Started Guides for this project. You can also choose another template,
 such as "templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template",
 that will give you a 4 node cluster.
 
+## RAM and CPU Core Requirements
+
+The short answer is make sure your machine (local VM, Amazon instance type, etc) has at least 2 cores and 12G of RAM.
+
+The "HelloWorld" example workflow will schedule using 8G of RAM.  So please make sure you launch on a machine instance type (AWS, Google Cloud, etc) with at least 12G of RAM.  For VirtualBox, you should do the same.  Our profile for VirtualBox requests 12G of RAM and 2 cores.  If you need to change this setting please see the --vb-ram and --vb-cores options that let you override the memory/core requirements in VirtualBox ONLY.  Keep in mind for AWS and other clouds the RAM and Cores are determinted by the instance type you choose not by the --vb-ram and --vb-cores options.
+
 ## Running with the Wrapper
 
 The wrapper script that controls the system described above is called "vagrant_cluster_launch.pl".
@@ -187,6 +193,7 @@ SeqWare) if desired (the full integration tests take 1 hour!):
 
     # example, see source for all args
     perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws --config-file vagrant_cluster_launch.json --skip-it-tests
+
 
 ## SeqWare Examples
 
