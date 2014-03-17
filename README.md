@@ -17,19 +17,20 @@ Together with this Vagrant-wrapping  script, we provide secondary provisioning
 shell scripts that setup a single-node or multi-node SeqWare cluster configured
 to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic
 the same process can be adapted to build other cluster types to serve other
-projects.  We include sample JSON configs below that show you how to build
+projects.  We include sample JSON configs (see templates/sample_configs/) that show you how to build
 nodes/clusters for the following projects:
 
 * SeqWare Pipeline (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
 * the ICGC DCC Data Portal web application and elasticsearch index (with both a small and large index option)
 * the ICGC DCC Data Submission and Validation system (TBD)
 * the ICGC DCC Extract, Transform, and Load system for creating elasticsearch indexes (TBD)
+* the TCGA/ICGC PancCancer Project
 
 In the latest version of the script you can specify multiple nodes with their
 own set of provisioning bash shell scripts making it easy to configure a single
 node or cluster with a simple to author config file. In the near future the
 mechanism of using shell scripts to configure nodes will be re-implemented (or
-supplemented) with Puppet scripts which should make it easier to maintain
+supplemented) with Puppet/Ansible scripts which should make it easier to maintain
 different clusters and node types.  We will also improve the seperation between
 SeqWare and the generic functionality of this cluster builder.
 
@@ -57,35 +58,40 @@ you launch a local node or cluster of virtual machine nodes on your desktop or
 local server. If you will *only* launch a node or cluster of nodes on Amazon
 or an OpenStack cloud you can skip this step.
 
-Install Vagrant using the package from their [site](http://downloads.vagrantup.com/).
-For example:
+Install Vagrant using the package from their
+[site](http://downloads.vagrantup.com/) that is correct for your platform.  For
+example, I used the following Ubuntu 12.04 64-bit:
 
     wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
     sudo dpkg -i vagrant_1.4.3_x86_64.deb
 
-Make sure you choose the right package format for your OS, the above is for Ubuntu.
-
 You then need to install plugins to handle AWS, vCloud, and/or OpenStack. The
-Virtualbox provider is available out of the box with Vagrant. You do this step as the user that will run Vagrant and the SeqWare Vagrant wrapper.
+Virtualbox provider is available out of the box with Vagrant. You do this step
+as the user that will run Vagrant and the SeqWare Vagrant wrapper.
 
     vagrant plugin install vagrant-aws
     vagrant plugin install vagrant-openstack-plugin
     vagrant plugin install vagrant-vcloud
 
-Unfortunately, the current version of the vagrant-openstack-plugin has an issue with the new multiple SSH key implementation in 
-Vagrant 1.4.0. You will need to manually install a workaround (courtesy of https://github.com/cloudbau/vagrant-openstack-plugin/issues/38 ):
+Unfortunately, the current version of the vagrant-openstack-plugin has an issue
+with the new multiple SSH key implementation in Vagrant 1.4.0. You will need to
+either use an earlier version of Vagrant of manually install a workaround
+(courtesy of https://github.com/cloudbau/vagrant-openstack-plugin/issues/38 ):
 
     wget https://raw.github.com/cloudbau/vagrant-openstack-plugin/48eac2932fa16ccd5fab2e1d2e0d04047f3be7bd/lib/vagrant-openstack-plugin/action/sync_folders.rb
     mv sync_folders.rb ~/.vagrant.d/gems/gems/vagrant-openstack-plugin-0.3.0/lib/vagrant-openstack-plugin/action/
 
 The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
-your distribution's package management system. Google "cpan perl install" for more information if you're unfamiliar with installing Perl packages:
+your distribution's package management system. Google "cpan perl install" for
+more information if you're unfamiliar with installing Perl packages. I highly
+recommend using PerlBrew to simplify working with Perl dependencies if you 
+do not use your native package manager as shown below for Ubuntu:
 
 * Getopt::Long: should be installed by default with Perl
 * Data::Dumper: should be installed by default with Perl
-* JSON: eg "sudo apt-get install libjson-perl"
-* Template: eg "sudo apt-get install libtemplate-perl"
+* JSON: eg "sudo apt-get install libjson-perl" on Ubuntu 12.04
+* Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
 
 To check to see if you have these you do:
 
@@ -113,9 +119,12 @@ On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or
 * VirtualBox: 4.2.18 r88780
 
 These work correctly, if you use a different version and run into problems
-please try these versions.
+please try one of these versions.
 
 ## Getting "Boxes"
+
+This is still needed but it should happen automatically the first time you
+use SeqWare-Vagrant.
 
 If you are running using VirtualBox you need to pre-download boxes which are
 images of computers ready to use.  The easiest way to do this is to find the
@@ -169,9 +178,18 @@ that will give you a 4 node cluster.
 
 ## RAM and CPU Core Requirements
 
-The short answer is make sure your machine (local VM, Amazon instance type, etc) has at least 2 cores and 12G of RAM.
+The short answer is make sure your machine (local VM, Amazon instance type,
+etc) has at least 2 cores and 12G of RAM. You can certainly use less but our
+SeqWare tutorials on http://seqware.io will not work properly.
 
-The "HelloWorld" example workflow will schedule using 8G of RAM.  So please make sure you launch on a machine instance type (AWS, Google Cloud, etc) with at least 12G of RAM.  For VirtualBox, you should do the same.  Our profile for VirtualBox requests 12G of RAM and 2 cores.  If you need to change this setting please see the --vb-ram and --vb-cores options that let you override the memory/core requirements in VirtualBox ONLY.  Keep in mind for AWS and other clouds the RAM and Cores are determinted by the instance type you choose not by the --vb-ram and --vb-cores options.
+The "HelloWorld" example workflow will schedule using 8G of RAM.  So please
+make sure you launch on a machine instance type (AWS, Google Cloud, etc) with
+at least 12G of RAM.  For VirtualBox, you should do the same.  Our default
+profile for VirtualBox requests 12G of RAM and 2 cores.  If you need to change
+this setting please see the --vb-ram and --vb-cores options that let you
+override the memory/core requirements in VirtualBox ONLY.  Keep in mind for AWS
+and other clouds the RAM and Cores are determinted by the instance type you
+choose not by the --vb-ram and --vb-cores options.
 
 ## Running with the Wrapper
 
@@ -247,12 +265,44 @@ This is the default engine that the vast majority of people will want to use:
 
 This is really just for SeqWare's own internal testing. We support a workflow engine that talks to SGE via an Oozie plugin and this configruation will let you spin up an SGE cluster configured to work with SeqWare:
 
-TODO: the SGE scripts need to be generalized for a cluster
-
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
     perl vagrant_cluster_launch.pl --use-openstack
+
+## TCGA/ICGC PanCancer Examples
+
+The TCGA/ICGC PanCancer project is using SeqWare-Vagrant to create analytical
+nodes/clusters for use with a BWA Workflow and downstream variant calling
+workflows. This project is using a variety of cloud technologies including
+VirtualBox, OpenStack, and vCloud.  For each environment we use SeqWare-Vagrant
+to create SeqWare environments that utilize Oozie-SGE.  This allows researchers
+to write workflows using SeqWare but also analytical pipelines that simply use
+SGE and "qsub" to process data.
+
+We provide two profiles for this project:
+
+* templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template: A single stand-alone node for use with OpenStack, vCloud, or VirtualBox
+* templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template: A cluster of 4 machines used for OpenStack or vCloud
+
+Here are some examples, you will want to customize the
+vagrant_cluster_launch.json to include the settings for the particular cloud
+environment you are working in (EBI, BioNimbus, DKFZ, Korea, etc).  Each cloud
+will provide you the specifics such as account name, API keys, and which cloud
+technology to use.
+
+    # use this template for clusters of 4 nodes, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for your environment
+    perl vagrant_cluster_launch.pl --use-openstack
+
+    # use this template for a single node, customize it
+    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+    # launch, use the correct command line args for your environment
+    perl vagrant_cluster_launch.pl --use-openstack
+
+Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
+more information about this project. 
 
 ## OICR Examples
 
@@ -364,6 +414,19 @@ following patch for a fix to get more information:
 
 https://github.com/jeremyharris/vagrant-aws/commit/1473c3a45570fdebed2f2b28585244e53345eb1d
 
+## Logging
+
+Every node launched by vagrant_cluster_launch.pl has it's own log file that you
+can view (or watch during cluster building).  Take a look inside the directory
+specified in the --working-dir option.  There you should see a .log file for
+each server being launched (for a cluster) or just master.log if you launched a
+node.  You can use "tail -f <logname>" to watch the progress of building your
+VMs.
+
+## Controlling the VM
+
+Once 
+
 ## Shutting Down
 
 You can terminate your instance via the provider interface (Open Stack, AWS, or VirtualBox).
@@ -406,17 +469,11 @@ and want to re-run without restarting the box:
 The list of TODO items, some of which are out-of-date.  See the
 vagrant_cluster_launch.pl script for more TODO items too.
 
-* need to setup HBase for the QueryEngine -- done
 * need to edit the landing page to remove mention of Pegasus
-* need to add code that will add all local drives to HDFS to maximize available storage (e.g. ephemerial drives) -- done
-* ecryptfs -- done
-* need to have a cluster provisioning template that works properly and coordinates network settings somehow
+* need to add code that will add all local drives to HDFS to maximize available storage (e.g. ephemerial drives)
+* ecryptfs
 * should I add glusterfs in parallel since it's POSIX compliant and will play better with SeqWare or should I just use NFS?
 * add teardown for cluster to this script
-* need to add setup init.d script that will run on first boot for subsequent images of the provisioned node
-* setup services with chkconfig to ensure a rebooted machine works properly -- done
 * better integration with our Maven build process, perhaps automatically calling this to setup integration test environment -- done
 * message of the day on login over ssh
-* pass in the particular branch to use with SeqWare -- done
-* would be great to have threading in here so nodes launch in parallel
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
