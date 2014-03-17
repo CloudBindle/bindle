@@ -61,7 +61,8 @@
 	],
 	[],
         [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_install_script.sh",
-          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_vagrant_user_script.sh"
+          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_vagrant_user_script.sh",
+          "templates/server_setup_scripts/pancancer/ubuntu_12.04_pancancer_script.sh"
         ]
       ]
     },
@@ -78,7 +79,7 @@
         [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh"],
         [ ],
         [ "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_worker_script.sh" ],
-        [  ]
+        [ "templates/server_setup_scripts/pancancer/ubuntu_12.04_pancancer_script.sh" ]
       ]
     }
   ]
