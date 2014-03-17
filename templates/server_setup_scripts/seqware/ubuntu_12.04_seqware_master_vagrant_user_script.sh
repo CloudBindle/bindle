@@ -56,7 +56,7 @@ curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/
 cp ~vagrant/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar /jars/
 
 # setup seqware cli
-cp ~vagrant/gitroot/seqware/seqware-pipeline/target/seqware /bin
+cp ~vagrant/gitroot/seqware/seqware-pipeline/target/seqware ~vagrant/bin/
 chmod +x ~vagrant/bin/seqware
 echo 'export PATH=$PATH:~vagrant/bin' >> ~vagrant/.bash_profile
 
