@@ -39,6 +39,16 @@ execution environments along with the full collection of SeqWare tools.
 * launch SeqWare workflow(s) and monitor their results
 * the previous step can be automated with a decider
 
+#### Detailed Steps - Annai BioComputeFarm Example with PanCancer BWA-Mem Workflow 2.0
+
+First, you need to get a BioComputeFarm account, email Annai systems and they will work with you for this.
+
+Next, you can launch a "launcher" host. This is your gateway to the system and allows you to launch clusters of nodes that actually do the processing.  It also is the location to run the "decider" that will schedule the BWA workflow running on your many clusters in this cloud.
+
+# launch a "launcher" node via the GUI at 
+
+LEFT OFF HERE
+
 ### Build a Workflow Development Environment
 
 SeqWare-Vagrant can be used to create a workflow development environment that
