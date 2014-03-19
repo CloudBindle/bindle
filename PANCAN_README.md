@@ -45,11 +45,35 @@ First, you need to get a BioComputeFarm account, email Annai systems and they wi
 
 Next, you can launch a "launcher" host. This is your gateway to the system and allows you to launch clusters of nodes that actually do the processing.  It also is the location to run the "decider" that will schedule the BWA workflow running on your many clusters in this cloud.
 
-# launch a "launcher" node via the GUI at 
+# launch a "launcher" node via the GUI at, this should be Ubuntu 12.04 
 
-# you may need to install some dependencies including git
-# TODO: we need to zip up the release
-ubuntu@brian-launcher:~$ git clone https://github.com/SeqWare/vagrant.git
+# make sure security settings are in place for launcher host
+# * pem login only
+# * firewall with port 22
+# * no launched hosts should be accessible directly
+
+# ssh into the launcher host
+
+# download SeqWare Vagrant 1.1
+wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/seqware-vagrant_1.1.tar.gz
+tar zxf seqware-vagrant_1.1.tar.gz
+
+# make sure you have all the dependencies needed for SeqWare-Vagrant
+ubuntu@brian-launcher:~/seqware-vagrant$ perl -c vagrant_cluster_launch.pl
+
+# install seqware-vagrant dependencies, again see README for SeqWare-Vagrant
+sudo apt-get install libjson-perl libtemplate-perl
+wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
+sudo dpkg -i vagrant_1.4.3_x86_64.deb
+vagrant plugin install vagrant-openstack-plugin
+
+
+# change your settings
+# this is where you need to populate the various OpenStack keys
+ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+
+# now launch a host
+
 
 
 ### Build a Workflow Development Environment
