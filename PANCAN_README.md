@@ -47,7 +47,10 @@ Next, you can launch a "launcher" host. This is your gateway to the system and a
 
 # launch a "launcher" node via the GUI at 
 
-LEFT OFF HERE
+# you may need to install some dependencies including git
+# TODO: we need to zip up the release
+ubuntu@brian-launcher:~$ git clone https://github.com/SeqWare/vagrant.git
+
 
 ### Build a Workflow Development Environment
 
