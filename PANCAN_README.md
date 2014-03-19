@@ -67,13 +67,12 @@ wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
 sudo dpkg -i vagrant_1.4.3_x86_64.deb
 vagrant plugin install vagrant-openstack-plugin
 
-
 # change your settings
 # this is where you need to populate the various OpenStack keys
 ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
 
 # now launch a host
-
+ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
 
 ### Build a Workflow Development Environment
