@@ -59,9 +59,9 @@ apt-get update
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 cloudera-manager-server-db cloudera-manager-server cloudera-manager-daemons
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2 git maven sysv-rc-conf hbase-master xfsprogs
 # get Java
-apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en &> /dev/null
-wget http://archive.cloudera.com/cm5/ubuntu/lucid/amd64/cm/pool/contrib/o/oracle-j2sdk1.7/oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb &> /dev/null
-dpkg -i oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb &> /dev/null
+apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en 
+wget http://archive.cloudera.com/cm5/ubuntu/lucid/amd64/cm/pool/contrib/o/oracle-j2sdk1.7/oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb 
+dpkg -i oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb
 
 # cloudera 1.7 java package doesn't set up alternatives for some reason
 update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java 2000
