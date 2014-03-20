@@ -74,6 +74,10 @@ you launch a local node or cluster of virtual machine nodes on your desktop or
 local server. If you will *only* launch a node or cluster of nodes on Amazon
 or an OpenStack cloud you can skip this step.
 
+Install dependencies:
+
+    sudo apt-get install gcc make
+
 Install Vagrant using the package from their
 [site](http://downloads.vagrantup.com/) that is correct for your platform.  For
 example, I used the following Ubuntu 12.04 64-bit:

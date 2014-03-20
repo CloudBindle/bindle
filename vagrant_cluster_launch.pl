@@ -491,15 +491,15 @@ sub setup_vagrantfile {
     run("cat $node_output.temp >> $node_output");
     run("rm $node_output.temp");
     run("cat $end >> $node_output");
+    # hack to deal with empty network/floatIP
+    my $full_output = `cat $node_output`;
+    # HACK: this is a hack because we don't properly templatize the Vagrantfile... I'm doing this to eliminate empty os.network and os.floating_ip which cause problems on various OpenStack clouds
+    $full_output =~ s/os.network = "<FILLMEIN>"//;
+    $full_output =~ s/os.network = ""//;
+    $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
+    $full_output =~ s/os.floating_ip = ""//;
+    run("echo '$full_output' > $node_output");
   } 
-  # hack to deal with empty network/floatIP
-  my $full_output = `cat $node_output`;
-  # HACK: this is a hack because we don't properly templatize the Vagrantfile... I'm doing this to eliminate empty os.network and os.floating_ip which cause problems on various OpenStack clouds
-  $full_output =~ s/os.network = "<FILLMEIN>"//;
-  $full_output =~ s/os.network = ""//;
-  $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
-  $full_output =~ s/os.floating_ip = ""//;
-  run("echo '$full_output' > $node_output");
 }
 
 # reads a JSON-based config
