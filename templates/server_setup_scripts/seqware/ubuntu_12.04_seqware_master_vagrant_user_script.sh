@@ -6,6 +6,9 @@
 # of cloud installs since there is no shared filesystem between the
 # users local computer and the remote cloud instance.
 
+# add user if vagrant doesn't exist
+useradd -m vagrant -s /bin/bash
+
 # various seqware dirs
 mkdir -p ~vagrant/bin
 mkdir -p ~vagrant/jars
@@ -21,8 +24,8 @@ sudo -u hdfs hadoop fs -chown -R vagrant /user/vagrant
 
 # configure seqware settings
 cp /vagrant/settings ~vagrant/.seqware/
-perl -p -i -e 's/\/home\/seqware\//\/home\/vagrant\//g' .seqware/settings
-perl -p -i -e 's/\/user\/seqware\//\/user\/vagrant\//g' .seqware/settings
+perl -p -i -e 's/\/home\/seqware\//\/home\/vagrant\//g' ~vagrant/.seqware/settings
+perl -p -i -e 's/\/user\/seqware\//\/user\/vagrant\//g' ~vagrant/.seqware/settings
 
 # install hubflow
 cd ~vagrant/gitroot
@@ -53,7 +56,7 @@ mkdir -p ~vagrant/.m2/
 curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/archetype-catalog.xml > ~vagrant/.m2/archetype-catalog.xml
 
 # setup jar
-cp ~vagrant/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar /jars/
+cp ~vagrant/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~vagrant/jars/
 
 # setup seqware cli
 cp ~vagrant/gitroot/seqware/seqware-pipeline/target/seqware ~vagrant/bin/
