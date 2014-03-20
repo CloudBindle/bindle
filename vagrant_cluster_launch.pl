@@ -498,7 +498,7 @@ sub setup_vagrantfile {
     $full_output =~ s/os.network = ""//;
     $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
     $full_output =~ s/os.floating_ip = ""//;
-    run("echo '$full_output' > $node_output");
+    system("echo '$full_output' > $node_output");
   } 
 }
 
