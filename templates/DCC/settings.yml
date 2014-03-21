@@ -9,7 +9,8 @@ elastic:
 
 # FIXME: need to prepare this section and include as a var
   nodeAddresses:
-%{DCC_PORTAL_SETTINGS_HOST_STR}
+        - host: "master"
+        - port: 9300
 
 # Genomemaps
 browser:
@@ -22,12 +23,15 @@ browser:
 # Data download
 download:
   enabled: true
-  uri: "%{DCC_PORTAL_DOWNLOADER_URI}"
-  dynamicRootPath: "%{DCC_PORTAL_DOWNLOADER_DYNAMIC_PATH}"
-  staticRootPath: "%{DCC_PORTAL_DOWNLOADER_STATIC_PATH}"
-  currentReleaseSymlink: "%{DCC_PORTAL_DOWNLOADER_CURRENT_PATH}"
-  maxUsers: %{DCC_PORTAL_DOWNLOADER_MAX_USERS}
-  stage: "DEVELOPMENT"
+  uri: "hdfs://master:8020"
+  staticRootPath: "/icgc/download/static"
+  dynamicRootPath: "/icgc/download/dynamic"
+  currentReleaseSymlink: "/current /TRA"
+  stage: "PRODUCTION"
+  quorum: "master"
+  oozieUrl: "http://master:11000/oozie"
+  appPath: "hdfs://master:8020/user/downloader/workflows/archive-main"
+  releaseName: "TRA"
 
 # Logging settings
 logging:

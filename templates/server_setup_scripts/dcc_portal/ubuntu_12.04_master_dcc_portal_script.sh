@@ -12,6 +12,4 @@ wget %{DCC_INDEX_TAR_URL}
 # NOTE: I've had problems with this in the past, where elasticsearch fails for some reason
 curl -XPOST 'master:9200/%{DCC_INDEX_NAME}/_import?target=/mnt/dcc-portal/%{DCC_INDEX_NAME}&millis=600000'
 # launch the portal
-# FIXME: somehow this doesn't run in the backend and the provisioning script hangs on this
-nohup java -Xmx4G -jar %{DCC_PORTAL_JAR_NAME} server settings.yml &
-
+nohup java -Xmx4G -jar %{DCC_PORTAL_JAR_NAME} server settings.yml > portal.out 2> portal.err  < /dev/null &

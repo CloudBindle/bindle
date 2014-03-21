@@ -38,11 +38,24 @@
     "SEQWARE_BRANCH_CMD": "git checkout develop",
     # DCC-specific
     "DCC_ES_HEAP_SIZE_GB": "8",
-    "DCC_ES_MIN_MASTER_NODES": "2",
-    "DCC_PORTAL_JAR_URL": "http://ca.on.oicr.icgc.s3.amazonaws.com/lib/dcc-portal-api-1.11-20130924.184611-237.jar",
-    "DCC_PORTAL_JAR_NAME": "dcc-portal-api-1.11-20130924.184611-237.jar",
-    "DCC_INDEX_NAME": "dcc-release-load-dev-06e-6-38",
-    "DCC_INDEX_TAR_URL": "http://ca.on.oicr.icgc.s3.amazonaws.com/index_dumps/dcc-release-load-dev-06e-6-38.tar.gz"
+    "DCC_ES_MIN_MASTER_NODES": "1",
+    "DCC_PORTAL_JAR_URL": "http://seqwaremaven.oicr.on.ca/artifactory/dcc-release/org/icgc/dcc/dcc-portal-api/2.6.3/dcc-portal-api-2.6.3.jar",
+    "DCC_PORTAL_JAR_NAME": "dcc-portal-api-2.6.3.jar",
+    "DCC_INDEX_NAME": "dcc-release-dcc-etl-cli",
+    "DCC_INDEX_TAR_URL": "http://ca.on.oicr.icgc.s3.amazonaws.com/index_dumps/dcc-release-dcc-etl-cli.tar.gz",
+    "DCC_PORTAL_PORT": "5381",
+    "DCC_DOWNLOADER_JAR_URL": "http://seqwaremaven.oicr.on.ca/artifactory/dcc-release/org/icgc/dcc/dcc-downloader/2.6.3/dcc-downloader-2.6.3.jar",
+    "DCC_DOWNLOADER_JAR": "dcc-downloader-2.6.3.jar",
+    "DCC_DOWNLOADER_CONFIG_URL": "https://s3.amazonaws.com/ca.on.oicr.icgc/dcc-downloader/dcc-downloader-config.tar.gz",
+    "DCC_DOWNLOADER_CONFIG_TAR": "dcc-downloader-config.tar.gz",
+    "DCC_DOWNLOADER_DYNAMIC_INDEX_URL": "https://s3.amazonaws.com/ca.on.oicr.icgc/dcc-downloader/dcc-downloader-dynamic-TRA.tar.gz",
+    "DCC_DOWNLOADER_DYNAMIC_INDEX_TAR": "dcc-downloader-dynamic-TRA.tar.gz",
+    "DCC_DOWNLOADER_STATIC_INDEX_URL": "https://s3.amazonaws.com/ca.on.oicr.icgc/dcc-downloader/dcc-downloader-static-TRA.tar.gz",
+    "DCC_DOWNLOADER_STATIC_INDEX_TAR": "dcc-downloader-static-TRA.tar.gz",
+    "DCC_DOWNLOADER_FILTER_JAR_URL": "https://s3.amazonaws.com/ca.on.oicr.icgc/dcc-downloader/dcc-downloader-filter-2.6.3.jar",
+    "DCC_DOWNLOADER_FILTER_JAR": "dcc-downloader-filter-2.6.3.jar",
+    "DCC_DOWNLOADER_WORKFLOW_URL": "https://s3.amazonaws.com/ca.on.oicr.icgc/dcc-downloader/dcc-downloader-workflows-2.6.3.tar.gz",
+    "DCC_DOWNLOADER_WORKFLOW_TAR": "dcc-downloader-workflows-2.6.3.tar.gz"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -55,12 +68,14 @@
       "floatip": ["<FILLMEIN>"],
       # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
       "first_pass_scripts": [
-        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
-      ], 
+        "templates/server_setup_scripts/ubuntu_12.04_dcc_minimal_script.sh"
+      ],
       # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
       "second_pass_scripts": [
-        [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
-        [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_master_dcc_portal_script.sh" ]
+        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh",
+          "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_elasticsearch_node_script.sh" ],
+        [ "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_master_dcc_downloader_script.sh",
+          "templates/server_setup_scripts/dcc_portal/ubuntu_12.04_master_dcc_portal_script.sh" ]
       ]
     },
     {
@@ -68,7 +83,7 @@
       "type": "worker",
       "floatip": ["<FILLMEIN>"],
       "first_pass_scripts": [
-        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+        "templates/server_setup_scripts/ubuntu_12.04_dcc_minimal_script.sh"
       ], 
       # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
       "second_pass_scripts": [
