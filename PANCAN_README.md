@@ -28,16 +28,20 @@ execution environments along with the full collection of SeqWare tools.
 
 #### Steps
 
-* decide on cloud environment and request an account
-* download and install:
+* decide on cloud environment and request an account, when you sign up you should get the SeqWare-Vagrant settings you need
+* download and install (our use our pre-created "launcher" VM images if available on this cloud):
 ** SeqWare-Vagrant
 ** Vagrant
 ** Vagrant plugins and/or VirtualBox
 * copy and customize the SeqWare-Vagrant template of your choice with your appropriate cloud settings
 * launch your cluster or node using vagrant_cluster_launch.pl
 * ssh into your cluster
-* launch SeqWare workflow(s) and monitor their results
-* the previous step can be automated with a decider
+* launch SeqWare workflow(s) and monitor their results, this can be automated with a decider and is the process we use to automate "Phase II" of the project
+* _or_
+* use the environment for developing, building, or using your own tools (e.g. "Phase III" activities), the following environments are available for your use:
+    * GridEngine
+    * SeqWare
+    * Hadoop
 
 #### Detailed Steps - Annai BioComputeFarm Example with PanCancer BWA-Mem Workflow 2.0
 
