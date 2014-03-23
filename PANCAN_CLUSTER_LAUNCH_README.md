@@ -265,21 +265,22 @@ Much more information can be found in the README for the SeqWare-Vagrant project
 
 In latter sections of this document you can see more information about:
 
-* differences with other PanCancer clouds environments, what needs to change in the above detailed steps
-* running other workflows, like BWA-Mem, see the seperate Workflow SOP
-* different templates available, for example, ones that automatically install the BWA-Mem workflow
+* differences with other PanCancer clouds environments, what needs to change in the above detailed steps, see "Cloud-Specific Notes" below
+* different templates available, for example, ones that automatically install the BWA-Mem workflow, see "Additional Configuration Profiles" below
 
-## Configuration Profiles
+## Additional Configuration Profiles
 
-First, please see the general documentation on SeqWare-Vagrant, the tool we use
-to build these clusters using Vagrant. This will walk you through the process
-of using this software.  This tool allows us to create clusters in different
-cloud environments using a common set of configuration scripts.  We have used
-this project to prepare two different profiles, one for building clusters of
-VMs and another for single, stand-alone VMs.  In addition, each of those can
-optionally install our reference BWA (and potentially other) workflows.  This
-latter process can be very time consuming so that is why we provide a profile
-with and without the workflow(s) pre-installed.
+This section describes some additional profiles we have available for the
+PanCancer project.  First, please see the general documentation above and the
+README for SeqWare-Vagrant, the tool we use to build these clusters using
+Vagrant. This will walk you through the process of using this software.  This
+tool allows us to create clusters in different cloud environments using a
+common set of configuration scripts.  We have used this project to prepare two
+different profiles, one for building clusters of VMs and another for single,
+stand-alone VMs.  In addition, each of those can optionally install our
+reference BWA (and potentially other) workflows.  This latter process can be
+very time consuming so that is why we provide a profile with and without the
+workflow(s) pre-installed.
 
 ### Cluster Without Workflows
 
@@ -290,16 +291,18 @@ newer/alternative/custom workflows.
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
     perl vagrant_cluster_launch.pl --use-openstack
 
 ### Cluster With BWA Workflow
 
-In this environment we create a cluster of VMs with the PanCancer BWA Workflow 2.0 installed.
+In this environment we create a cluster of VMs with the PanCancer BWA Workflow
+2.0 installed. This process can take ~1.5 hours depending on your connection to
+the storage site for the workflow (it is a large workflow).
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow_2_0.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
     perl vagrant_cluster_launch.pl --use-openstack
 
 ### Single Instance without Workflows
@@ -310,7 +313,7 @@ as 20 minutes and gives you flexibility to install newer/alternative workflows.
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
     perl vagrant_cluster_launch.pl --use-openstack
 
 ### Single Instance with Workflows
@@ -319,50 +322,51 @@ In this environment we create a VM with the PanCancer BWA Workflow 2.0 installed
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow_2_0.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
     perl vagrant_cluster_launch.pl --use-openstack
 
-## Notes for the EBI Embassy Cloud (vCloud)
+## Cloud-Specific Notes
+
+Each cloud used for PanCancer will be slightly different.  This section covers
+information that is particular to each.
+
+### Notes for the EBI Embassy Cloud (vCloud)
 
 The Embassy Cloud at EBI uses vCloud.  The Vagrant vCloud plugin has limited
 functionality and, therefore, only single nodes can be launched there.
 
-## Notes for BioNimbus (OpenStack)
+### Notes for BioNimbus (OpenStack)
 
 BioNimbus uses OpenStack and the Vagrant OpenStack plugin is quite stable. You
 can launch VM clusters or single nodes.
 
-## Notes for OICR (OpenStack)
+### Notes for OICR (OpenStack)
 
 OICR uses OpenStack internally for testing and the Vagrant OpenStack plugin is
 quite stable.  The cluster is not available to the general PanCancer group.
+Here are some difference from the docs above:
 
-# change your settings
-# this is where you need to populate the various OpenStack keys
-ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-
-# now launch a host
-ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
-
-
-###OpenStack
+    # install the open stack vagrant plugin
     $ vagrant plugin install vagrant-openstack-plugin
 
-At this point you should have a launcher with SeqWare-Vagrant and associated
-tools installed.
-
-# change your settings
-# this is where you need to populate the various OpenStack keys
-ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-
-# now launch a host
-ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+    # example launching a host 
+    $ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
 ### Notes for Annai Systems (BioComputeFarm)
 
-## Notes for Amazon (AWS)
+Annai provides an OpenStack cluster that works quite well.  You can use it for
+both nodes and clusters.
+
+### Notes for Amazon (AWS)
 
 OICR uses AWS internally for testing and the AWS Vagrant plugin is quite
 stable. The cluster is available for any PanCancer user but is not officially
 part of the Phase II activities.
+
+### Notes for Barcelona and Tokyo (VirtualBox)
+
+Cloud are not available for both of these environments.  Instead, please use
+VirtualBox to launch a single node and then use the "Export Appliance..."
+command to create an OVA file.  This OVA can be converted into a KVM/Xen VM and
+deployed as many times as needed to process production data.
 
