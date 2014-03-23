@@ -26,6 +26,10 @@ employed by the project to answer their specific research questions.
 The environments built with SeqWare-Vagrant provide both GridEngine and Hadoop
 execution environments along with the full collection of SeqWare tools.
 
+This process can be used to create both single compute instances for
+small-scale computation and clusters of compute instances suitable for
+larger-scale computation.
+
 #### Steps
 
 * decide on cloud environment and request an account, when you sign up you should get the SeqWare-Vagrant settings you need
@@ -43,33 +47,119 @@ execution environments along with the full collection of SeqWare tools.
     * SeqWare
     * Hadoop
 
-#### Detailed Steps - Annai BioComputeFarm Example with PanCancer BWA-Mem Workflow 2.0
+#### Detailed Example - Amazon Web Services Single Node/Cluster of Nodes with the HelloWorld Workflow
 
-First, you need to get a BioComputeFarm account, email Annai systems and they will work with you for this.
+Here I will show you how to create a single compute node running on AWS and
+capable or executing the HelloWorld workflow to ensure your environment is
+working.  Another tutotrial will show you how to install the PanCancer BWA-Mem
+Workflow 2.1. I chose AWS for its ease of access however please keep in mind
+the AWS cloud is not a PanCancer participating cloud. This information is
+provided for illustration purposes only. You can use AWS to work with
+synthetic/non-controlled access data but please use a PanCancer approved cloud
+for computation on controlled access data.  The mechanism for other clouds is
+identical to the example below, however, so the example shown below should be
+extremely helpful in accessing PanCancer clouds.
 
-Next, you can launch a "launcher" host. This is your gateway to the system and allows you to launch clusters of nodes that actually do the processing.  It also is the location to run the "decider" that will schedule the BWA workflow running on your many clusters in this cloud.
+##### Step - Get an Account
 
-# launch a "launcher" node via the GUI at, this should be Ubuntu 12.04 
+First, sign up for an account on the AWS website, see http://aws.amazon.com for
+directions.
 
-# make sure security settings are in place for launcher host
-# * pem login only
-# * firewall with port 22
-# * no launched hosts should be accessible directly
+##### Step - Create a Launcher Host
 
-# ssh into the launcher host
+Next, you can create a "launcher" host. This is your gateway to the system and
+allows you to launch individual computational nodes or clusters of nodes that
+actually do the processing of data.  It also is the location to run the
+"decider" that will schedule the BWA workflow running on your many clusters in
+this cloud.  This latter topic will be discussed in another guide focused on
+workflow launching and automation.
 
-# download SeqWare Vagrant 1.1
-wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/seqware-vagrant_1.1.tar.gz
-tar zxf seqware-vagrant_1.1.tar.gz
+The launcher host also improves the isolation of your computational
+infrastructure.  It should be the only host accessible via SSH, should use SSH
+keys rather than passwords, use a non-standard SSH port, and, ideally, include
+Failtoban or another intrusion deterant.  For AWS, please see the extensive
+documentation on using security groups to isolate instances behind firewalls
+and setup firewall rules at http://aws.amazon.com.
 
-# make sure you have all the dependencies needed for SeqWare-Vagrant
-ubuntu@brian-launcher:~/seqware-vagrant$ perl -c vagrant_cluster_launch.pl
+For our purposes we use an Ubuntu 12.04 AMI provided by Amazon.  See the
+documentation on http://aws.amazon.com for information about programmatic,
+command line, and web GUI tools for starting this launcher host.  For the
+purposes of this tutorial we assume you have successfully started the launcher
+host using the web GUI at http://aws.amazon.com.  The screen shot below shows
+the selection of the AMI from the list provided by Amazon.
 
-# install seqware-vagrant dependencies, again see README for SeqWare-Vagrant
-sudo apt-get install libjson-perl libtemplate-perl
-wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
-sudo dpkg -i vagrant_1.4.3_x86_64.deb
-vagrant plugin install vagrant-openstack-plugin
+    SCREENSHOT
+
+Next, we recommend you use an "t1.micro" instance type as this is inexpensive
+($14/month) to keep running constantly. 
+
+We also assume that you have setup your firewall (security group) and have
+produced a .pem SSH key file for use to login to this host.  In my case my key
+file is called "brian-oicr-3.pem" and, once launched, I can login to my
+launcher host over SSH using something similar to the following:
+
+    ssh -i brian-oicr-3.pem ubuntu@ec2-54-221-150-76.compute-1.amazonaws.com
+
+Up to this point the activities we have described are not at all specific to
+the PanCancer project.  If you have any issues following these steps please see
+the extensive tutorials online for launching a EC2 host on AWS.  Also, please
+be aware that Amazon charges by the hour, rounded up.  You are responsible for
+any Amazon expenses you incure with your account.
+
+#### Step - Install SeqWare-Vagrant, Vagrant, and Other Tools on the Launcher
+
+The next step is to configure Vagrant (cloud-agnostic VM launcher),
+SeqWare-Vagrant (our tool for wrapping Vagrant and setting up a computational
+environment/cluster), and various other dependencies to get these to work.  Log
+onto your launcher now and perform the following actions as ubuntu (who also
+has sudo).
+
+Much more information about SeqWare-Vagrant can be found at our GitHub site
+https://github.com/SeqWare/vagrant. In particular take a look at the README.md.
+
+Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
+
+    # download SeqWare Vagrant 1.1
+    $ wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/seqware-vagrant_1.1.tar.gz
+    $ tar zxf seqware-vagrant_1.1.tar.gz
+    $ cd seqware-vagrant_1.1
+    
+    # install seqware-vagrant dependencies, again see README for SeqWare-Vagrant
+    $ sudo apt-get install libjson-perl libtemplate-perl
+    
+    # make sure you have all the dependencies needed for SeqWare-Vagrant, this should not produce an error
+    $ perl -c vagrant_cluster_launch.pl
+    
+    # now install the Vagrant tool which is used by SeqWare-Vagrant
+    $ wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
+    $ sudo dpkg -i vagrant_1.4.3_x86_64.deb
+    $ vagrant plugin install vagrant-aws
+
+At this point you should have a launcher with SeqWare-Vagrant and associated
+tools installed. This is now the machine from which you can create one or more
+SeqWare nodes/clusters for use with various workflows, GridEngine, or Hadoop.
+
+In the future we will provide pre-configured launcher VMs on the various clouds
+to eliminate the installation tasks above.
+
+#### Step - Launch a SeqWare Node
+
+Now that you have SeqWare-Vagrant and dependencies installed the next step is
+to launch computational nodes or clusters that will run workflows via SeqWare,
+launch cluster jobs via GridEngine, or perform MapReduce jobs.  In this step we
+will launch a standalone node and in the next step I will show you how to
+launch a whole cluster of nodes that are suitable for larger-scale analysis. 
+
+Assuming you are still logged into you launcher node above you will do the
+following to setup a computational node.  The steps below assume you are
+working in the seqware-vagrant_1.1 directory:
+
+    # copy the template used to setup a SeqWare single compute node for PanCancer
+    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json 
+
+#### Step - Launch a SeqWare Cluster
+
+
 
 # change your settings
 # this is where you need to populate the various OpenStack keys
@@ -77,6 +167,21 @@ ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_clu
 
 # now launch a host
 ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+
+
+###OpenStack
+    $ vagrant plugin install vagrant-openstack-plugin
+
+At this point you should have a launcher with SeqWare-Vagrant and associated
+tools installed.
+
+# change your settings
+# this is where you need to populate the various OpenStack keys
+ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+
+# now launch a host
+ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+
 
 
 ### Build a Workflow Development Environment
@@ -120,6 +225,10 @@ SeqWare tools at our project website http://seqware.io.
 * you can compile SeqWare workflows on your local computer or on the VM
 * launch SeqWare workflow(s) on your VM to test them and monitor their results
 * package your workflow as a zip bundle (see Developer guide) once your testing is complete, this can be distributed to other clouds for installation and execution
+
+#### Detailed Steps Using VirtualBox Locally
+
+TODO
 
 ## Configuration Profiles
 
