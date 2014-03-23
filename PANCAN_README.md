@@ -125,7 +125,8 @@ Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
     $ cd seqware-vagrant_1.1
     
     # install seqware-vagrant dependencies, again see README for SeqWare-Vagrant
-    $ sudo apt-get install libjson-perl libtemplate-perl
+    $ sudo apt-get update
+    $ sudo apt-get install libjson-perl libtemplate-perl make gcc
     
     # make sure you have all the dependencies needed for SeqWare-Vagrant, this should not produce an error
     $ perl -c vagrant_cluster_launch.pl
