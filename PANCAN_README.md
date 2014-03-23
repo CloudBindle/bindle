@@ -223,22 +223,33 @@ Now that you have a node or a cluster the next step is to launch a sample
 HelloWorld SeqWare workflow to ensure all the infrastructure on the box is
 functioning correctly.  Depending on the template you used this may or may not
 be already installed under the seqware user account. If not, you can download a
-copy of the workflow and install it yourself. That is what these commands
-assume.
+copy of the workflow and install it yourself following our guides on
+http://seqware.io (see
+https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip).
+The commands below assume the workflow is installed into
+provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.
 
     # assumes you have logged into your master node and switched to the seqware user
-    $ LEFT OFF HERE
+    $ ls provisioned-bundles/
+    Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11
+    # now run the workflow
+    $ seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11 
+
+This command should finish without errors.  If there are problems please report
+the errors to the SeqWare user group, see http://seqware.io/community/ for
+information about posting to our mailing list.
 
 #### Step - Terminate Node/Cluster
 
 At this point you have successfully ran a workflow.  You can use this node or
 cluster to run real workflows or just as a general GridEngine or Hadoop
-environment.  Those topics are beyond the scope of this document but are covered in other SOPs.  When you
-finish with a node or cluster you can terminate it or, dependening on the
-environment, you can suspend it for use later.  Keep in mind suspend works for
-single nodes but clusters of nodes cannot be suspended and then booted up later
-again on most cloud infrastructure because IP addresses typically change and
-this disrupts things like GridEngine and Hadoop.
+environment.  Those topics are beyond the scope of this document but are
+covered in other SOPs.  When you finish with a node or cluster you can
+terminate it or, dependening on the environment, you can suspend it for use
+later.  Keep in mind suspend works for single nodes but clusters of nodes
+cannot be suspended and then booted up later again on most cloud infrastructure
+because IP addresses typically change and this disrupts things like GridEngine
+and Hadoop.
 
     # terminate the cluster/node
     $ cd target-aws-1/master
@@ -255,7 +266,7 @@ Much more information can be found in the README for the SeqWare-Vagrant project
 In latter sections of this document you can see more information about:
 
 * differences with other PanCancer clouds environments, what needs to change in the above detailed steps
-* running other workflows, like BWA-Mem
+* running other workflows, like BWA-Mem, see the seperate Workflow SOP
 * different templates available, for example, ones that automatically install the BWA-Mem workflow
 
 
