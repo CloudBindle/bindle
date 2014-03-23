@@ -1,4 +1,4 @@
-# TCGA/ICGC PanCancer - Cluster Launch SOP
+# TCGA/ICGC PanCancer - Computational Node/Cluster Launch SOP
 
 This is our SOP for how to launch clusters/nodes using SeqWare-Vagrant
 specifically for use by the TCGA/ICGC PanCancer project.  In addition to
@@ -35,8 +35,8 @@ larger-scale computation.
 * decide on cloud environment and request an account, when you sign up you should get the SeqWare-Vagrant settings you need
 * download and install (our use our pre-created "launcher" VM images if available on this cloud):
 ** SeqWare-Vagrant
-** Vagrant
-** Vagrant plugins and/or VirtualBox
+    * Vagrant
+    * Vagrant plugins and/or VirtualBox
 * copy and customize the SeqWare-Vagrant template of your choice with your appropriate cloud settings
 * launch your cluster or node using vagrant_cluster_launch.pl
 * ssh into your cluster
@@ -142,12 +142,12 @@ SeqWare nodes/clusters for use with various workflows, GridEngine, or Hadoop.
 In the future we will provide pre-configured launcher VMs on the various clouds
 to eliminate the installation tasks above.
 
-#### Step - Launch a SeqWare Node
+#### Step - Configuration
 
 Now that you have SeqWare-Vagrant and dependencies installed the next step is
 to launch computational nodes or clusters that will run workflows via SeqWare,
 launch cluster jobs via GridEngine, or perform MapReduce jobs.  In this step we
-will launch a standalone node and in the next step I will show you how to
+will launch a standalone node and in the next command block I will show you how to
 launch a whole cluster of nodes that are suitable for larger-scale analysis. 
 
 Assuming you are still logged into you launcher node above you will do the
@@ -155,33 +155,62 @@ following to setup a computational node.  The steps below assume you are
 working in the seqware-vagrant_1.1 directory:
 
     # copy the template used to setup a SeqWare single compute node for PanCancer
-    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json 
+    $ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json 
+    # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
+    $ vim vagrant_cluster_launch.json
 
-#### Step - Launch a SeqWare Cluster
+Alternatively, you may want to launch a compute cluster instead of a single
+node.  In that case, use a different template.  You can customize the number of
+worker nodes by increasing the number in the worker array, see the config json
+file.  We typically use between 3 and 6 worker nodes which, depending on the
+cloud, would align a 60x coverage genome in between 10 and 5 hours respectiely.
 
+    # copy the template used to setup a SeqWare compute cluster for PanCancer
+    $ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json 
+    # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings, also customize number of workers
+    $ vim vagrant_cluster_launch.json
 
+#### Step - Launch a SeqWare Node/Cluster
 
-# change your settings
-# this is where you need to populate the various OpenStack keys
-ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+Now that you have customized the settings in vagrant_cluster_launch.json the
+next step is to launch a computational node. Note, each launch of a
+node/cluster gets its own "--working-dir", you cannot resuse these.  Within the
+working dir you will find a log for each node (simply master.log for a
+single-node launch) and a directory for each node that is used by the vagrant
+command line tool (the "master" directory for a single-node launch). The latter
+is important for controlling your node/cluster once launched. 
 
-# now launch a host
-ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+    # now launch the compute node
+    $ perl vagrant_cluster_launch.pl --use-aws --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
+You can follow the progress of this cluster launch in another terminal with.
+Use multiple terminals to watch logs for multiple-node clusters if you desire:
 
-###OpenStack
-    $ vagrant plugin install vagrant-openstack-plugin
+    # watch the log
+    $ tail -f target-os-1/master.log 
 
-At this point you should have a launcher with SeqWare-Vagrant and associated
-tools installed.
+Once this process complete you should see no error messages from
+"vagrant_cluster_launch.pl". If so, you are ready to use your cluster/node.
 
-# change your settings
-# this is where you need to populate the various OpenStack keys
-ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+#### Step - Log In To Node/Cluster
 
-# now launch a host
-ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+#### Step - Verify Node/Cluster with HelloWorld
 
+Now that you have 
+
+#### Step - Terminate Node/Cluster
+
+At this point 
+
+#### Next Steps
+
+Much more information can be found in the README for the SeqWare-Vagrant project, see https://github.com/SeqWare/vagrant
+
+In latter sections of this document you can see more information about:
+
+* differences with other PanCancer clouds environments, what needs to change in the above detailed steps
+* running other workflows, like BWA-Mem
+* different templates available, for example, ones that automatically install the BWA-Mem workflow
 
 
 ### Build a Workflow Development Environment
@@ -283,7 +312,7 @@ In this environment we create a VM with the PanCancer BWA Workflow 2.0 installed
     # launch, use the correct command line args for your cloud environment
     perl vagrant_cluster_launch.pl --use-openstack
 
-## Notes for EBI's Embassy Cloud (vCloud)
+## Notes for the EBI Embassy Cloud (vCloud)
 
 The Embassy Cloud at EBI uses vCloud.  The Vagrant vCloud plugin has limited
 functionality and, therefore, only single nodes can be launched there.
@@ -297,6 +326,29 @@ can launch VM clusters or single nodes.
 
 OICR uses OpenStack internally for testing and the Vagrant OpenStack plugin is
 quite stable.  The cluster is not available to the general PanCancer group.
+
+# change your settings
+# this is where you need to populate the various OpenStack keys
+ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+
+# now launch a host
+ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+
+
+###OpenStack
+    $ vagrant plugin install vagrant-openstack-plugin
+
+At this point you should have a launcher with SeqWare-Vagrant and associated
+tools installed.
+
+# change your settings
+# this is where you need to populate the various OpenStack keys
+ubuntu@brian-launcher:~/seqware-vagrant$ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+
+# now launch a host
+ubuntu@brian-launcher:~/seqware-vagrant$ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+
+### Notes for Annai Systems (BioComputeFarm)
 
 ## Notes for Amazon (AWS)
 
