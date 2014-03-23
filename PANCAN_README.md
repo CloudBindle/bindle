@@ -34,7 +34,7 @@ larger-scale computation.
 
 * decide on cloud environment and request an account, when you sign up you should get the SeqWare-Vagrant settings you need
 * download and install (our use our pre-created "launcher" VM images if available on this cloud):
-** SeqWare-Vagrant
+    * SeqWare-Vagrant
     * Vagrant
     * Vagrant plugins and/or VirtualBox
 * copy and customize the SeqWare-Vagrant template of your choice with your appropriate cloud settings
@@ -219,10 +219,26 @@ copy of the workflow and install it yourself. That is what these commands
 assume.
 
     # assumes you have logged into your master node and switched to the seqware user
+    $ LEFT OFF HERE
 
 #### Step - Terminate Node/Cluster
 
-At this point 
+At this point you have successfully ran a workflow.  You can use this node or
+cluster to run real workflows or just as a general GridEngine or Hadoop
+environment.  Those topics are beyond the scope of this document but are covered in other SOPs.  When you
+finish with a node or cluster you can terminate it or, dependening on the
+environment, you can suspend it for use later.  Keep in mind suspend works for
+single nodes but clusters of nodes cannot be suspended and then booted up later
+again on most cloud infrastructure because IP addresses typically change and
+this disrupts things like GridEngine and Hadoop.
+
+    # terminate the cluster/node
+    $ cd target-aws-1/master
+    $ vagrant destroy
+
+You should always check in the AWS console (or OpenStack, vCloud, or other
+console for a different cloud) that your nodes have been terminated otherwise
+you will be billed for a machine you think is terminated.
 
 #### Next Steps
 
