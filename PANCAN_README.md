@@ -181,22 +181,44 @@ command line tool (the "master" directory for a single-node launch). The latter
 is important for controlling your node/cluster once launched. 
 
     # now launch the compute node
-    $ perl vagrant_cluster_launch.pl --use-aws --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+    $ perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
 
 You can follow the progress of this cluster launch in another terminal with.
 Use multiple terminals to watch logs for multiple-node clusters if you desire:
 
     # watch the log
-    $ tail -f target-os-1/master.log 
+    $ tail -f target-aws-1/master.log 
 
 Once this process complete you should see no error messages from
 "vagrant_cluster_launch.pl". If so, you are ready to use your cluster/node.
 
 #### Step - Log In To Node/Cluster
 
+Vagrant provides a simple way to log into a launched node/cluster.  Typically you will only want/need to login to the master node.  For example:
+
+    # log into the master node
+    $ cd target-aws-1/master
+    $ vagrant ssh
+
+This will log you into the master node.  You can change user to the seqware
+user which will be used for subsequent steps or root if you need to do some
+administration of the box.
+
+    # switch user to seqware
+    $ sudo su - seqware
+    # or switch user to root (not generally needed!)
+    $ sudo su -
+
 #### Step - Verify Node/Cluster with HelloWorld
 
-Now that you have 
+Now that you have a node or a cluster the next step is to launch a sample
+HelloWorld SeqWare workflow to ensure all the infrastructure on the box is
+functioning correctly.  Depending on the template you used this may or may not
+be already installed under the seqware user account. If not, you can download a
+copy of the workflow and install it yourself. That is what these commands
+assume.
+
+    # assumes you have logged into your master node and switched to the seqware user
 
 #### Step - Terminate Node/Cluster
 
