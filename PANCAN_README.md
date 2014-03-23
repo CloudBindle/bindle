@@ -159,6 +159,13 @@ working in the seqware-vagrant_1.1 directory:
     $ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json 
     # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
     $ vim vagrant_cluster_launch.json
+    # paste your key pem file, whatever you call it
+    $ vim ~/.ssh/brian-oicr-3.pem
+    $ chmod 600 /home/ubuntu/.ssh/brian-oicr-3.pem
+
+Make sure you have copied your key to this machine (your pem file). I suggest
+you use IAM to create limited scope credentials.  See the Amazon site for more
+info.
 
 Alternatively, you may want to launch a compute cluster instead of a single
 node.  In that case, use a different template.  You can customize the number of
