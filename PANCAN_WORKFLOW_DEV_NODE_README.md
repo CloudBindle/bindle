@@ -238,7 +238,7 @@ the Workflow Java object, workflow.ini, and other template files all from your
 nice IDE interface on your desktop computer.  When you want to compile or test
 the workflow you can do this on your VM which is setup for both activities.
 
-### Step - Test and Packae Your Workflow
+### Step - Test and Package Your Workflow
 
 As with the example above, you can compile and test your workflow after you make changes.  Just repeat the mvn and seqware commands above on your VM as vagrant after you make changes in your IDE on your desktop host computer:
 
