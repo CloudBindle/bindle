@@ -8,6 +8,13 @@ if [ -d "/maha" ]; then
   mount -o rw,bind `mount | grep maha\/tmp | awk '{print $1}'` /mnt
 fi
 
+# workaround for Tokyo's cloud
+if [ -d "/nshare4" ]; then 
+  dir=/nshare4/vmtmp/$RANDOM 
+  mkdir -p $dir 
+  mount -o rw,bind $dir /mnt 
+fi
+
 # basic tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
