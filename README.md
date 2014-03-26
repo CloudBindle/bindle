@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## About SeqWare Vagrant
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
@@ -413,3 +414,4 @@ vagrant_cluster_launch.pl script for more TODO items too.
 * pass in the particular branch to use with SeqWare -- done
 * would be great to have threading in here so nodes launch in parallel
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
+
