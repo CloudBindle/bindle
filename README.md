@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## About SeqWare Vagrant
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
