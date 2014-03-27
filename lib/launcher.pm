@@ -8,7 +8,7 @@ package launcher;
   sub connect {
      my ($class, $host, $options) = @_;
 
-     print "Connecting to launcher\n"; 
+     print "Connecting to Launcher\n"; 
   
      my $ssh = Net::OpenSSH->new( $host, %$options);
      $ssh->error and die "Couldn't establish SSH connection: ". $ssh->error;   

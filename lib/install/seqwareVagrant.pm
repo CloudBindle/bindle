@@ -26,7 +26,7 @@ package install::seqwareVagrant;
  }
 
  sub get_branch {
-   my $branch system("git rev-parse --abbrev-ref HEAD")
+   my $branch = system("git rev-parse --abbrev-ref HEAD")
                and die "Couldn't get the branch of git being used: $!";
 
    return $branch;
