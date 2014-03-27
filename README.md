@@ -21,9 +21,6 @@ projects.  We include sample JSON configs below that show you how to build
 nodes/clusters for the following projects:
 
 * SeqWare Pipeline (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
-* the ICGC DCC Data Portal web application and elasticsearch index (with both a small and large index option)
-* the ICGC DCC Data Submission and Validation system (TBD)
-* the ICGC DCC Extract, Transform, and Load system for creating elasticsearch indexes (TBD)
 
 In the latest version of the script you can specify multiple nodes with their
 own set of provisioning bash shell scripts making it easy to configure a single
@@ -258,44 +255,9 @@ something similar to the below.
 
 ### General OICR Settings
 
-The templates below do
-not include our OpenStack settings but you can see Brian for OICR-specific
+The templates below do not include our OpenStack settings but you can see Brian for OICR-specific
 settings which are also described in more detail here:
 https://wiki.oicr.on.ca/display/SEQWARE/Cluster+or+Node+Launching+with+Vagrant
-
-### ICGC DCC Portal - Small Cluster
-
-This will spin up a standard, 2 node SeqWare cluster (using Oozie-Hadoop), will
-setup elasticsearch, will download a dump of the (small) elasticsearch DCC
-index, load the dump into elasticsearch, and launch the DCC Portal web app on
-port 8998.
-
-Keep in mind you should edit the json below before you launch to make sure your
-floating IP addresses and other settings are correct.  Also, the specific index
-dump file and DCC Portal jar file are hard coded in the provision scripts
-referenced inside the JSON so you will want to change these if there's an
-update.  Also, take a look at templates/DCC/settings.yml which has the index
-name embedded and will need to change if the index is updated.
-
-    # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you
-    perl vagrant_cluster_launch.pl --use-openstack
-
-Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
-
-### ICGC DCC Portal - Large Cluster
-
-This is the same as the previous example but defaults to an 8 node cluster (one
-master, 7 workers). It also calls scripts that reference the large
-Elasticsearch DCC Portal index dumps. In the future we will increase this
-number, optimize the configuration to better take advantage of the node number,
-and explore HA options.
-
-    # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you
-    perl vagrant_cluster_launch.pl --use-openstack
 
 ### CentOS Information
 
