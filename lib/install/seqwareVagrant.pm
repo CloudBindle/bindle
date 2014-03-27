@@ -11,17 +11,25 @@ package install::seqwareVagrant;
  }
 
  sub install {
-   my ($class, $ssh, $branch) = @_;
+   my ($class, $ssh) = @_;
 
    print "Cloning SeqWare Vagrant\n";
 
    $ssh->capture('mkdir -p ~/git');
    $ssh->error and die "Couldn't make git directory: ".$ssh->error;
-
+   
+   my $branch = get_branch();
  
    $ssh->capture("cd git; if [ -d vagrant ]; then (cd vagrant && git pull); else git clone git://github.com/SeqWare/vagrant.git -b $branch ~/git/vagrant;fi");
    $ssh->error and die "Couldn't clone SeqWare Vagrant: ". $ssh->error;
 
+ }
+
+ sub get_branch {
+   my $branch system("git rev-parse --abbrev-ref HEAD")
+               and die "Couldn't get the branch of git being used: $!";
+
+   return $branch;
  }
 
  sub comment_network {
