@@ -375,34 +375,20 @@ sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
   setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir");
+  my @file_actions = @{$configs->{PREPARE_FILES}};
   foreach my $node (sort keys %{$cluster_configs}) {
-    # cron for SeqWare
-    autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
-    # various files used for SeqWare when installed and not built from source
-    autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/seqware-webservice.xml");
-    autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/seqware-portal.xml");
-    # settings, user data
-    copy("templates/settings", "$work_dir/$node/settings");
-    copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
-    # script for setting up hadoop hdfs
-    copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
-    # these are used for when the box is rebooted, it setups the /etc/hosts file for example
-    replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
-    replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
-    # this is used for the master SGE node to recover when the system is rebooted
-    # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
-    replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
-    # hadoop settings files
-    # FIXME: right now these config files have "master" hardcoded as the master node
-    # FIXME: break out into config driven provisioner
-    copy("templates/conf.worker.tar.gz", "$work_dir/$node/conf.worker.tar.gz");
-    copy("templates/conf.master.tar.gz", "$work_dir/$node/conf.master.tar.gz");
-    # DCC
-    # FIXME: break out into config driven provisioner
-    autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
-    # DCC validator
-    copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
-    copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
+    foreach my $action (@file_actions) {
+      my $action_type = $action->{action};
+      if ($action_type eq 'autoreplace') {
+        autoreplace($action->{input}, "$work_dir/$node/$action->{output}");
+      } elsif ($action_type eq 'copy') {
+        copy($action->{input}, "$work_dir/$node/$action->{output}");
+      } elsif ($action_type eq 'replace_host') {
+        replace($action->{input}, "$work_dir/$node/$action->{output}", '%{HOST}', $node);
+      } else {
+        die("Invalid action type: $action_type");
+      }
+    }
   }
 }
 
