@@ -3,9 +3,6 @@ use Getopt::Long;
 use Data::Dumper;
 use JSON;
 #use Template;
-use Config;
-$Config{useithreads} or die('Recompile Perl with threads to run this program.');
-use threads;
 use Storable 'dclone';
 
 use File::Slurp;
@@ -255,24 +252,25 @@ sub make_dcc_portal_host_string {
 # processes and copies files to the specific hosts
 sub run_provision_files {
   my ($cluster_configs, $hosts) = @_;
-  my @all_threads;
+
+  my @processes = ();
   foreach my $host_name (sort keys %{$hosts}) {
-    my $scripts = $cluster_configs->{$host_name}{provision_files};
-    my $host = $hosts->{$host_name};
-    print "  PROVISIONING FILES TO HOST $host_name\n";
-    my $thr = threads->create(\&provision_files_thread, $host_name, $scripts, $host);
-    print "  LAUNCHED THREAD PROVISION FILES TO $host_name\n";
-    push (@all_threads, $thr);
+    push @processes, [\&run_provision_files_host, $cluster_configs, $host_name, $hosts->{$host_name}];
   }
-  # Now wait for the threads to finish; this will block if the thread isn't terminated
-  foreach my $thr (@all_threads){
-    $thr->join();
+  prun(@processes) or die( errplus() );
   }
+
+sub run_provision_files_host {
+  my ($cluster_configs, $host_name, $host) = @_;
+  my $scripts = $cluster_configs->{$host_name}{provision_files};
+  print "  PROVISIONING FILES TO HOST $host_name\n";
+  my $thr = provision_files_thread($host_name, $scripts, $host);
+  print "  LAUNCHED PROCESS PROVISION FILES TO $host_name\n";
 }
 
 sub provision_files_thread {
   my ($host_name, $scripts, $host) = @_;
-  print "    STARTING THREAD TO PROVISION FILES TO HOST $host_name\n";
+  print "    STARTING PROCESS TO PROVISION FILES TO HOST $host_name\n";
   # now run each of these scripts on this host
   foreach my $script (keys %{$scripts}) {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
@@ -288,33 +286,41 @@ sub provision_files_thread {
   }
 }
 
+# Process to handle provisioning. This is somewhat harder, as we have to know when to stop, and
+# we should really detect this before we fork a process, because that way we don't need to worry
+# about getting data back. 
 
-# this runs all the "second_pass_scripts" in the json for a given host
 sub run_provision_script_list {
   my ($cluster_configs, $hosts) = @_;
+
+  my @phases = ([]);
   my $cont = 1;
   my $curr_cell = 0;
-
-  #print Dumper ($cluster_configs);
-
   while($cont) {
-    my @all_threads = ();
     foreach my $host_name (sort keys %{$hosts}) {
-      print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
       my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
-      my $host = $hosts->{$host_name};
       if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
       else {
         my $curr_scripts = $scripts->[$curr_cell];
-        my $thr = threads->create(\&provision_script_list_thread, $host_name, $host, $curr_scripts, $curr_cell);
-        push(@all_threads, $thr);
+        push @{@phases[-1]}, [\&run_provision_script_host, $cluster_configs, $host_name, $hosts->{$host_name}, $curr_scripts, $curr_cell];
       }
     }
-    foreach my $thr (@all_threads){
-      $thr->join();
-    }
+    push @phases, [];
     $curr_cell++;
   }
+
+  foreach my $processes (@phases) {
+    if (@$processes) {
+      prun(@$processes) or die( errplus() );
+    }
+  }
+}
+
+
+sub run_provision_script_host {
+  my ($cluster_configs, $host_name, $host, $curr_scripts, $curr_cell) = @_;
+  print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
+  provision_script_list_thread($host_name, $host, $curr_scripts, $curr_cell);
 }
 
 sub provision_script_list_thread {
@@ -402,35 +408,23 @@ sub setup_os_config_scripts() {
   }
 }
 
-
-sub read_config() {
-  my ($file, $config) = @_;
-  open IN, "<", $file or die "Can't open your vagrant launch config file: $file\n";
-  while (<IN>) {
-   chomp;
-   next if (/^#/);
-   if (/^\s*(\S+)\s*=\s*(.*)$/) {
-     $config->{$1} = $2;
-     #print "$1 \t $2\n";
-   }
-  }
-  close IN;
-}
-
-
 sub launch_instances {
-  my @all_threads;
+
+  my @processes = ();
   foreach my $node (sort keys %{$cluster_configs}) {  
-    print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
-    my $thr = threads->create(\&launch_instance, $node);
-    push (@all_threads, $thr);
+    push @processes, [\&launch_instance_process, $node];
   }
-  print "  ALL LAUNCH THREADS STARTED\n";
-  # Now wait for the threads to finish; this will block if the thread isn't terminated
-  foreach my $thr (@all_threads){
-    $thr->join();
+
+  print " STARTING LAUNCH PROCESSES\n";
+  prun(@processes) or die( errplus() );
+  print " ALL LAUNCH PROCESSES COMPLETED\n";
   }
-  print " ALL LAUNCH THREADS COMPLETED\n";
+
+sub launch_instance_process {
+  my ($node) = @_;
+  print "  STARTING PROCESS TO LAUNCH INSTANCE FOR NODE $node\n";
+  launch_instance($node);
+  print "  DONE PROCESS TO LAUNCH INSTANCE FOR NODE $node\n";
 }
 
 sub launch_instance {
@@ -570,5 +564,89 @@ sub run {
   }
   print "RUNNING: $final_cmd\n";
   my $result = system($final_cmd);
-  if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
+  if ($result != 0) { 
+    die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n";
+  } else {
+    print "DONE: $final_cmd - status $result\n";
 }
+}
+
+###############################################################################################
+# Embedded version of Parallel::Simple v0.01, basically so that we can avoid the dependency on threads
+# in the initial version. This does a very similar thing, except more simply and with fork(). 
+# If you don't have a working fork(), you're screwed. 
+
+my $parallel_error;
+my $parallel_return_values;
+
+sub err { $parallel_error         }
+sub rv  { $parallel_return_values }
+ 
+sub errplus {
+    return unless ( defined $parallel_error );
+    "$parallel_error\n" . ( ref($parallel_return_values) =~ /HASH/ ?
+        join( '', map { "\t$_ => $parallel_return_values->{$_}\n" } sort keys %$parallel_return_values ) :
+        join( '', map { "\t$_ => $parallel_return_values->[$_]\n" } 0..$#$parallel_return_values )
+    );
+}
+ 
+sub prun {
+    ( $parallel_error, $parallel_return_values ) = ( undef, undef );         # reset globals
+    return 1 unless ( @_ );                                # return true if 0 args passed
+    my %options = %{pop @_} if ( ref($_[-1]) =~ /HASH/ );  # grab options, if specified
+    return 1 unless ( @_ );                                # return true if 0 code blocks passed
+ 
+    # normalize named and unnamed blocks into similar structure to simplify main loop
+    my $named  = ref($_[0]) ? 0 : 1;  # if first element is a subref, they're not named
+    my $i      = 0;                   # used to turn array into hash with array-like keys
+    my %blocks = $named ? @_ : map { $i++ => $_ } @_;
+ 
+    # fork children
+    my %child_registry;  # pid => { name => $name, return_value => $return_value }
+    while ( my ( $name, $block ) = each %blocks ) {
+        my $child = fork();
+        unless ( defined $child ) {
+            $parallel_error = "$!";
+            last;  # something's wrong; stop trying to fork
+        }
+        if ( $child == 0 ) {  # child
+            my ( $subref, @args ) = ref($block) =~ /ARRAY/ ? @$block : ( $block );
+            my $return_value = eval { $subref->( @args ) };
+            warn( $@ ) if ( $@ );  # print death message, because eval doesn't
+            exit( $@ ? 255 : $options{use_return} ? $return_value : 0 );
+        }
+        $child_registry{$child} = { name => $name, return_value => undef };
+    }
+ 
+    # wait for children to finish
+    my $successes = 0;
+    my $child;
+    do {
+        $child = waitpid( -1, 0 );
+        if ( $child > 0 and exists $child_registry{$child} ) {
+            $child_registry{$child}{return_value} = $? unless ( defined $child_registry{$child}{return_value} );
+            $successes++ if ( $? == 0 );
+            if ( $? > 0 and $options{abort_on_error} ) {
+                while ( my ( $pid, $child ) = each %child_registry ) {
+                    unless ( defined $child->{return_value} ) {
+                        kill( 9, $pid );
+                        $child->{return_value} = -1;
+                    }
+                }
+            }
+        }
+    } while ( $child > 0 );
+ 
+    # store return values using appropriate data type
+    $parallel_return_values = $named
+        ? { map { $_->{name} => $_->{return_value} } values %child_registry }
+        : [ map { $_->{return_value} } sort { $a->{name} <=> $b->{name} } values %child_registry ];
+ 
+    my $num_blocks = keys %blocks;
+    return 1 if ( $successes == $num_blocks );  # all good!
+ 
+    $parallel_error = "only $successes of $num_blocks blocks completed successfully";
+    return 0;  # sorry... better luck next time
+}
+
+1;
