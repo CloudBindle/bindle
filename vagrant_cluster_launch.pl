@@ -29,13 +29,7 @@ use Config::Any::Merge;
 # * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
-my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
-my $aws_key = '';
-my $aws_secret_key = '';
-my $launch_aws = 0;
-my $launch_vb = 0;
-my $launch_os = 0;
-my $launch_vcloud = 0;
+my $provider = "virtualbox";
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
@@ -47,20 +41,16 @@ my $help = 0;
 if (scalar(@ARGV) == 0) { $help = 1; }
 
 GetOptions (
-  "use-aws" => \$launch_aws,
-  "use-virtualbox" => \$launch_vb,
-  "use-openstack" => \$launch_os,
-  "use-vcloud" => \$launch_vcloud,
+  "provider=s" => \$provider,
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
   "skip-launch" => \$skip_launch,
   "help" => \$help,
 );
 
-
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --provider=aws|virtualbox|openstack|vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
@@ -71,7 +61,10 @@ my $configs = {};
 my $cluster_configs = {};
 # Use this temporary object to reconfigure the worker arrays to the format the original script expects
 my $temp_cluster_configs = ();
-($configs, $temp_cluster_configs) = read_json_config($json_config_file);
+my @config_files = ($json_config_file);
+unshift @config_files, "templates/launchers/${provider}-config.json";
+unshift @config_files, "templates/launchers/default-config.json";
+($configs, $temp_cluster_configs) = read_config(@config_files);
 
 foreach my $node_config (@{$temp_cluster_configs}){
   my @names = @{$node_config->{'name'}};
@@ -90,27 +83,8 @@ foreach my $node_config (@{$temp_cluster_configs}){
 # TODO: these are hardcoded and may change
 # you can override for VirtualBox only via the json config
 # you can find boxes listed at http://www.vagrantbox.es/
-if ($launch_vb) {
-  $launch_cmd = "vagrant up";
 
-  # Allow a custom box to be specified
-  if (!defined($configs->{'BOX'})) { $configs->{'BOX'} = "Ubuntu_12.04"; }
-  if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"; }
-} elsif ($launch_os) {
-  $launch_cmd = "vagrant up --provider=openstack";
-  $configs->{'BOX'} = "dummy";
-  $configs->{'BOX_URL'} = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box";
-} elsif ($launch_aws) {
-  $launch_cmd = "vagrant up --provider=aws";
-  $configs->{'BOX'} = "dummy";
-  $configs->{'BOX_URL'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
-} elsif ($launch_vcloud) {
-  $launch_cmd = "vagrant up --provider=vcloud";
-  $configs->{'BOX'} = "pancancer_1";
-  $configs->{'BOX_URL'} = "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
-} else {
-  die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
-}
+$launch_cmd = $configs->{'LAUNCH_CMD'};
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
@@ -451,17 +425,15 @@ sub setup_vagrantfile {
 }
 
 # reads a JSON-based config
-sub read_json_config {
-  my ($config_file) = @_;
-  open IN, "<", $config_file or die("Can't read JSON config file: $config_file: $!");
-  my $json_txt = "";
-  while(<IN>) { 
-    next if (/^\s*#/);
-    $json_txt .= $_;
-  }
-  close IN;
-  my $temp_configs = decode_json($json_txt);
-  return($temp_configs->{general}, $temp_configs->{node_config});
+# SNW: Modified to use Config::Any::Merge, as this allows merging from multiple config files - 
+# this provides a more sane approach to defaulting should we ever choose to use it. And we
+# probably shouldn't anyway. As a bonus, we get to use a wider range of config files, including
+# YAML, which permits documentation. JSON doesn't strictly, so it's harder for model deployment. 
+# Not a huge fan of YAML btw, but for readability, it's a win over JSON. 
+sub read_config {
+  my @files = @_;
+  my $cfg = Config::Any::Merge->load_files({files => [@files], use_ext => 1});
+  return($cfg->{general}, $cfg->{node_config});
 }
 
 sub autoreplace {
