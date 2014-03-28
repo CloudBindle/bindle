@@ -2,6 +2,7 @@
 
 This script is attempting to automate the setting up and testing of SeqWare Vagrant
 
+this is adding a layer on that allows launchers to be controlled from a distance. 
 
 ## About SeqWare Vagrant
 
