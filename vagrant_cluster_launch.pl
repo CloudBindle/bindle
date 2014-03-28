@@ -8,6 +8,11 @@ $Config{useithreads} or die('Recompile Perl with threads to run this program.');
 use threads;
 use Storable 'dclone';
 
+use File::Slurp;
+use File::Remove 'remove';
+use File::Path 'make_path';
+use Config::Any::Merge;
+
 # VARS
 
 # Notes:
@@ -62,7 +67,7 @@ if($help) {
 }
 
 # make the target dir
-run("mkdir -p $work_dir");
+make_path($work_dir);
 
 # config object used for find and replace
 my $configs = {};
@@ -273,13 +278,13 @@ sub provision_files_thread {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("mkdir -p $work_dir/scripts/");
+    make_path("$work_dir/scripts");
     my $tmp_script_name = "$work_dir/scripts/tmp_$host_name\_$script_name";
-    system("rm $tmp_script_name");
+    remove($tmp_script_name);
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
     run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script}, $host_name);
-    system("rm $tmp_script_name");
+    remove($tmp_script_name);
   }
 }
 
@@ -320,8 +325,8 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("mkdir -p $work_dir/scripts/");
-    system("rm $work_dir/scripts/config_script.$host_name\_$script_name");
+    make_path("$work_dir/scripts");
+    remove("$work_dir/scripts/config_script.$host_name\_$script_name");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
     setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
@@ -378,8 +383,8 @@ sub setup_os_config_scripts_list {
   my @scripts = split /,/, $config_scripts;
   foreach my $script (@scripts) {
     autoreplace($script, "$output.temp", $configs); 
-    run("cat $output.temp >> $output");
-    run("rm $output.temp");
+    write_file($output, {append => 1}, read_file("$output.temp"));
+    remove("$output.temp");
   }
 }
 
@@ -388,11 +393,11 @@ sub setup_os_config_scripts_list {
 sub setup_os_config_scripts() {
   my ($configs, $output_dir, $output_file) = @_;
   foreach my $host (sort keys %{$configs}) {
-    run("mkdir $output_dir/$host");
+    make_path("$output_dir/$host");
     foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
       autoreplace($script, "$output_file.temp");
-      run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
-      run("rm $output_file.temp");
+      write_file("$output_dir/$host/$host\_$output_file", {append => 1}, read_file("$output_file.temp"));
+      remove("$output_file.temp");
     }
   }
 }
@@ -482,9 +487,9 @@ sub setup_vagrantfile {
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better
     autoreplace("$part", "$node_output.temp");
-    run("cat $node_output.temp >> $node_output");
-    run("rm $node_output.temp");
-    run("cat $end >> $node_output");
+    write_file($node_output, {append => 1}, read_file("$node_output.temp"));
+    remove("$node_output.temp");
+    write_file($node_output, {append => 1}, read_file($end));
   } 
 }
 
