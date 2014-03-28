@@ -86,11 +86,6 @@ foreach my $node_config (@{$temp_cluster_configs}){
 
 #print Dumper($cluster_configs);
 
-# dealing with defaults from the config including various SeqWare-specific items
-if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
-if (!defined($configs->{'MAVEN_MIRROR'})) { $configs->{'MAVEN_MIRROR'} = ""; }
-
-
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
 # you can override for VirtualBox only via the json config
@@ -204,49 +199,17 @@ sub provision_instances {
   # this is putting in a variable for the /etc/hosts file
   my $host_str = figure_out_host_str($hosts);
   $configs->{'HOSTS'} = $host_str;
-  my $sge_host_str = figure_out_sge_host_str($hosts);
-  $configs->{'SGE_HOSTS'} = $sge_host_str;
   # FIXME: notice hard-coded to be "master"
   my $master_pip = $hosts->{master}{pip};
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
   my $exports = make_exports_str($hosts);
   $configs->{'EXPORTS'} = $exports;
-  # DCC specific stuff
-  # for the settings.yml
-  $configs->{'DCC_PORTAL_SETTINGS_HOST_STR'} = make_dcc_portal_host_string($hosts);
-  # for the elasticsearch.yml
-  $configs->{'DCC_ES_HOSTS_STR'} = make_dcc_es_host_string($hosts); 
 
   # now process templates to remote destinations
   run_provision_files($cluster_configs, $hosts);
 
   # this runs over all hosts and calls the provision scripts in the correct order
   run_provision_script_list($cluster_configs, $hosts);
-
-}
-
-sub make_dcc_es_host_string {
-  my ($hosts) = @_;
-  my $host_str = "";
-  my $first = 1;
-  foreach my $host (keys %{$hosts}) {
-    my $pip = $hosts->{$host}{pip};
-    if ($first) { $first = 0; $host_str .= "\"$pip\""; }
-    else { $host_str .= ", \"$pip\""; }
-  }
-  return($host_str);
-}
-
-sub make_dcc_portal_host_string {
-  my ($hosts) = @_;
-  my $host_str = "";
-  foreach my $host (keys %{$hosts}) {
-    my $pip = $hosts->{$host}{pip};
-    $host_str .= "
-    - host: \"$pip\"
-      port: 9300";
-  }
-  return($host_str);
 }
 
 # processes and copies files to the specific hosts
