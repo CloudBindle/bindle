@@ -1,3 +1,8 @@
+###
+
+This script is attempting to automate the setting up and testing of SeqWare Vagrant
+
+
 ## About SeqWare Vagrant
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
