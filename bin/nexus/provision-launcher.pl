@@ -30,21 +30,21 @@ my %options = (
 
 my $ssh = launcher->connect( $cfg->param('launcher.host'), \%options);
 
-launcher->add_pem_file($ssh, \%options);
-install::packages->all($ssh, $cfg->param('seqwarevagrant.vagrant_file_name'));
+#launcher->add_pem_file($ssh, \%options);
+#install::packages->all($ssh, $cfg->param('seqwarevagrant.vagrant_file_name'));
 
-if ($cfg->param('platform.type') eq 'openstack') {
-  install::vagrant::plugin->openstack($ssh);
-} elsif ($cfg->param('platform.type') eq 'aws') {
-  install::vagrant::plugin->aws($ssh);
-}
+#if ($cfg->param('platform.type') eq 'openstack') {
+#  install::vagrant::plugin->openstack($ssh);
+#} elsif ($cfg->param('platform.type') eq 'aws') {
+#  install::vagrant::plugin->aws($ssh);
+#}
 
 install::seqwareVagrant->install($ssh);
 
-install::seqwareVagrant->comment_network($ssh)
-                                     if ($cfg->param('platform.network') eq 'none');
+#install::seqwareVagrant->comment_network($ssh)
+#                                     if ($cfg->param('platform.network') eq 'none');
 
-install::seqwareVagrant->comment_float_ip($ssh) 
-                                   if ($cfg->param('platform.float_ip') eq 'none');
+#install::seqwareVagrant->comment_float_ip($ssh) 
+#                                   if ($cfg->param('platform.float_ip') eq 'none');
 
 print "Done Provisioning Launcher!!\n";

@@ -20,7 +20,7 @@ package install::seqwareVagrant;
    
    my $branch = get_branch();
  
-   $ssh->capture("cd git; if [ -d vagrant ]; then (cd vagrant && git pull); else git clone git://github.com/SeqWare/vagrant.git -b $branch ~/git/vagrant;fi");
+   $ssh->capture("cd git; if [ -d vagrant ]; then (cd vagrant && git pull); else git clone -b $branch git://github.com/SeqWare/vagrant.git ~/git/vagrant;fi");
    $ssh->error and die "Couldn't clone SeqWare Vagrant: ". $ssh->error;
 
  }
