@@ -352,6 +352,14 @@ Here are some difference from the docs above:
     # example launching a host 
     $ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
+Also note, here are the additional things I had to do to get this to work:
+
+* I absolutely had to use float IP addresses for all nodes. Without the float IPs addresses the nodes could not reach the Internet and provisioning failed.
+* I had to apply the patch to the folder sync object in Vagrant (see this project README). Otherwise the sync of /vagrant failed on the provisioning failed.  Note, this is required by Vagrant >= 1.4.x
+* I used the "seqware" network
+* I used the "SoftEng" tennant
+* see our internal wiki for more settings
+
 ### Notes for Annai Systems (BioComputeFarm)
 
 Annai provides an OpenStack cluster that works quite well.  You can use it for
