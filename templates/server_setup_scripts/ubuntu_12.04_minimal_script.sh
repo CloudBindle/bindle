@@ -15,6 +15,12 @@ if [ -d "/nshare4" ]; then
   mount -o rw,bind $dir /mnt 
 fi
 
+# workaround for Bionimbus' PDC cloud
+if [ -d "/glusterfs" ]; then
+  # this is causing problems with the server not being in the whitelist
+  rm /etc/apt/sources.list.d/R.list
+fi
+
 # basic tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
