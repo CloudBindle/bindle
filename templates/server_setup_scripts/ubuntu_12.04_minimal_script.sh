@@ -19,6 +19,10 @@ fi
 if [ -d "/glusterfs" ]; then
   # this is causing problems with the server not being in the whitelist
   rm /etc/apt/sources.list.d/R.list
+  # this is required to get the proxy settings in each subsequent, non-interactive shell
+  echo "source /etc/profile.d/proxy.sh" > ~/.bashrc.new
+  cat ~/.bashrc >> ~/.bashrc.new
+  mv ~/.bashrc.new ~/.bashrc
 fi
 
 # basic tools
