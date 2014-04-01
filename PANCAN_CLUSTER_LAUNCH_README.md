@@ -338,12 +338,25 @@ functionality and, therefore, only single nodes can be launched there.
 ### Notes for BioNimbus (OpenStack)
 
 BioNimbus uses OpenStack and the Vagrant OpenStack plugin is quite stable. You
-can launch VM clusters or single nodes.
+can launch VM clusters or single nodes. This uses their PDC controlled access cluster.  Here are some things you need to do to get this to work:
+
+* generate your keypair using the web conole 
+* make sure you patch the rsync issue, see README.md for this project
+
+    # install the open stack vagrant plugin
+    $ vagrant plugin install vagrant-openstack-plugin
+
+    # example launching a host 
+    $ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
 ### Notes for OICR (OpenStack)
 
 OICR uses OpenStack internally for testing and the Vagrant OpenStack plugin is
 quite stable.  The cluster is not available to the general PanCancer group.
+
+* generate your keypair using the web conole 
+* make sure you patch the rsync issue, see README.md for this project
+
 Here are some difference from the docs above:
 
     # install the open stack vagrant plugin
@@ -371,7 +384,7 @@ OICR uses AWS internally for testing and the AWS Vagrant plugin is quite
 stable. The cluster is available for any PanCancer user but is not officially
 part of the Phase II activities.
 
-### Notes for Barcelona and Tokyo (VirtualBox)
+### Notes for Barcelona (VirtualBox)
 
 Cloud are not available for both of these environments.  Instead, please use
 VirtualBox to launch a single node and then use the "Export Appliance..."
