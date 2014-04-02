@@ -36,12 +36,8 @@ configs (see templates/sample_configs/) that show you how to build
 nodes/clusters for the following projects:
 
 * SeqWare Pipeline (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
-<<<<<<< HEAD
-* the ICGC DCC Data Portal web application and elasticsearch index (with both a small and large index option)
-* the ICGC DCC Data Submission and Validation system
+* SeqWare Query Engine
 * the TCGA/ICGC PancCancer Project
-=======
->>>>>>> develop
 
 In the latest version of the script you can specify multiple nodes with their
 own set of provisioning bash shell scripts making it easy to configure a single
@@ -395,7 +391,6 @@ The templates below do not include our OpenStack settings but you can see Brian 
 settings which are also described in more detail here:
 https://wiki.oicr.on.ca/display/SEQWARE/Cluster+or+Node+Launching+with+Vagrant
 
-<<<<<<< HEAD
 ### ICGC DCC Portal - Small Cluster
 
 This will spin up a standard, 2 node SeqWare cluster (using Oozie-Hadoop), will
@@ -472,8 +467,6 @@ Here's a quick overview:
 
 *Do not forget to shut down your instances!*
 
-=======
->>>>>>> develop
 ### CentOS Information
 
 This is for development of features relating to CentOS support. It includes the following updates and fixes:
