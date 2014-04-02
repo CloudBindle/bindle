@@ -31,7 +31,7 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
                 HTTP_CLIENT="wget"
             fi
 
-            $HTTP_CLIENT "http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.0/oozie-sge-1.0.0.jar"
+            $HTTP_CLIENT "http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.1/oozie-sge-1.0.1.jar"
             $HTTP_CLIENT "http://repo1.maven.org/maven2/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar"
             chmod +x *.jar
 
@@ -39,12 +39,24 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
             perl -pi -e "s/org.apache.oozie.action.email.EmailActionExecutor/io.seqware.oozie.action.sge.SgeActionExecutor,org.apache.oozie.action.email.EmailActionExecutor/;" oozie-site.xml
             perl -pi -e "s/shell-action-/sge-action-1.0.xsd,shell-action-/;" oozie-site.xml
 
+	    # set appropriate default for maximum workflow length 
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.WorkflowAppService.WorkflowDefinitionMaxLength<\/name><value>10000000<\/value><\/property>/;" oozie-site.xml
+	    # set appropriate default for oozie retries max
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.action.retries.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
+	    # set appropriate default for oozie user-level retries max
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
+
+
             if [ ! -z "$OOZIE_ACTION_RECHECK_PERIOD" ]; then
-                perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>${OOZIE_ACTION_RECHECK_PERIOD}<\/value><\/property>/;" oozie-site.xml
+               perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>${OOZIE_ACTION_RECHECK_PERIOD}<\/value><\/property>/;" oozie-site.xml
+            else
+               perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>10<\/value><\/property>/;" oozie-site.xml
             fi
 
             if [ ! -z "$OOZIE_CHECK_SERVICE_PERIOD" ]; then
                 perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.interval<\/name><value>${OOZIE_CHECK_SERVICE_PERIOD}<\/value><\/property>/;" oozie-site.xml
+            else
+                perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.interval<\/name><value>5<\/value><\/property>/;" oozie-site.xml
             fi
 
             if $OOZIE_SGE_DEBUG_LOG; then
@@ -53,6 +65,9 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
 
             echo '# Allow oozie user to qsub as other users:' >> /etc/sudoers
             echo "oozie ALL=(ALL) NOPASSWD: $QSUB" >> /etc/sudoers
+            # not sure why I needed this
+	    echo "oozie ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+	    echo "seqware ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
             /etc/init.d/oozie restart
 

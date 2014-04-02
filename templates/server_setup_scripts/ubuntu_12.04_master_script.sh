@@ -1,21 +1,24 @@
 #!/bin/bash -vx
 
-# first, fix the /etc/hosts file since SGE wants reverse lookup to work
+# first, set the hostname
+hostname master
+
+# fix the /etc/hosts file since SGE wants reverse lookup to work
 cp /etc/hosts /tmp/hosts
-echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
-cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
+echo '127.0.0.1 localhost' > /etc/hosts
+echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
+cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
 
 # setup hosts
 # NOTE: the hostname seems to already be set at least on BioNimubs OS
 echo '%{HOSTS}' >> /etc/hosts
-hostname master
 
 # general apt-get
 apt-get update
 export DEBIAN_FRONTEND=noninteractive
 
 # common installs for master and workers
-apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs
+apt-get -q -y --force-yes install git maven sysv-rc-conf xfsprogs curl
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 usermod -a -G seqware mapred
@@ -31,7 +34,7 @@ service zookeeper-server start
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2
+apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -97,6 +100,18 @@ sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
 wget -q http://extjs.com/deploy/ext-2.2.zip
 unzip ext-2.2.zip
 mv ext-2.2 /var/lib/oozie/
+
+# setup oozie with postgres
+sudo -u postgres psql --command "CREATE ROLE oozie LOGIN ENCRYPTED PASSWORD 'oozie' NOSUPERUSER INHERIT CREATEDB NOCREATEROLE;"
+sudo -u postgres psql --command "CREATE DATABASE oozie WITH OWNER = oozie ENCODING = 'UTF-8' TABLESPACE = pg_default LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8' CONNECTION LIMIT = -1;"
+echo "host    oozie         oozie         0.0.0.0/0             md5" >> /etc/postgresql/9.1/main/pg_hba.conf
+sudo -u postgres /usr/lib/postgresql/9.1/bin/pg_ctl reload -s -D /var/lib/postgresql/9.1/main
+perl -pi -e  "s/org.apache.derby.jdbc.EmbeddedDriver/org.postgresql.Driver/;" oozie-site.xml
+perl -pi -e "s/jdbc:derby:.*create=true/jdbc:postgresql:\/\/localhost:5432\/oozie/;" oozie-site.xml
+perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.username<\/name>[.\s]*<value>sa<\/value>/<name>oozie.service.JPAService.jdbc.username<\/name><value>oozie<\/value>/;" oozie-site.xml
+perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.password<\/name>[.\s]*<value> <\/value>/<name>oozie.service.JPAService.jdbc.password<\/name><value>oozie<\/value>/;" oozie-site.xml
+sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
+
 service oozie start
 
 # setup hbase
@@ -110,16 +125,23 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat6 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
+for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
 
 # configure dirs for seqware
-mkdir -p /usr/tmp/seqware-oozie 
+# note these are placed on /mnt since that
+# is the ephemeral disk on Amazon instances
+mkdir -p /mnt/seqware-oozie
+chmod a+rx /mnt
+chmod a+rwx /mnt/seqware-oozie
+mkdir -p /usr/tmp/
 chmod -R a+rwx /usr/tmp/
-chown -R seqware:seqware /usr/tmp/seqware-oozie
-
-sudo mkdir /datastore
-sudo chown seqware:seqware /datastore
-sudo chmod 774 /datastore
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
+mkdir -p /mnt/datastore
+chmod a+rx /mnt
+chmod a+rwx /mnt/datastore
+ln -s /mnt/datastore /datastore
+chown seqware:seqware /mnt/datastore
 
 ## Setup NFS before seqware
 # see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
@@ -135,3 +157,4 @@ cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
 chown root:root /etc/init.d/hadoop-init
 chmod 755 /etc/init.d/hadoop-init
 sysv-rc-conf hadoop-init on
+

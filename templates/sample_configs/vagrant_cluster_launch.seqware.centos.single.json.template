@@ -1,4 +1,4 @@
-# ABOUT
+# ABOUT:
 # the general section contains variables used throughout templates
 # the node_config section defines the nodes of the cluster
 # comments starting with '#' are removed before parsing
@@ -6,8 +6,6 @@
   # GENERAL CONFIG
   # will likely make these lower-case in the future
   "general": {
-    # if you have access to a local maven mirror/cache, fill in and uncomment the following
-    # "MAVEN_MIRROR": "http://<FILLMEIN>/artifactory/repo", 
     # OPEN STACK
     "OS_API_KEY": "<FILLMEIN>",
     "OS_USER": "<FILLMEIN>",
@@ -34,7 +32,10 @@
     "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
     "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
     # NOTE: you can checkout whatever branch you like, see our GitHub site
-    "SEQWARE_BRANCH_CMD": "git checkout develop"
+    "SEQWARE_BRANCH_CMD": "git checkout develop",
+    # Box definition for VirtualBox:
+    "BOX": "CentOS-6.2-64bit",
+    "BOX_URL": "https://129.94.136.21/data/public/c6ab40.php?dl=true"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -47,31 +48,14 @@
       "floatip": ["<FILLMEIN>"],
       # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
       "first_pass_scripts": [
-        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
+        "templates/server_setup_scripts/centos_6.2_minimal_script.sh"
       ], 
-      # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
+      # NOTE: this is an array of arrays, since this is a single box there's only one inner array. 
       "second_pass_scripts": [
-        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
-        # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
-        [ ],
-        [ "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_script.sh",
-          "templates/server_setup_scripts/seqware/ubuntu_12.04_seqware_master_vagrant_user_script.sh",
+        [ "templates/server_setup_scripts/centos_6.2_master_script.sh",
+          "templates/server_setup_scripts/seqware/centos_6.2_seqware_master_script.sh",
           "templates/server_setup_scripts/seqware/hello-world-workflow.sh"
         ]
-      ]
-    },
-    {
-      "name": ["worker1", "worker2"],
-      "type": "worker",
-      "floatip": ["<FILLMEIN>", "<FILLMEIN>"],
-      "first_pass_scripts": [
-        "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
-      ], 
-      # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
-      "second_pass_scripts": [
-        [ ],
-        [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh" ],
-        [ ]
       ]
     }
   ]

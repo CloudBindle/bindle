@@ -9,12 +9,9 @@
 # sudo sysv-rc-conf hadoop-init on
 
 
-stat /data/1/
-if [ $? != 0 ]; then
-
 echo `date` 'Begin initializing hadoop filesystems' >> /tmp/hadoop-init.log
 
-HOST=`hostname`
+HOST='%{HOST}'
 
 # remove the old 'master' entry
 cat /etc/hosts | grep -v $HOST > /tmp/hosts
@@ -33,6 +30,32 @@ service hadoop-0.20-mapreduce-jobtracker stop
 service hadoop-hdfs-datanode stop
 service hadoop-hdfs-namenode stop
 
+stat /mnt/seqware-oozie
+if [ $? != 0 ]; then
+mkdir -p /mnt/seqware-oozie
+chmod a+rx /mnt
+chmod a+rwx /mnt/seqware-oozie
+mkdir -p /usr/tmp/
+chmod -R a+rwx /usr/tmp/
+# remove if there already to prevent circular link
+rm /usr/tmp/seqware-oozie
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
+fi
+
+stat /mnt/datastore
+if [ $? != 0 ]; then
+mkdir -p /mnt/datastore
+chmod a+rx /mnt
+chmod a+rwx /mnt/datastore
+# remove if there already to prevent circular link
+rm /datastore
+ln -s /mnt/datastore /datastore
+chown seqware:seqware /mnt/datastore
+fi
+
+stat /data/1/
+if [ $? != 0 ]; then
 
 # initialize ephemeral disk for hadoop
 mkdir -p /data/1/dfs/nn /data/1/dfs/dn
@@ -46,6 +69,8 @@ chmod -R a+rwx /tmp/hadoop-mapred
 
 # initialize HDFS
 sudo -u hdfs hadoop namenode -format -force
+
+fi
 
 service hadoop-hdfs-namenode start
 service hadoop-hdfs-datanode start
@@ -75,4 +100,4 @@ service hbase-thrift start
 service hbase-regionserver start
 
 echo `date` 'Completed initializing hadoop filesystems' >> /tmp/hadoop-init.log
-fi
+
