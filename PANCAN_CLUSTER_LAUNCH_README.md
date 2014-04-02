@@ -343,6 +343,8 @@ can launch VM clusters or single nodes. This uses their PDC controlled access cl
 * generate your keypair using the web conole 
 * make sure you patch the rsync issue, see README.md for this project
 
+Here are examples:
+
     # install the open stack vagrant plugin
     $ vagrant plugin install vagrant-openstack-plugin
 
