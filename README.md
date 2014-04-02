@@ -51,12 +51,14 @@ builder.
 The profiles been tested to work by provisioning a cluster and running the
 HelloWorld workflow from SeqWare on the following configurations and platforms:
 
-| *Configuration name*                                              | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox |
-|-------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|
-|*vagrant_cluster_launch.seqware.install.sge_cluster.json.template* | &#x2713;         | &#x2713; |                      |            |
-|*vagrant_cluster_launch.seqware.install.sge_node.json.template*    | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |
-|*vagrant_cluster_launch.seqware.sge_cluster.json.template*         | &#x2713;         | &#x2713; |                      |            |
-|*vagrant_cluster_launch.seqware.sge_node.json.template*            | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |
+| *Configuration name*                                              | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) |
+|-------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|:-----------:|
+|*vagrant_cluster_launch.seqware.install.sge_cluster.json.template* | &#x2713;         | &#x2713; |                      |            | |
+|*vagrant_cluster_launch.seqware.install.sge_node.json.template*    | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | |
+|*vagrant_cluster_launch.seqware.sge_cluster.json.template*         | &#x2713;         | &#x2713; |                      |            | |
+|*vagrant_cluster_launch.seqware.sge_node.json.template*            | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | |
+|*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713; |  |  |  |  |
+|*vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template*      | &#x2713; | &#x2713; |  | &#x2713; | &#x2713; |
 
 ## Build & Source Control   
 
