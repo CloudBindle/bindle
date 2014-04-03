@@ -67,13 +67,15 @@ for i in cron hadoop-hdfs-datanode hadoop-0.20-mapreduce-tasktracker; do echo $i
 apt-get -q -y --force-yes install rpcbind nfs-common
 # make dir
 mkdir -p /usr/tmp/
-mkdir -p /mnt/seqware-oozie
+if [ !-d "/mnt/seqware-oozie" ]; then
+  mkdir -p /mnt/seqware-oozie
+  mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
+fi
 mkdir -p /mnt/datastore
 echo 'rpcbind : ALL' >> /etc/hosts.deny
 echo 'rpcbind : %{MASTER_PIP}' >> /etc/hosts.allow
 mount %{MASTER_PIP}:/home /home
 mount %{MASTER_PIP}:/mnt/home /mnt/home
-mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
 mount %{MASTER_PIP}:/mnt/datastore /mnt/datastore
 
 chmod a+rwx /home
