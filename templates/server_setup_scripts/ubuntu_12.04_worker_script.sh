@@ -67,7 +67,7 @@ for i in cron hadoop-hdfs-datanode hadoop-0.20-mapreduce-tasktracker; do echo $i
 apt-get -q -y --force-yes install rpcbind nfs-common
 # make dir
 mkdir -p /usr/tmp/
-if [ !-d "/mnt/seqware-oozie" ]; then
+if [ ! -d "/mnt/seqware-oozie" ]; then
   mkdir -p /mnt/seqware-oozie
   mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
 fi
