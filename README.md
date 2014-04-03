@@ -57,7 +57,7 @@ HelloWorld workflow from SeqWare on the following configurations and platforms:
 |*vagrant_cluster_launch.seqware.install.sge_node.json.template*    | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | |
 |*vagrant_cluster_launch.seqware.sge_cluster.json.template*         | &#x2713;         | &#x2713; |                      |            | |
 |*vagrant_cluster_launch.seqware.sge_node.json.template*            | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | |
-|*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713; | &#x2713; | &#x2717; | NA | &#x2717; (NFS blocked) |
+|*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713; | &#x2713; | &#x2717; | NA | &#x2713; |
 |*vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template*      | &#x2713; | &#x2713; |  | &#x2713; | &#x2713; |
 
 ## Build & Source Control   
