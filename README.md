@@ -1,4 +1,4 @@
-## About SeqWare Vagrant
+## About Bindle
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
@@ -22,7 +22,7 @@ what software needs to be installed, the configuration, and environment changes
 all without having to code anything that is cloud-specific.  Because the
 process is so generic we can use it to support a wide variety of in-house
 software projects and use cases.  For example, some projects use
-SeqWare-Vagrant to create automated test environments, others use it to create
+Bindle to create automated test environments, others use it to create
 workflow development environments, data processing environments, or even
 production system installs.
 
@@ -145,7 +145,7 @@ please try one of these versions.
 ## Getting "Boxes"
 
 This is still needed but it should happen automatically the first time you
-use SeqWare-Vagrant on VirtualBox.
+use Bindle on VirtualBox.
 
 If you are running using VirtualBox you can pre-download boxes which are
 images of computers ready to use.  The easiest way to do this is to find the
@@ -174,7 +174,7 @@ configuration templates in:
 
 Copy one of the files (for example
 templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
-to the root dir of this project (seqware-vagrant) and rename it
+to the root dir of this project (bindle) and rename it
 to vagrant_cluster_launch.json:
 
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
@@ -206,7 +206,7 @@ that will give you a 4 node cluster.
 The short answer is make sure your machine (local VM, Amazon instance type,
 etc) has at least 2 cores and 12G of RAM. You can certainly use less but our
 SeqWare tutorials on http://seqware.io will not work properly. If you're using
-SeqWare-Vagrant to build environments for a non-SeqWare project then the memory
+Bindle to build environments for a non-SeqWare project then the memory
 requirements are set by you.
 
 The SeqWare "HelloWorld" example workflow will schedule using 8G of RAM.  So
@@ -346,10 +346,10 @@ Amazon's cloud, VirtualBox snapshot, etc).
 
 ## TCGA/ICGC PanCancer Examples
 
-The TCGA/ICGC PanCancer project is using SeqWare-Vagrant to create analytical
+The TCGA/ICGC PanCancer project is using Bindle to create analytical
 nodes/clusters for use with a BWA Workflow and downstream variant calling
 workflows. This project is using a variety of cloud technologies including
-VirtualBox, OpenStack, and vCloud.  For each environment we use SeqWare-Vagrant
+VirtualBox, OpenStack, and vCloud.  For each environment we use Bindle
 to create SeqWare environments that utilize Oozie-SGE.  This allows researchers
 to write workflows using SeqWare but also analytical pipelines that simply use
 SGE and "qsub" to process data.
@@ -440,7 +440,7 @@ VMs.
 
 Once the vagrant_cluster_launch.pl script finishes running you will have one or
 more VM instances running on a given cloud or local VM environment.
-Unfortunately, SeqWare-Vagrant does not provide the full range of VM lifecycle
+Unfortunately, Bindle does not provide the full range of VM lifecycle
 management e.g. suspend, shutdown, ssh connection automation, etc.  Vagrant
 does provide these functions and you can find more information at
 [Vagrant](http://vagrantup.com).
@@ -508,7 +508,7 @@ This is for development of features relating to CentOS support. It includes the 
     *NOTE:* If asked to upgrade from using an .rvmc file to a .ruby-version file, do *not* do this.
 
 6. Copy or symlink the Seqware-veewee folder from SeqWare/vagrant into the veewee directory:
-    `ln -s *[PATH TO SEQWARE-VAGRANT]*/SeqWare-veewee ./definitions/SeqWare-veewee`
+    `ln -s *[PATH TO BINDLE]*/SeqWare-veewee ./definitions/SeqWare-veewee`
  
 7. Edit veewee's "definition.rb" file, and comment out the following three scripts:
     chef.sh, puppet.sh, ruby.sh
