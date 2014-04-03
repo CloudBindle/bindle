@@ -23,6 +23,11 @@ if [ -d "/glusterfs" ]; then
   echo "source /etc/profile.d/proxy.sh" > ~/.bashrc.new
   cat ~/.bashrc >> ~/.bashrc.new
   mv ~/.bashrc.new ~/.bashrc
+  # now filesystem
+  mkdir -p /glusterfs/users/BOCONNOR/seqware-oozie
+  chmod a+rwx /glusterfs/users/BOCONNOR/seqware-oozie
+  mkdir -p /mnt/seqware-oozie
+  mount -o bind /glusterfs/users/BOCONNOR/seqware-oozie /mnt/seqware-oozie
 fi
 
 # basic tools
