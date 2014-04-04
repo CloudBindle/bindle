@@ -1,5 +1,3 @@
-## About Bindle
-
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
 nodes configured with one or more Bash shell scripts. This lets you build Linux
@@ -542,3 +540,4 @@ vagrant_cluster_launch.pl script for more TODO items too.
 * better integration with our Maven build process, perhaps automatically calling this to setup integration test environment -- done
 * message of the day on login over ssh
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
+
