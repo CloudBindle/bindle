@@ -1,4 +1,6 @@
 use strict;
+use warnings;
+
 use Getopt::Long;
 use Data::Dumper;
 use JSON;
@@ -239,7 +241,7 @@ sub run_provision_script_list {
       if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
       else {
         my $curr_scripts = $scripts->[$curr_cell];
-        push @{@phases[-1]}, [\&run_provision_script_host, $cluster_configs, $host_name, $hosts->{$host_name}, $curr_scripts, $curr_cell];
+        push @{$phases[-1]}, [\&run_provision_script_host, $cluster_configs, $host_name, $hosts->{$host_name}, $curr_scripts, $curr_cell];
       }
     }
     push @phases, [];
@@ -333,7 +335,7 @@ sub setup_os_config_scripts_list {
 
 # this basically cats files together after doing an autoreplace
 # that fills in variables from the config part of the JSON
-sub setup_os_config_scripts() {
+sub setup_os_config_scripts {
   my ($configs, $output_dir, $output_file) = @_;
   foreach my $host (sort keys %{$configs}) {
     make_path("$output_dir/$host");
