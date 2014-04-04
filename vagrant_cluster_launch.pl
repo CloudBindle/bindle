@@ -44,6 +44,10 @@ if (scalar(@ARGV) == 0) { $help = 1; }
 
 GetOptions (
   "provider=s" => \$provider,
+  "use-aws" => sub { $provider = 'aws'; warn("--use-aws is deprecated: use --provider=aws"); },
+  "use-virtualbox" => sub { $provider = 'virtualbox'; warn("--use-virtualbox is deprecated: use --provider=virtualbox"); },
+  "use-openstack" => sub { $provider = 'openstack'; warn("--use-openstack is deprecated: use --provider=openstack"); },
+  "use-vcloud" => sub { $provider = 'vcloud'; warn("--use-vcloud is deprecated: use --provider=vcloud"); },
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
   "skip-launch" => \$skip_launch,
