@@ -1,9 +1,9 @@
 # TCGA/ICGC PanCancer - Computational Node/Cluster Launch SOP
 
-This is our SOP for how to launch clusters/nodes using SeqWare-Vagrant
+This is our SOP for how to launch clusters/nodes using Bindle
 specifically for use by the TCGA/ICGC PanCancer project.  In addition to
 providing production cluster environments for analyzing samples on the clouds
-used by the PanCancer project, the SeqWare-Vagrant process can also be used to
+used by the PanCancer project, the Bindle process can also be used to
 create workflow development environments.
 
 ## Use Cases
@@ -15,7 +15,7 @@ new workflows for the project. For this guide we will focus on the first.
 
 ### Build a PanCancer Workflow Running Environment
 
-SeqWare-Vagrant for PanCancer is intended to be used to create clusters of
+Bindle for PanCancer is intended to be used to create clusters of
 virtual machines running in one of several cloud environments used by the
 PanCancer project.  These clusters are used to process approximately 2,500
 whole human genomes using standardized workflows: BWA and variant calling. This
@@ -23,7 +23,7 @@ constitutes "Phase II" of the project. "Phase III" will see the use of this
 technology stack by a variety of researchers across the cloud environments
 employed by the project to answer their specific research questions.
 
-The environments built with SeqWare-Vagrant provide both GridEngine and Hadoop
+The environments built with Bindle provide both GridEngine and Hadoop
 execution environments along with the full collection of SeqWare tools.
 
 This process can be used to create both single compute instances for
@@ -32,12 +32,12 @@ larger-scale computation.
 
 #### Steps
 
-* decide on cloud environment and request an account, when you sign up you should get the SeqWare-Vagrant settings you need
+* decide on cloud environment and request an account, when you sign up you should get the Bindle settings you need
 * download and install (our use our pre-created "launcher" VM images if available on this cloud):
-    * SeqWare-Vagrant
+    * Bindle
     * Vagrant
     * Vagrant plugins and/or VirtualBox
-* copy and customize the SeqWare-Vagrant template of your choice with your appropriate cloud settings
+* copy and customize the Bindle template of your choice with your appropriate cloud settings
 * launch your cluster or node using vagrant_cluster_launch.pl
 * ssh into your cluster
 * launch SeqWare workflow(s) and monitor their results, this can be automated with a decider and is the process we use to automate "Phase II" of the project
@@ -106,37 +106,37 @@ the extensive tutorials online for launching a EC2 host on AWS.  Also, please
 be aware that Amazon charges by the hour, rounded up.  You are responsible for
 any Amazon expenses you incure with your account.
 
-#### Step - Install SeqWare-Vagrant, Vagrant, and Other Tools on the Launcher
+#### Step - Install Bindle, Vagrant, and Other Tools on the Launcher
 
 The next step is to configure Vagrant (cloud-agnostic VM launcher),
-SeqWare-Vagrant (our tool for wrapping Vagrant and setting up a computational
+Bindle (our tool for wrapping Vagrant and setting up a computational
 environment/cluster), and various other dependencies to get these to work.  Log
 onto your launcher now and perform the following actions as ubuntu (who also
 has sudo).
 
-Much more information about SeqWare-Vagrant can be found at our GitHub site
+Much more information about Bindle can be found at our GitHub site
 https://github.com/SeqWare/vagrant. In particular take a look at the README.md.
 
 Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
 
-    # download SeqWare Vagrant 1.1
-    $ wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/seqware-vagrant_1.1.tar.gz
-    $ tar zxf seqware-vagrant_1.1.tar.gz
-    $ cd seqware-vagrant_1.1
+    # download SeqWare Vagrant 1.2
+    $ wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/bindle_1.2.tar.gz
+    $ tar zxf bindle_1.2.tar.gz
+    $ cd bindle_1.2
     
-    # install seqware-vagrant dependencies, again see README for SeqWare-Vagrant
+    # install bindle dependencies, again see README for Bindle
     $ sudo apt-get update
     $ sudo apt-get install libjson-perl libtemplate-perl make gcc
     
-    # make sure you have all the dependencies needed for SeqWare-Vagrant, this should not produce an error
+    # make sure you have all the dependencies needed for Bindle, this should not produce an error
     $ perl -c vagrant_cluster_launch.pl
     
-    # now install the Vagrant tool which is used by SeqWare-Vagrant
+    # now install the Vagrant tool which is used by Bindle
     $ wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
     $ sudo dpkg -i vagrant_1.4.3_x86_64.deb
     $ vagrant plugin install vagrant-aws
 
-At this point you should have a launcher with SeqWare-Vagrant and associated
+At this point you should have a launcher with Bindle and associated
 tools installed. This is now the machine from which you can create one or more
 SeqWare nodes/clusters for use with various workflows, GridEngine, or Hadoop.
 
@@ -145,7 +145,7 @@ to eliminate the installation tasks above.
 
 #### Step - Configuration
 
-Now that you have SeqWare-Vagrant and dependencies installed the next step is
+Now that you have Bindle and dependencies installed the next step is
 to launch computational nodes or clusters that will run workflows via SeqWare,
 launch cluster jobs via GridEngine, or perform MapReduce jobs.  In this step we
 will launch a standalone node and in the next command block I will show you how to
@@ -153,7 +153,7 @@ launch a whole cluster of nodes that are suitable for larger-scale analysis.
 
 Assuming you are still logged into you launcher node above you will do the
 following to setup a computational node.  The steps below assume you are
-working in the seqware-vagrant_1.1 directory:
+working in the bindle_1.2 directory:
 
     # copy the template used to setup a SeqWare single compute node for PanCancer
     $ cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json 
@@ -261,7 +261,7 @@ you will be billed for a machine you think is terminated.
 
 #### Next Steps
 
-Much more information can be found in the README for the SeqWare-Vagrant project, see https://github.com/SeqWare/vagrant
+Much more information can be found in the README for the Bindle project, see https://github.com/SeqWare/vagrant
 
 In latter sections of this document you can see more information about:
 
@@ -272,7 +272,7 @@ In latter sections of this document you can see more information about:
 
 This section describes some additional profiles we have available for the
 PanCancer project.  First, please see the general documentation above and the
-README for SeqWare-Vagrant, the tool we use to build these clusters using
+README for Bindle, the tool we use to build these clusters using
 Vagrant. This will walk you through the process of using this software.  This
 tool allows us to create clusters in different cloud environments using a
 common set of configuration scripts.  We have used this project to prepare two
@@ -291,7 +291,7 @@ newer/alternative/custom workflows.
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
     perl vagrant_cluster_launch.pl --use-openstack
 
 ### Cluster With BWA Workflow
@@ -302,7 +302,7 @@ the storage site for the workflow (it is a large workflow).
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
     perl vagrant_cluster_launch.pl --use-openstack
 
 ### Single Instance without Workflows
@@ -313,7 +313,7 @@ as 20 minutes and gives you flexibility to install newer/alternative workflows.
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
     perl vagrant_cluster_launch.pl --use-openstack
 
 ### Single Instance with Workflows
@@ -322,7 +322,7 @@ In this environment we create a VM with the PanCancer BWA Workflow 2.0 installed
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
+    # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
     perl vagrant_cluster_launch.pl --use-openstack
 
 ## Cloud-Specific Notes
