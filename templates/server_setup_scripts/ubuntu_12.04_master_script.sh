@@ -97,9 +97,11 @@ service hue start
 
 # setup Oozie
 sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
+cd /tmp
 wget -q http://extjs.com/deploy/ext-2.2.zip
 unzip ext-2.2.zip
 mv ext-2.2 /var/lib/oozie/
+cd -
 
 # setup oozie with postgres
 sudo -u postgres psql --command "CREATE ROLE oozie LOGIN ENCRYPTED PASSWORD 'oozie' NOSUPERUSER INHERIT CREATEDB NOCREATEROLE;"
