@@ -8,7 +8,9 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -q -y --force-yes install liblz-dev zlib1g-dev libxml-dom-perl samtools libossp-uuid-perl libjson-perl libxml-libxml-perl
 
 # download public key
-wget https://cghub.ucsc.edu/software/downloads/cghub_public.key
+if [ ! -e "cghub_public.key" ]; then
+  wget https://cghub.ucsc.edu/software/downloads/cghub_public.key
+fi
 
 # dependencies for genetorrent 
 apt-get -q -y --force-yes install libboost-filesystem1.48.0 libboost-program-options1.48.0 libboost-regex1.48.0 libboost-system1.48.0 libicu48 libxerces-c3.1 libxqilla6
