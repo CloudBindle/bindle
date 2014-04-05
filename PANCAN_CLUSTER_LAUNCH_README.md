@@ -301,7 +301,7 @@ In this environment we create a cluster of VMs with the PanCancer BWA Workflow
 the storage site for the workflow (it is a large workflow).
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow_2_0.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
+    cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
     perl vagrant_cluster_launch.pl --use-openstack
 
@@ -321,7 +321,7 @@ as 20 minutes and gives you flexibility to install newer/alternative workflows.
 In this environment we create a VM with the PanCancer BWA Workflow 2.0 installed.
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow_2_0.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+    cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your cloud environment, see docs above and the README for SeqWare-Vagrant
     perl vagrant_cluster_launch.pl --use-openstack
 
