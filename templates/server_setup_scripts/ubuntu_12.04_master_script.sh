@@ -129,6 +129,10 @@ service hue restart
 # setup daemons to start on boot
 for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
 
+# enforce Java 7 use for tomcat
+sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/lib\/jvm\/java-7-oracle-cloudera/;" /etc/default/tomcat7 
+
+
 # configure dirs for seqware
 # note these are placed on /mnt since that
 # is the ephemeral disk on Amazon instances
