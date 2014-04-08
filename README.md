@@ -427,6 +427,22 @@ and explore HA options.
     # launch, use the correct command line args for you
     perl vagrant_cluster_launch.pl --use-openstack
 
+## Persistence of the /mnt directories
+
+Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on EBS instead. Note that this incurrs an additional cost. 
+
+The way of doing this is to add this snippet to the AWS configuration of templates/Vagrantfile\_part.template in this manner:
+
+    aws.block_device_mapping = [
+    {
+        'Ebs.VolumeSize' => 8,
+        'Ebs.DeleteOnTermination' => true,
+        'DeviceName' => "/dev/sdb", 
+        'VirtualName' => "ephemeral0"
+    }
+
+Modify your EBS volume size as required. 
+
 ## Logging
 
 Every node launched by vagrant_cluster_launch.pl has it's own log file that you
