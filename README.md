@@ -431,17 +431,21 @@ and explore HA options.
 
 Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on EBS instead. Note that this incurrs an additional cost. 
 
-The way of doing this is to add this snippet to the AWS configuration of templates/Vagrantfile\_part.template in this manner:
+The following images are setup in this fashion:
+* 
 
-    aws.block_device_mapping = [
-    {
-        'Ebs.VolumeSize' => 8,
-        'Ebs.DeleteOnTermination' => true,
-        'DeviceName' => "/dev/sdb", 
-        'VirtualName' => "ephemeral0"
-    }
+The steps to create this image:
+1. Format your new EBS drive
+2. Mount your new EBS drive (at say /dev/xvdf) at a temporary location 
 
-Modify your EBS volume size as required. 
+    mount /dev/xvdf /temp_mnt
+
+3. Copy the contents of /mnt to your temporary location. Preserve timestamps and permissions 
+
+    cp -R -p /mnt/* /temp_mnt
+
+4. Unmount /mnt and mount /dev/xvdf at /mnt
+5. Update /etc/fstab
 
 ## Logging
 
