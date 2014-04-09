@@ -96,7 +96,7 @@ apt-get update
 # get Java
 apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en 
 # fix for heartbleed http://blog.matthewdfuller.com/2014/04/how-to-fix-openssl-heart-bleed-bug-on.html
-apt-get upgrade openssl
+apt-get -q -y --force-yes install  openssl
 cd /tmp
 wget http://archive.cloudera.com/cm5/ubuntu/lucid/amd64/cm/pool/contrib/o/oracle-j2sdk1.7/oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb 
 dpkg -i oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb
