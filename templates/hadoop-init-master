@@ -74,6 +74,7 @@ fi
 
 service hadoop-hdfs-namenode start
 service hadoop-hdfs-datanode start
+sleep 60
 
 # initialize HDFS for services
 sudo -u hdfs hadoop fs -mkdir /tmp
