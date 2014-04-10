@@ -1,0 +1,39 @@
+---
+# CaPSID pipeline
+- name: CaPSID pipeline | Install development tools
+  apt: pkg=build-essential state=present update_cache=yes cache_valid_time=3600
+
+- name: CaPSID pipeline | Install python
+  apt: pkg=python2.7 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=python2.7-dev state=present update_cache=yes cache_valid_time=3600
+
+- name: CaPSID pipeline | Get pip
+  get_url:
+    dest: '/tmp/get-pip.py'
+    url: 'https://raw.github.com/pypa/pip/master/contrib/get-pip.py'
+
+- name: CaPSID pipeline | Install pip
+  shell: python2.7 /tmp/get-pip.py creates=/usr/local/bin/pip
+
+- name: CaPSID pipeline | Install git
+  apt: pkg=git state=present update_cache=yes cache_valid_time=3600
+
+- name: CaPSID pipeline | Create /var/local
+  shell: mkdir -p /var/local creates=/var/local
+
+- name: CaPSID pipeline | Check out CaPSID from Github
+  shell: git clone https://github.com/capsid/capsid-pipeline.git capsid_pipeline creates=/var/local/capsid_pipeline chdir=/var/local
+
+- name: CaPSID pipeline | Check out checkout
+  shell: git checkout develop chdir=/var/local/capsid_pipeline
+
+- name: CaPSID pipeline | Pull updates
+  shell: git pull chdir=/var/local/capsid_pipeline
+
+# OF course, if we had dependencies that were Debian packaged and suitable, then
+# that would be better to reduce C compilation time. 
+
+- name: CaPSID pipeline | Install CaPSID dependencies
+  shell: pip install -e . chdir=/var/local/capsid_pipeline
+
+- include: r.yml

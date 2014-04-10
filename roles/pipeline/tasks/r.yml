@@ -1,0 +1,29 @@
+---
+# R tools
+- name: R | Install python-pycurl
+  apt: pkg=python-pycurl state=present update_cache=yes cache_valid_time=3600
+
+- name: R | Fetch signing key
+  command: apt-key adv --keyserver keyserver.ubuntu.com --recv E084DAB9
+
+- name: R | Add repository
+  apt_repository: 
+    repo: 'deb http://cran.utstat.utoronto.ca/bin/linux/ubuntu precise/'
+    state: present
+    update_cache: yes
+
+- name: R | Install R
+  apt: pkg=r-base state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=r-base-dev state=present update_cache=yes cache_valid_time=3600
+
+- name: R | Install Rprofile.site
+  copy: src=Rprofile.site dest=/etc/R/Rprofile.site mode=0644
+
+- name: R | Install lzma-dev
+  apt: pkg=liblzma-dev state=present update_cache=yes cache_valid_time=3600
+
+- name: R | Configure R for Java
+  command: R CMD javareconf
+
+- name: R | Install RMongo
+  command: R -e 'install.packages("RMongo")'
