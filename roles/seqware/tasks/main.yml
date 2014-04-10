@@ -1,0 +1,94 @@
+---
+# file: roles/seqware/tasks/main.yml
+- name: SeqWare | Add Hadoop repository
+  lineinfile: 
+    line: 'deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib'
+    dest: /etc/apt/sources.list.d/cloudera.list
+    state: present
+    create: yes
+
+- name: SeqWare | Add Hadoop repository
+  lineinfile: 
+    line: 'deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib'
+    dest: /etc/apt/sources.list.d/cloudera.list
+    state: present
+    create: yes
+
+- name: SeqWare | Add signing key
+  apt_key: url=http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key state=present
+
+- name: SeqWare | Create mountable home
+  command: mkdir -p /mnt/home creates=/mnt/home
+
+- name: SeqWare | Add user
+  user: 
+    home: '/mnt/home/seqware'
+    createhome: yes
+    name: 'seqware'
+    shell: '/bin/bash'
+
+- name: SeqWare | Create home link
+  command: ln -s ~seqware /home/seqware creates=/home/seqware
+
+- name: Seqware | Set hostname
+  command: hostname {{ original_hostname }}
+
+- name: SeqWare | Install dependencies
+  apt: pkg=libasound2 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=libxi6 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=libxt6 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=language-pack-en state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=git state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=maven state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=sysv-rc-conf state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=xfsprogs state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Install Hadoop and all its little friends
+  apt: pkg=hadoop-0.20-mapreduce-tasktracker state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-0.20-mapreduce-jobtracker state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-hdfs-datanode state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-client state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase-regionserver state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-hdfs-namenode state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue-server state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue-plugins state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue-oozie state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=oozie state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=oozie-client state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase-master state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase-thrift state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Set user groups
+  user: name=mapred groups=seqware append=yes state=present
+  user: name=seqware groups=mapred append=yes state=present
+
+- name: SeqWare | Install zookeeper
+  apt: pkg=zookeeper state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=zookeeper-server state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Initialize zookeeper
+  command: service zookeeper-server init creates=/var/lib/zookeeper
+
+- name: SeqWare | Start zookeeper
+  service: name=zookeeper-server state=started
+
+- name: SeqWare | Install postgresql
+  apt: pkg=postgresql-9.1 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=postgresql-client-9.1 state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Install tomcat
+  apt: pkg=tomcat7-common state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=tomcat7 state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Install apache2
+  apt: pkg=apache2 state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Copy resources
+  copy: 
+    src: files/
+    dest: /etc/hadoop/
+
+- name: SeqWare | Install Hadoop configuration directory
+  
