@@ -1,0 +1,6 @@
+---
+- name: Generating hosts file
+  template: src=hosts.j2 dest=/etc/hosts
+
+- name: Setting hostname to {{ inventory_hostname }}
+  hostname: name={{ inventory_hostname }}
