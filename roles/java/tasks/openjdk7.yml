@@ -1,0 +1,7 @@
+---
+# file: roles/java/tasks/cloudera.yml
+- name: Java | Install OpenJDK runtime
+  apt: pkg=openjdk-7-jre-headless state=present update_cache=yes cache_valid_time=3600
+
+- name: Java | Install OpenJDK Java developer kit
+  apt: pkg=openjdk-7-jdk state=present update_cache=yes cache_valid_time=3600
