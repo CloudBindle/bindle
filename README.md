@@ -562,3 +562,4 @@ vagrant_cluster_launch.pl script for more TODO items too.
 * better integration with our Maven build process, perhaps automatically calling this to setup integration test environment -- done
 * message of the day on login over ssh
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
+* an option for AWS to specify the region
