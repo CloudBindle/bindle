@@ -79,6 +79,9 @@ cp ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${S
 cp ~seqware/gitroot/seqware/seqware-pipeline/target/seqware ~seqware/bin
 chmod +x ~seqware/bin/seqware
 echo 'export PATH=$PATH:~seqware/bin' >> ~seqware/.bash_profile
+# run it so the jar is downloaded before really calling it below
+su - seqware -c "seqware"
+
 
 # make everything owned by seqware
 chown -R seqware:seqware ~seqware
