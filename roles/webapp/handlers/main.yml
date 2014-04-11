@@ -1,0 +1,4 @@
+---
+# file: roles/webapp/handlers/main.yml
+- name: restart capsid
+  service: name=capsid state=restarted

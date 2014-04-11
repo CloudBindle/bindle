@@ -11,6 +11,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   ansible_groups = {
     "grid-master" => ["master"],
+    "webapp" => ["webserver"],
     "grid-worker" => (1..WORKER_VM_COUNT).collect{ |i| "worker-#{i}" },
     "database" => (1..DATABASE_VM_COUNT).collect{ |i| "database-#{i}" },
     "all_groups:children" => ["grid-master", "grid-worker", "database"]
@@ -29,7 +30,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.gui = false
       vb.customize ["modifyvm", :id, "--memory", "1024"]
     end
-
   end
 
   # We use a dummy playbook because (a) we want the ansible provisioner
@@ -38,10 +38,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # issue at: https://github.com/mitchellh/vagrant/issues/1784
   # There is no realworkaround on this yet. 
 
-  config.vm.define "master" do |pipeline|
-    configure_virtualbox(pipeline)
+  config.vm.define "master" do |master|
+    configure_virtualbox(master)
 
-    pipeline.vm.provision "ansible" do |ansible|
+    master.vm.provision "ansible" do |ansible|
       ansible.playbook = "dummy-playbook.yml"
       ansible.groups = ansible_groups
       ansible.extra_vars = { original_hostname: "master" }
@@ -50,8 +50,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
 
-  (1..WORKER_VM_COUNT).each do |i|
+  config.vm.define "webserver" do |webserver|
+    configure_virtualbox(webserver)
 
+    webserver.vm.provision "ansible" do |ansible|
+      ansible.playbook = "dummy-playbook.yml"
+      ansible.groups = ansible_groups
+      ansible.extra_vars = { original_hostname: "webserver" }
+      # ansible.verbose = "vvvv"
+    end
+  end
+
+
+  (1..WORKER_VM_COUNT).each do |i|
     vm_name = "worker-#{i}"
 
     config.vm.define vm_name do |pipeline|
@@ -64,11 +75,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # ansible.verbose = "vvvv"
       end
     end
-
   end
 
   (1..DATABASE_VM_COUNT).each do |i|
-
     vm_name = "database-#{i}"
 
     config.vm.define vm_name do |database|
@@ -81,7 +90,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # ansible.verbose = "vvvv"
       end
     end
-
   end
 
 end

@@ -1,0 +1,53 @@
+---
+- name: Webapp | Installing packages
+  apt: pkg={{ item.package }} state=present update_cache=yes cache_valid_time=3600
+  with_items:
+    - { package: 'maven' }
+    - { package: 'git' }
+    - { package: 'daemon' }
+
+- name: Webapp | Create directories
+  shell: mkdir -p {{ item.path }} creates={{ item.path }}
+  with_items:
+    - { path: '/var/local' }
+    - { path: '/var/local/capsid' }
+    - { path: '/var/log/capsid' }
+    - { path: '/var/run/capsid' }
+
+- name: Webapp | Check out CaPSID webapp from Github
+  shell: git clone https://github.com/capsid/capsid-webapp.git capsid_webapp creates=/var/local/capsid_webapp chdir=/var/local
+
+- name: Webapp | Check out checkout
+  shell: git checkout develop chdir=/var/local/capsid_webapp
+
+- name: Webapp | Pull updates
+  shell: git pull chdir=/var/local/capsid_webapp
+
+- name: Webapp | Build CaPSID webapp
+  shell: mvn package chdir=/var/local/capsid_webapp creates=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-1.6-SNAPSHOT-dist.zip
+
+- name: Webapp | Deploy to local directory
+  unarchive: src=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-1.6-SNAPSHOT-dist.zip copy=no dest=/var/local/capsid
+  notify:
+    - restart capsid
+
+- name: Webapp | Write configuration files
+  template: src={{ item.src }} dest={{ item.dest }}
+  notify:
+    - restart capsid
+  with_items:
+    - { src: 'capsid.j2', dest: '/etc/default/capsid' }
+    - { src: 'init.d.j2', dest: '/etc/init.d/capsid' }
+
+- name: Webapp | Set /etc/init.d/capsid to be executable
+  file: path=/etc/init.d/capsid mode=0700
+
+- name: Webapp | Create user capsid
+  user: name=capsid comment="CaPSID webapp" state=present
+
+- name: Webapp | Assign files to the capsid user
+  file: path={{ item.path }} recurse=yes owner=capsid group=adm mode=0750
+  with_items:
+    - { path: '/var/local/capsid' }
+    - { path: '/var/log/capsid' }
+    - { path: '/var/run/capsid' }

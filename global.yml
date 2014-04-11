@@ -23,6 +23,12 @@
     - role: java
     - { role: grid-engine, grid_engine_master: True }
 
+- hosts: webapp
+  sudo: True
+  roles:
+    - role: java
+    - role: webapp
+
 - hosts: grid-worker 
   sudo: True
   roles:
