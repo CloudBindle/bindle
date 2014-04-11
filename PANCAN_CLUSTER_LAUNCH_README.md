@@ -396,6 +396,11 @@ OICR uses AWS internally for testing and the AWS Vagrant plugin is quite
 stable. The cluster is available for any PanCancer user but is not officially
 part of the Phase II activities.
 
+Some issues I had to address on Amazon:
+
+* some AMIs will automount the first ephemeral disk on /mnt, others will not. This causes issues with the provisioning process. We need to improve our support of these various configurations. Use m1.xlarge for the time being.
+* the network security group you launch master and workers in must allow incoming connections from itself otherwise the nodes will not be able to communicate with each other
+
 ### Notes for Barcelona (VirtualBox)
 
 Cloud are not available for both of these environments.  Instead, please use
