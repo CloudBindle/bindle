@@ -44,7 +44,7 @@ foreach my $dev (@list) {
       my $dev_name = $1;
       if (!mounted($dev_name)) {
         print "  MOUNTING BECAUSE NOT MOUNTED\n";
-        my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name");
+        my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name'");
         my $mount_path = "/mnt/$dev_name";
         if (setup_ecryptfs("/mnt/$dev_name")) { $mount_path = $mount_path."/encrypted"; }
         my $mount2 = system("mkdir -p $mount_path/hadoop-hdfs/cache/hdfs/dfs/data && chown -R hdfs:hdfs $mount_path/hadoop-hdfs'");
