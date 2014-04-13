@@ -31,6 +31,7 @@
       aws.secret_access_key = "%{AWS_SECRET_KEY}"
       aws.keypair_name = "%{AWS_SSH_KEY_NAME}"
       aws.user_data = File.read("user_data.txt")
+      aws.region = "eu-west-1"
       aws.ami = "%{AWS_IMAGE}"
       aws.instance_type = "%{AWS_INSTANCE_TYPE}"
       override.ssh.username = "%{AWS_SSH_USERNAME}"
