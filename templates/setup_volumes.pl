@@ -1,4 +1,5 @@
 use strict;
+use Getopt::Long;
 
 # PURPOSE:
 # This script attempts to format, mount, and encrypt all the volumes available . You
@@ -12,8 +13,18 @@ use strict;
 # * you have ecryptfs and mkfs.xfs installed
 # TODO
 
+my $final_list;
+my $out_file = "mount_report.txt";
 my $list = `ls -1 /dev/sd* /dev/xv*`;
 my @list = split /\n/, $list;
+
+GetOptions (
+  "output=s" => \$out_file
+);
+
+
+# MAIN LOOP
+
 foreach my $dev (@list) {
   # skip if doesn't exist
   next if (!-e $dev || -l $dev);
@@ -22,41 +33,36 @@ foreach my $dev (@list) {
   # then extra device so can continue
   print "DEV: $dev\n";
   # if already mounted just add directory
-  if(mounted($dev)) {
-    print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
-    my $mount_path = find_mount_path($dev);
-    # if ecryptfs was success, the mount path gets encrypted added to it
-    if(setup_ecryptfs($mount_path)) {
-      $mount_path = $mount_path."/encrypted";
-    }
-    if (!-e "$mount_path/hadoop-hdfs/cache/hdfs/dfs/data") {
-      print "  MOUNT NOT IN HDFS SETTINGS\n";
-      system("mkdir -p $mount_path/hadoop-hdfs/cache/hdfs/dfs/data && chown -R hdfs:hdfs $mount_path/hadoop-hdfs");
-      add_to_config("$mount_path/hadoop-hdfs/cache/hdfs/dfs/data");
-    }
-  } else {
+  if(!mounted($dev)) {
     print "  NOT MOUNTED!\n";
     my $format = system("bash -c 'mkfs.xfs -f $dev &> /dev/null'");
     if ($format) { print "  UNABLE TO FORMAT!\n"; }
-    else {
-      print "  FORMATTED OK!\n";
-      $dev =~ /\/dev\/(\S+)/;
-      my $dev_name = $1;
-      if (!mounted($dev_name)) {
-        print "  MOUNTING BECAUSE NOT MOUNTED\n";
-        my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name'");
-        my $mount_path = "/mnt/$dev_name";
-        if (setup_ecryptfs("/mnt/$dev_name")) { $mount_path = $mount_path."/encrypted"; }
-        my $mount2 = system("mkdir -p $mount_path/hadoop-hdfs/cache/hdfs/dfs/data && chown -R hdfs:hdfs $mount_path/hadoop-hdfs");
-        if ($mount != 0 || $mount2 != 0) { print "  UNABLE TO MOUNT $dev on /mnt/$1\n"; }
-        else {
-          # <value>file:///var/lib/hadoop-hdfs/cache/${user.name}/dfs/data</value>
-          add_to_config("$mount_path/hadoop-hdfs/cache/hdfs/dfs/data");
-        }
-      }
-    }
+    else {  print "  FORMATTED OK!\n"; }
+    $dev =~ /\/dev\/(\S+)/;
+    my $dev_name = $1;
+    print "  MOUNTING BECAUSE NOT MOUNTED\n";
+    my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name'");
+    if ($mount) { print "  UNABLE TO MOUNT $dev on /mnt/$dev_name\n"; }
+  } else {
+    print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
   }
+  my $mount_path = find_mount_path($dev);
+  # if ecryptfs was success, the mount path gets encrypted added to it
+  if(setup_ecryptfs($mount_path)) {
+    $mount_path = $mount_path."/encrypted";
+  }
+  # add to the list of mounted dirs
+  $final_list .= "$mount_path\n";
 }
+
+# OUTPUT REPORT
+
+open OUT, ">$out_file" or die "Can't open output file $out_file\n";
+print OUT $final_list;
+close OUT;
+
+
+# SUBROUTINES
 
 sub blacklist {
   my $dev = shift;
