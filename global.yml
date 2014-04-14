@@ -33,6 +33,7 @@
   sudo: True
   roles:
     - role: java
+    - role: pipeline
 
 - hosts: database 
   sudo: True
