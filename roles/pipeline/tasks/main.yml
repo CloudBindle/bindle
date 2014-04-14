@@ -23,7 +23,7 @@
 
 - name: CaPSID pipeline | Check out CaPSID from Github
   git:
-    repo: ttps://github.com/capsid/capsid-pipeline.git
+    repo: https://github.com/capsid/capsid-pipeline.git
     dest: /var/local/capsid_pipeline
     update: yes
     version: develop
