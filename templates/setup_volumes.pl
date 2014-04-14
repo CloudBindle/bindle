@@ -1,18 +1,16 @@
 use strict;
 
 # PURPOSE:
-# This script attempts to format, mount, encrypt, and add volumes to HDFS.  You
+# This script attempts to format, mount, and encrypt all the volumes available . You
 # will be left with various devices mounted as /mnt/<devname>/ with a directory
 # called /mnt/<devname>/encrypted under which anything written will be
 # encrypted using ecryptfs with a random key. Anything outside of this
 # directory will not be encrypted. If ecryptfs is not installed the encrypted
 # directory is not created.
 # ASSUMPTIONS:
-# * hdfs is not running
-# * you have ecryptfs, mkfs.xfs, and hadoop installed
-# * you want all drives to be used for HDFS
+# * this script does not setup HDFS or Gluster
+# * you have ecryptfs and mkfs.xfs installed
 # TODO
-# * setup via hadoop config for hdfs no longer works!  need to improve this
 
 my $list = `ls -1 /dev/sd* /dev/xv*`;
 my @list = split /\n/, $list;
