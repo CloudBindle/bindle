@@ -448,8 +448,8 @@ The steps to create this image:
 
 In order to specify regions and zones, JSON templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
 
-   "AWS_REGION": "us-east-1",
-   "AWS_ZONE": "a",
+    "AWS_REGION": "us-east-1",
+    "AWS_ZONE": "a",
 
 ## AWS - Additional EBS Space
 
