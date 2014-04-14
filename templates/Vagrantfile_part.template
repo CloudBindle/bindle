@@ -34,6 +34,20 @@
       aws.region = "eu-west-1"
       aws.ami = "%{AWS_IMAGE}"
       aws.instance_type = "%{AWS_INSTANCE_TYPE}"
+      aws.block_device_mapping =  [
+			{
+		        'DeviceName' => "/dev/sdf",
+		        'VirtualName' => "block_storage",
+		        'Ebs.VolumeSize' => 500,
+		        'Ebs.DeleteOnTermination' => true
+			},
+                        {
+		        'DeviceName' => "/dev/sdg",
+		        'VirtualName' => "block_storage",
+		        'Ebs.VolumeSize' => 400,
+		        'Ebs.DeleteOnTermination' => true
+			}
+		]
       override.ssh.username = "%{AWS_SSH_USERNAME}"
       override.ssh.private_key_path = "%{AWS_SSH_PEM_FILE}"
     end

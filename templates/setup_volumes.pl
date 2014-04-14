@@ -41,7 +41,7 @@ foreach my $dev (@list) {
     $dev =~ /\/dev\/(\S+)/;
     my $dev_name = $1;
     print "  MOUNTING BECAUSE NOT MOUNTED\n";
-    my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name'");
+    my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name' && chmod a+rwx /mnt/$dev_name");
     if ($mount) { print "  UNABLE TO MOUNT $dev on /mnt/$dev_name\n"; }
   } else {
     print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
@@ -111,13 +111,18 @@ sub setup_ecryptfs {
   # attempt to find this tool
   my $result = system("which mount.ecryptfs");
   if ($result == 0) {
-    my @chars = ( "A" .. "Z", "a" .. "z", 0 .. 9 );
-    my $password = join("", @chars[ map { rand @chars } ( 1 .. 11 ) ]);
-    my $ecrypt_cmd = "mkdir -p $dir/encrypted && mount.ecryptfs $dir/encrypted $dir/encrypted -o ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough=n,ecryptfs_enable_filename_crypto=n,no_sig_cache,key=passphrase:passwd=$password";
-    $ecrypt_result = system($ecrypt_cmd);
-    if ($ecrypt_result) {
-       print "   ERROR: there was a problem running the ecrypt command $ecrypt_cmd\n";
-       return(0);
+    my $found = `mount | grep $dir/encrypted | grep 'type ecryptfs' | wc -l`;
+    if (!$found) {
+      my @chars = ( "A" .. "Z", "a" .. "z", 0 .. 9 );
+      my $password = join("", @chars[ map { rand @chars } ( 1 .. 11 ) ]);
+      my $ecrypt_cmd = "mkdir -p $dir/encrypted && mount.ecryptfs $dir/encrypted $dir/encrypted -o ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough=n,ecryptfs_enable_filename_crypto=n,no_sig_cache,key=passphrase:passwd=$password && chmod a+rwx $dir/encrypted";
+      $ecrypt_result = system($ecrypt_cmd);
+      if ($ecrypt_result) {
+         print "   ERROR: there was a problem running the ecrypt command $ecrypt_cmd\n";
+         return(0);
+      }
+    } else {
+      print "   ALREADY ENCRYPTED: this was already encrypted $dir so skipping.\n";
     }
   } else {
     print "   ERROR: can't find mount.ecryptfs so skipping encryption of the HDFS volume\n";

@@ -454,6 +454,7 @@ sub prepare_files {
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
+    copy("templates/setup_volumes.pl", "$work_dir/$node/setup_volumes.pl");
     # these are used for when the box is rebooted, it setups the /etc/hosts file for example
     replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
     replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
