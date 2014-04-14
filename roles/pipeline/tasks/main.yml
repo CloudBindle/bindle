@@ -22,13 +22,11 @@
   shell: mkdir -p /var/local creates=/var/local
 
 - name: CaPSID pipeline | Check out CaPSID from Github
-  shell: git clone https://github.com/capsid/capsid-pipeline.git capsid_pipeline creates=/var/local/capsid_pipeline chdir=/var/local
-
-- name: CaPSID pipeline | Check out checkout
-  shell: git checkout develop chdir=/var/local/capsid_pipeline
-
-- name: CaPSID pipeline | Pull updates
-  shell: git pull chdir=/var/local/capsid_pipeline
+  git:
+    repo: ttps://github.com/capsid/capsid-pipeline.git
+    dest: /var/local/capsid_pipeline
+    update: yes
+    version: develop
 
 # OF course, if we had dependencies that were Debian packaged and suitable, then
 # that would be better to reduce C compilation time. 
