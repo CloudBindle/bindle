@@ -1,0 +1,5 @@
+- include: bowtie2.yml
+
+- include: bfast.yml
+
+- include: shrimp2.yml

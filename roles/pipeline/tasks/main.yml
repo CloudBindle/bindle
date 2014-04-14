@@ -34,4 +34,17 @@
 - name: CaPSID pipeline | Install CaPSID dependencies
   shell: pip install -e . chdir=/var/local/capsid_pipeline
 
+# There is no good reason why we ought to need to do this, but we might. Anyway,
+# here we go. 
+
+- name: CaPSID pipeline | Install CaPSID
+  shell: python setup.py install chdir=/var/local/capsid_pipeline
+
+# Add in R
+
 - include: r.yml
+
+# Add in the aligners. We install all of them on all systems, just in case, as it
+# isn't too much work. 
+
+- include: aligners.yml

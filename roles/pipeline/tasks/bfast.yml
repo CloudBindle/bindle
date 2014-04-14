@@ -1,0 +1,19 @@
+- name: CaPSID pipeline | Get bfast
+  get_url:
+    dest: '/tmp/bfast-0.7.0a.tar.gz'
+    url: 'http://sourceforge.net/projects/bfast/files/bfast/0.7.0/bfast-0.7.0a.tar.gz/download'
+
+- name: CaPSID pipeline | Unpack bfast
+  shell: tar xf /tmp/bfast-0.7.0a.tar.gz chdir=/var/local creates=/var/local/bfast-0.7.0a
+
+- name: CaPSID pipeline | Configure bfast
+  shell: ./configure chdir=/var/local/bfast-0.7.0a creates=/var/local/bfast-0.7.0a/config.h
+
+- name: CaPSID pipeline | Build bfast
+  shell: make chdir=/var/local/bfast-0.7.0a creates=/var/local/bfast-0.7.0a/bfast/bfast
+
+- name: CaPSID pipeline | Install bfast
+  shell: make install chdir=/var/local/bfast-0.7.0a creates=/usr/local/bin/bfast
+
+- name: CaPSID pipeline | Make clean link to bfast
+  file: state=link src=/var/local/bfast-0.7.0a dest=/var/local/bfast
