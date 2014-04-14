@@ -40,6 +40,7 @@ my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
 my $vb_ram = 12000;
 my $vb_cores = 2;
+my @ebs_vols = ();
 
 my $help = 0;
 
@@ -56,6 +57,7 @@ GetOptions (
   "skip-launch" => \$skip_launch,
   "vb-ram=i" => \$vb_ram,
   "vb-cores=i" => \$vb_cores,
+  "aws-ebs=s{1,}" => \@ebs_vols,
   "help" => \$help,
 );
 
@@ -492,6 +494,18 @@ sub setup_vagrantfile {
 	$configs->{AWS_ZONE} = "nil";
     } else{
 	$configs->{AWS_ZONE} = "\"$configs->{AWS_REGION}$configs->{AWS_ZONE}\"";
+    }
+    $configs->{AWS_EBS_VOLS} = "";
+    if (scalar @ebs_vols > 0){
+	$configs->{AWS_EBS_VOLS} .= "aws.block_device_mapping = [";
+	my $count = 102;
+	foreach my $size (@ebs_vols){
+            my $current_name = chr($count);
+	    $configs->{AWS_EBS_VOLS} .= "{'DeviceName' => \"/dev/sd$current_name\", 'VirtualName' => \"block_storage\", 'Ebs.VolumeSize' => $size, 'Ebs.DeleteOnTermination' => true},";
+	    $count += 1;
+	}
+        chop($configs->{AWS_EBS_VOLS});
+	$configs->{AWS_EBS_VOLS} .= "]";
     }
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");

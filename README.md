@@ -431,9 +431,6 @@ and explore HA options.
 
 Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on EBS instead. Note that this incurrs an additional cost. 
 
-The following images are setup in this fashion:
-* 
-
 The steps to create this image:
 1. Format your new EBS drive
 2. Mount your new EBS drive (at say /dev/xvdf) at a temporary location 
@@ -446,6 +443,19 @@ The steps to create this image:
 
 4. Unmount /mnt and mount /dev/xvdf at /mnt
 5. Update /etc/fstab
+
+## AWS - Regions and Availability Zones
+
+In order to specify regions and zones, JSON templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
+
+   "AWS_REGION": "us-east-1",
+   "AWS_ZONE": "a",
+
+## AWS - Additional EBS Space
+
+In order to add extra EBS volumes across the board, use the following syntax in order to provision a 400 and 500 GB volume attached to each node:
+
+     perl vagrant_cluster_launch.pl --use-aws --aws-ebs 400 500
 
 ## Logging
 
