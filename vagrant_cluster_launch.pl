@@ -485,6 +485,14 @@ sub setup_vagrantfile {
     $configs->{VB_CORES} = $cores;
     $configs->{VB_RAM} = $ram;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
+    if (not exists $configs->{AWS_REGION}){
+	$configs->{AWS_REGION} = "us-east-1";
+    }
+    if (not exists $configs->{AWS_ZONE}){
+	$configs->{AWS_ZONE} = "nil";
+    } else{
+	$configs->{AWS_ZONE} = "\"$configs->{AWS_REGION}$configs->{AWS_ZONE}\"";
+    }
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better
