@@ -14,7 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "webapp" => ["webserver"],
     "grid-worker" => (1..WORKER_VM_COUNT).collect{ |i| "worker-#{i}" },
     "database" => (1..DATABASE_VM_COUNT).collect{ |i| "database-#{i}" },
-    "all_groups:children" => ["grid-master", "grid-worker", "database"]
+    "all_groups:children" => ["grid-master", "grid-worker", "database", "webapp"]
   }
 
   @address_low = 4
