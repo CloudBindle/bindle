@@ -13,7 +13,6 @@
   shell: mkdir -p {{ item.path }} creates={{ item.path }}
   with_items:
     - { path: '/var/local' }
-    - { path: '/var/local/capsid' }
     - { path: '/var/log/capsid' }
     - { path: '/var/run/capsid' }
 
@@ -44,9 +43,21 @@
 # are carefully set, and we don't use them with ansible completely correctly. Even so,
 # this is clunky and awkward. 
 - name: Webapp | Deploy to local directory
-  unarchive: src=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-{{capsid_webapp_version.stdout}}-dist.zip copy=no dest=/var/local/capsid
+  unarchive: 
+    src: /var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-{{capsid_webapp_version.stdout}}-dist.zip 
+    copy: no
+    dest: /var/local
   notify:
     - restart capsid
+
+# Make a new link without a version. This makes the actual packaging and configuration much
+# less tricky. It also means the 
+- name: Webapp | Make clean link to webapp
+  file: 
+    state: link 
+    src: /var/local/capsid-webapp-httpd-{{capsid_webapp_version.stdout}}
+    dest: /var/local/capsid 
+    force: yes
 
 - name: Webapp | Write CaPSID configuration files
   template: src={{ item.src }} dest={{ item.dest }}
@@ -55,6 +66,8 @@
   with_items:
     - { src: 'capsid.j2', dest: '/etc/default/capsid' }
     - { src: 'init.d.j2', dest: '/etc/init.d/capsid' }
+    - { src: 'capsid-jetty.j2', dest: '/var/local/capsid/conf/capsid.xml' }
+    - { src: 'capsid-groovy.j2', dest: '/var/local/capsid/conf/capsid-config.groovy' }
 
 - name: Webapp | Write nginx configuration files
   template: src={{ item.src }} dest={{ item.dest }}
@@ -81,6 +94,6 @@
 - name: Webapp | Assign files to the capsid user
   file: path={{ item.path }} recurse=yes owner=capsid group=adm mode=0750
   with_items:
-    - { path: '/var/local/capsid' }
+    - { path: '/var/local/capsid-webapp-httpd-{{capsid_webapp_version.stdout}}' }
     - { path: '/var/log/capsid' }
     - { path: '/var/run/capsid' }
