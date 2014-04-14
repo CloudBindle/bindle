@@ -5,6 +5,8 @@
     - { package: 'maven' }
     - { package: 'git' }
     - { package: 'daemon' }
+    - { package: 'nginx' }
+    - { package: 'ssl-cert' }
 
 - name: Webapp | Create directories
   shell: mkdir -p {{ item.path }} creates={{ item.path }}
@@ -29,7 +31,7 @@
   notify:
     - restart capsid
 
-- name: Webapp | Write configuration files
+- name: Webapp | Write CaPSID configuration files
   template: src={{ item.src }} dest={{ item.dest }}
   notify:
     - restart capsid
@@ -37,8 +39,24 @@
     - { src: 'capsid.j2', dest: '/etc/default/capsid' }
     - { src: 'init.d.j2', dest: '/etc/init.d/capsid' }
 
+- name: Webapp | Write nginx configuration files
+  template: src={{ item.src }} dest={{ item.dest }}
+  notify:
+    - restart nginx
+  with_items:
+    - { src: 'nginx-site.j2', dest: '/etc/nginx/sites-available/capsid' }
+    - { src: 'nginx-service.j2', dest: '/etc/init/nginx.conf' }
+
 - name: Webapp | Set /etc/init.d/capsid to be executable
   file: path=/etc/init.d/capsid mode=0700
+
+- name: Webapp | Remove default nginx site
+  file: state=absent path=/etc/nginx/sites-enabled/default
+
+- name: Webapp | Make nginx site link
+  file: state=link src=/etc/nginx/sites-available/capsid dest=/etc/nginx/sites-enabled/capsid
+  notify:
+    - restart nginx
 
 - name: Webapp | Create user capsid
   user: name=capsid comment="CaPSID webapp" state=present
