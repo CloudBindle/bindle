@@ -7,6 +7,7 @@
     - { package: 'daemon' }
     - { package: 'nginx' }
     - { package: 'ssl-cert' }
+    - { package: 'xmlstarlet' }
 
 - name: Webapp | Create directories
   shell: mkdir -p {{ item.path }} creates={{ item.path }}
@@ -23,11 +24,27 @@
     update: yes
     version: develop
 
-- name: Webapp | Build CaPSID webapp
-  shell: mvn package chdir=/var/local/capsid_webapp creates=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-1.6-SNAPSHOT-dist.zip
+# This merits explanation, but basically, it extracts a value from a POM file. 
+- name: Webapp | Discover local version
+  shell: xmlstarlet sel -N m="http://maven.apache.org/POM/4.0.0" -t -m '//m:project/m:version' -v . /var/local/capsid_webapp/pom.xml
+  register: capsid_webapp_version
 
+- name: Webapp | Testing
+  shell: echo {{capsid_webapp_version.stdout}}
+
+- name: Webapp | Build CaPSID webapp
+  shell: >
+    mvn clean package
+    chdir=/var/local/capsid_webapp
+    creates=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-{{capsid_webapp_version.stdout}}-dist.zip
+
+# This is a tricky area. We have a dist containing everything, and we want to deploy a 
+# working web application. It would actually be better not to have to do this, but that
+# tangles stuff together a bit more. The problem is, a few paths in the Debian package
+# are carefully set, and we don't use them with ansible completely correctly. Even so,
+# this is clunky and awkward. 
 - name: Webapp | Deploy to local directory
-  unarchive: src=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-1.6-SNAPSHOT-dist.zip copy=no dest=/var/local/capsid
+  unarchive: src=/var/local/capsid_webapp/capsid-webapp-httpd/target/capsid-webapp-httpd-{{capsid_webapp_version.stdout}}-dist.zip copy=no dest=/var/local/capsid
   notify:
     - restart capsid
 
