@@ -52,6 +52,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.define "webserver" do |webserver|
     configure_virtualbox(webserver)
+    webserver.vm.network "forwarded_port", guest: 443, host: 8443
 
     webserver.vm.provision "ansible" do |ansible|
       ansible.playbook = "dummy-playbook.yml"
