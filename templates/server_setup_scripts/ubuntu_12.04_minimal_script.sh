@@ -113,3 +113,8 @@ if [ -n "%{MAVEN_MIRROR}" ]; then
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\"> <mirrors> <mirror> <id>artifactory</id><mirrorOf>*</mirrorOf> <url> %{MAVEN_MIRROR} </url>            <name>Artifactory</name>        </mirror>    </mirrors></settings>" > ~seqware/.m2/settings.xml
 fi
 
+# setup ephemeral and EBS volumes that are attached to this system
+apt-get update
+apt-get -q -y --force-yes install ecryptfs-utils xfsprogs
+perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt
+
