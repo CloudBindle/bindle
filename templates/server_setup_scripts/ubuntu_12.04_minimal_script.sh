@@ -134,9 +134,6 @@ apt-get -q -y --force-yes install ecryptfs-utils xfsprogs
 perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt
 
 # now setup volumes for use with gluster
-echo '%{HOSTS}' > /vagrant/gluster_hosts.txt
 apt-get -q -y --force-yes install glusterfs-server
-perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/mount_report.txt --output /vagrant/gluster_volumes_report.txt
-# remove the hosts option above, needed for next step
-# --hosts /vagrant/gluster_hosts.txt 
+perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt
 
