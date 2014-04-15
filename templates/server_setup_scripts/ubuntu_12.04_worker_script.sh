@@ -1,18 +1,18 @@
 #!/bin/bash -vx
 
-# setup hostname
-hostname %{HOST}
-
-# setup /etc/hosts
-# fix the /etc/hosts file since SGE wants reverse lookup to work
-cp /etc/hosts /tmp/hosts
-echo '127.0.0.1 localhost' > /etc/hosts
-echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
-cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
-
-# setup hosts
-# NOTE: the hostname seems to already be set at least on BioNimubs OS
-echo '%{HOSTS}' >> /etc/hosts
+## setup hostname
+#hostname %{HOST}
+#
+## setup /etc/hosts
+## fix the /etc/hosts file since SGE wants reverse lookup to work
+#cp /etc/hosts /tmp/hosts
+#echo '127.0.0.1 localhost' > /etc/hosts
+#echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
+#cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
+#
+## setup hosts
+## NOTE: the hostname seems to already be set at least on BioNimubs OS
+#echo '%{HOSTS}' >> /etc/hosts
 
 # general apt-get
 apt-get update
@@ -69,7 +69,8 @@ apt-get -q -y --force-yes install rpcbind nfs-common
 mkdir -p /usr/tmp/
 if [ ! -d "/mnt/seqware-oozie" ]; then
   mkdir -p /mnt/seqware-oozie
-  mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
+  #mount %{MASTER_PIP}:/mnt/seqware-oozie /mnt/seqware-oozie
+  mount -t glusterfs master:/gv0 /mnt/seqware-oozie
 fi
 mkdir -p /mnt/datastore
 echo 'rpcbind : ALL' >> /etc/hosts.deny

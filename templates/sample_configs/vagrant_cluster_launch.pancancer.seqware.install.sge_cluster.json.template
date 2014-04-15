@@ -55,6 +55,7 @@
       ], 
       # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
       "second_pass_scripts": [
+        [ "templates/server_setup_scripts/ubuntu_12.04_gluster_probe.sh" ],
         [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
         [ ],
         # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
@@ -77,6 +78,7 @@
       ], 
       # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
       "second_pass_scripts": [
+        [ "templates/server_setup_scripts/ubuntu_12.04_gluster_probe.sh" ],
         [ ],
         [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh"],
         [ ],

@@ -113,8 +113,30 @@ if [ -n "%{MAVEN_MIRROR}" ]; then
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\"> <mirrors> <mirror> <id>artifactory</id><mirrorOf>*</mirrorOf> <url> %{MAVEN_MIRROR} </url>            <name>Artifactory</name>        </mirror>    </mirrors></settings>" > ~seqware/.m2/settings.xml
 fi
 
+# hosts
+# setup hostname
+hostname %{HOST}
+
+# setup /etc/hosts
+# fix the /etc/hosts file since SGE wants reverse lookup to work
+cp /etc/hosts /tmp/hosts
+echo '127.0.0.1 localhost' > /etc/hosts
+echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
+cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
+
+# setup hosts
+# NOTE: the hostname seems to already be set at least on BioNimubs OS
+echo '%{HOSTS}' >> /etc/hosts
+
 # setup ephemeral and EBS volumes that are attached to this system
 apt-get update
 apt-get -q -y --force-yes install ecryptfs-utils xfsprogs
 perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt
+
+# now setup volumes for use with gluster
+echo '%{HOSTS}' > /vagrant/gluster_hosts.txt
+apt-get -q -y --force-yes install glusterfs-server
+perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/mount_report.txt --output /vagrant/gluster_volumes_report.txt
+# remove the hosts option above, needed for next step
+# --hosts /vagrant/gluster_hosts.txt 
 

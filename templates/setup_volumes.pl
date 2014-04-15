@@ -35,7 +35,7 @@ foreach my $dev (@list) {
   # if already mounted just add directory
   if(!mounted($dev)) {
     print "  NOT MOUNTED!\n";
-    my $format = system("bash -c 'mkfs.xfs -f $dev &> /dev/null'");
+    my $format = system("bash -c 'mkfs.xfs -i size=512 $dev &> /dev/null'");
     if ($format) { print "  UNABLE TO FORMAT!\n"; }
     else {  print "  FORMATTED OK!\n"; }
     $dev =~ /\/dev\/(\S+)/;

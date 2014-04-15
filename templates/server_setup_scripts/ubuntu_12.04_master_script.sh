@@ -1,17 +1,17 @@
 #!/bin/bash -vx
 
-# first, set the hostname
-hostname master
-
-# fix the /etc/hosts file since SGE wants reverse lookup to work
-cp /etc/hosts /tmp/hosts
-echo '127.0.0.1 localhost' > /etc/hosts
-echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
-cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
-
-# setup hosts
-# NOTE: the hostname seems to already be set at least on BioNimubs OS
-echo '%{HOSTS}' >> /etc/hosts
+## first, set the hostname
+#hostname master
+#
+## fix the /etc/hosts file since SGE wants reverse lookup to work
+#cp /etc/hosts /tmp/hosts
+#echo '127.0.0.1 localhost' > /etc/hosts
+#echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` >> /etc/hosts
+#cat /tmp/hosts | grep -v '127.0.1.1' | grep -v `hostname` | grep -v localhost | >> /etc/hosts
+#
+## setup hosts
+## NOTE: the hostname seems to already be set at least on BioNimubs OS
+#echo '%{HOSTS}' >> /etc/hosts
 
 # general apt-get
 apt-get update
@@ -137,12 +137,17 @@ sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/
 # note these are placed on /mnt since that
 # is the ephemeral disk on Amazon instances
 mkdir -p /mnt/seqware-oozie
+# mount gluster here
+# TODO: I think at this point the bricks are made, this call will need to create the shared volume and then mount it
+mount -t glusterfs master:/gv0 /mnt/seqware-oozie
 chmod a+rx /mnt
 chmod a+rwx /mnt/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
+# usr
 mkdir -p /usr/tmp/
 chmod -R a+rwx /usr/tmp/
 ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
-chown -R seqware:seqware /mnt/seqware-oozie
+# datastore
 mkdir -p /mnt/datastore
 chmod a+rx /mnt
 chmod a+rwx /mnt/datastore
