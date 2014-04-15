@@ -21,15 +21,17 @@ my $cmd = "gluster volume create gv0 replica 2 transport tcp";
 open IN, "<$host" or die "Cannot open file $host\n";
 while(<IN>) {
   chomp;
-  my @a = split /\S+/;
-  my $hostname = $a[1]; 
-  open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
-  while(<DIRS>) {
-    chomp;
-    my $dir = $_;
-    $cmd .= " $hostname:$dir";
+  my @a = split /\s+/;
+  if (scalar(@a) == 2) {
+    my $hostname = $a[1]; 
+    open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
+    while(<DIRS>) {
+      chomp;
+      my $dir = $_;
+      $cmd .= " $hostname:$dir";
+    }
+    close DIRS;
   }
-  close DIRS;
 }
 close IN;
 $cmd .= "; gluster volume start gv0";
