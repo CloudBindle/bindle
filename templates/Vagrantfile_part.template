@@ -32,7 +32,7 @@
       aws.keypair_name = "%{AWS_SSH_KEY_NAME}"
       aws.user_data = File.read("user_data.txt")
       aws.region = "%{AWS_REGION}"
-      aws.availability_zone = %{AWS_ZONE}
+      aws.availability_zone = "%{AWS_ZONE}"
       aws.ami = "%{AWS_IMAGE}"
       aws.instance_type = "%{AWS_INSTANCE_TYPE}"
       %{AWS_EBS_VOLS}
