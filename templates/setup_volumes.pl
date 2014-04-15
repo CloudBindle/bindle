@@ -112,7 +112,8 @@ sub setup_ecryptfs {
   my $result = system("which mount.ecryptfs");
   if ($result == 0) {
     my $found = `mount | grep $dir/encrypted | grep 'type ecryptfs' | wc -l`;
-    if (!$found) {
+    chomp $found;
+    if ($found =~ /0/) {
       my @chars = ( "A" .. "Z", "a" .. "z", 0 .. 9 );
       my $password = join("", @chars[ map { rand @chars } ( 1 .. 11 ) ]);
       my $ecrypt_cmd = "mkdir -p $dir/encrypted && mount.ecryptfs $dir/encrypted $dir/encrypted -o ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough=n,ecryptfs_enable_filename_crypto=n,no_sig_cache,key=passphrase:passwd=$password && chmod a+rwx $dir/encrypted";
