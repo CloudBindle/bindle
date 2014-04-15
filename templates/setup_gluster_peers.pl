@@ -19,8 +19,10 @@ my $out_txt;
 open IN, "<$host" or die "Cannot open file $host\n";
 while(<IN>) {
   chomp;
-  my @a = split /\S+/;
+  my @a = split /\s+/;
+  next if (scalar(@a) != 2);
   my $cmd = "gluster peer probe $a[1]";
+  print "CMD: $cmd\n";
   if (system($cmd)) {
     print "Problems peering with '$cmd'\n";
   }
