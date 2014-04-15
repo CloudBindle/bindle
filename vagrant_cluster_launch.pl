@@ -497,7 +497,7 @@ sub setup_vagrantfile {
 	$configs->{AWS_ZONE} = "nil";
     }
     else{
-	$configs->{AWS_ZONE} = "\"$configs->{AWS_ZONE}\"";
+	if ($configs->{AWS_ZONE} !~ /^"\S+"$/) { $configs->{AWS_ZONE} = "\"$configs->{AWS_ZONE}\""; }
     }
     $configs->{AWS_EBS_VOLS} = "";
     if (scalar @ebs_vols > 0){

@@ -73,7 +73,7 @@
     {
       "name": ["worker1", "worker2", "worker3"],
       "type": "worker",
-      "floatip": ["<FILLMEIN>", "<FILLMEIN>", "worker3"],
+      "floatip": ["<FILLMEIN>", "<FILLMEIN>", "<FILLMEIN>"],
       "first_pass_scripts": [
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
