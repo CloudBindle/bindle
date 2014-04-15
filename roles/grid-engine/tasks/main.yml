@@ -2,9 +2,11 @@
 # file: roles/grid-engine/tasks/main.yml
 - name: SGE | Install gridengine-client
   apt: pkg=gridengine-client state=present update_cache=yes cache_valid_time=3600
+  when: grid_engine_master == True
 
 - name: SGE | Install gridengine-qmon
   apt: pkg=gridengine-qmon state=present update_cache=yes cache_valid_time=3600
+  when: grid_engine_master == True
 
 - name: SGE | Install gridengine-exec
   apt: pkg=gridengine-exec state=present update_cache=yes cache_valid_time=3600
@@ -12,3 +14,63 @@
 - name: SGE | Install gridengine-master 
   apt: pkg=gridengine-master state=present update_cache=yes cache_valid_time=3600
   when: grid_engine_master == True
+
+- name: SGE | Configure master
+  command: qconf -as {{ inventory_hostname }}
+  when: grid_engine_master == True
+
+# Add the user on both master and worker nodes
+- name: SGE | Create user capsid
+  user: name=capsid comment="CaPSID worker" state=present
+
+# Be careful when adding the user. First get he current list, and only add if it isn't
+# already present.
+- name: SGE | Check current user list
+  command: qconf -suserl
+  when: grid_engine_master == True
+  register: sge_current_users
+
+- name: SGE | Add the capsid user
+  command: qconf -au capsid users
+  when: grid_engine_master == True and not 'capsid' in sge_current_users.stdout_lines
+
+# Again, we don't want to do this if it already exists
+- name: SGE | Check current host groups
+  command: qconf -shgrpl
+  when: grid_engine_master == True
+  register: sge_current_host_groups
+
+- name: SGE | Build host group configuration
+  template: src=ahgrp.j2 dest=/tmp/sge_ahgrp
+  when: grid_engine_master == True and not '@allhosts' in sge_current_host_groups.stdout_lines
+
+- name: SGE | Add the host group configuration
+  command: qconf -Ahgrp /tmp/sge_ahgrp
+  when: grid_engine_master == True and not '@allhosts' in sge_current_host_groups.stdout_lines
+
+# Again, we don't want to do this if it already exists
+- name: SGE | Check current queues
+  command: qconf -sql
+  when: grid_engine_master == True
+  register: sge_current_queues
+
+- name: SGE | Build main queue
+  template: src=aq.j2 dest=/tmp/sge_aq
+  when: grid_engine_master == True and not 'main.q' in sge_current_queues.stdout_lines
+
+- name: SGE | Add main queue
+  command: qconf -Aq /tmp/sge_aq
+  when: grid_engine_master == True and not 'main.q' in sge_current_queues.stdout_lines
+
+- name: SGE | Add attribute specifications
+  command: qconf -aattr {{ item.obj_spec }} {{ item.attr_name }} {{ item.val }} {{ item.obj_instance }}
+  when: grid_engine_master == True
+  with_items:
+    - { obj_spec: 'hostgroup', attr_name: 'hostlist', val: 'master', obj_instance: '@allhosts' }
+    - { obj_spec: 'queue', attr_name: 'hostlist', val: '@allhosts', obj_instance: 'main.q'}
+    - { obj_spec: 'queue', attr_name: 'slots', val: '4', obj_instance: 'main.q'}
+    - { obj_spec: 'hostgroup', attr_name: 'hostlist', val: 'master', obj_instance: '@allhosts' }
+
+# - name: SGE | Add execution host
+#   command: qconf -ae worker-1
+#   when: grid_engine_master == True
