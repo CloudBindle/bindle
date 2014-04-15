@@ -495,10 +495,9 @@ sub setup_vagrantfile {
     }
     if (not exists $configs->{AWS_ZONE}){
 	$configs->{AWS_ZONE} = "nil";
+    } else{
+	$configs->{AWS_ZONE} = "\"$configs->{AWS_REGION}$configs->{AWS_ZONE}\"";
     }
-   #  else{
-   # 	$configs->{AWS_ZONE} = "$configs->{AWS_ZONE}\"";
-   # }
     $configs->{AWS_EBS_VOLS} = "";
     if (scalar @ebs_vols > 0){
 	$configs->{AWS_EBS_VOLS} .= "aws.block_device_mapping = [";
