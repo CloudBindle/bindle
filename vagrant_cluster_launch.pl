@@ -493,10 +493,11 @@ sub setup_vagrantfile {
     if (not exists $configs->{AWS_REGION}){
 	$configs->{AWS_REGION} = "us-east-1";
     }
-    if (not exists $configs->{AWS_ZONE}){
+    if (not exists $configs->{AWS_ZONE} or $configs->{AWS_ZONE} eq "nil" ){
 	$configs->{AWS_ZONE} = "nil";
-    } else{
-	$configs->{AWS_ZONE} = "\"$configs->{AWS_REGION}$configs->{AWS_ZONE}\"";
+    }
+    else{
+	$configs->{AWS_ZONE} = "\"$configs->{AWS_ZONE}\"";
     }
     $configs->{AWS_EBS_VOLS} = "";
     if (scalar @ebs_vols > 0){
