@@ -26,17 +26,18 @@
 # Be careful when adding the user. First get he current list, and only add if it isn't
 # already present.
 - name: SGE | Check current user list
-  command: qconf -suserl
+  shell: qconf -su users | grep -E "^entries" | cut -f2 -d " "
   when: grid_engine_master == True
   register: sge_current_users
 
 - name: SGE | Add the capsid user
   command: qconf -au capsid users
-  when: grid_engine_master == True and not 'capsid' in sge_current_users.stdout_lines
+  when: grid_engine_master == True and not 'capsid' in sge_current_users.stdout.split(',')
 
 # Again, we don't want to do this if it already exists
 - name: SGE | Check current host groups
   command: qconf -shgrpl
+  ignore_errors: yes
   when: grid_engine_master == True
   register: sge_current_host_groups
 
@@ -51,6 +52,7 @@
 # Again, we don't want to do this if it already exists
 - name: SGE | Check current queues
   command: qconf -sql
+  ignore_errors: yes
   when: grid_engine_master == True
   register: sge_current_queues
 
