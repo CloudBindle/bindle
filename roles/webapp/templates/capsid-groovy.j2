@@ -1,0 +1,47 @@
+// Ansible-generated Groovy configuration file for CaPSID
+
+grails {
+    plugins {
+        springsecurity {
+            ldap {
+                active = false
+                context {
+                    server = "ldap://ldap.oicr.on.ca/"
+                    anonymousReadOnly = true
+                }
+                search {
+                    base = "dc=oicr,dc=on,dc=ca"
+                }
+                authorities {
+                    groupSearchBase = "ou=Groups,dc=oicr,dc=on,dc=ca"
+                    groupSearchFilter = "memberUid={1}"
+                    retrieveDatabaseRoles = true
+                }
+            }
+        }
+    }
+
+    mongo {
+        host = "database-1"
+        databaseName = "capsid"
+        port = 27017
+        username = ""
+        password = ""
+
+        options {
+            autoConnectRetry = true
+            connectTimeout = 3000
+            connectionsPerHost = 40
+            socketTimeout = 60000
+            threadsAllowedToBlockForConnectionMultiplier = 5
+            maxAutoConnectRetryTime = 5
+            maxWaitTime = 120000
+        }
+    }
+}
+
+datasource {
+    grails {
+        gridfs = "capsid"
+    }
+}

@@ -1,0 +1,8 @@
+---
+# file: roles/java/tasks/main.yml
+- include: 'cloudera.yml'
+  when: java_provider == "Cloudera"
+
+- include: 'openjdk7.yml'
+  when: java_provider == "OpenJDK7"
+

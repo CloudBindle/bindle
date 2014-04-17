@@ -1,0 +1,10 @@
+- name: CaPSID pipeline | Get bowtie2
+  get_url:
+    dest: '/tmp/bowtie2-2.2.2-linux-x86_64.zip'
+    url: 'http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.2/bowtie2-2.2.2-linux-x86_64.zip/download'
+
+- name: CaPSID pipeline | Unpack bowtie2
+  shell: unzip /tmp/bowtie2-2.2.2-linux-x86_64.zip chdir=/var/local creates=/var/local/bowtie2-2.2.2
+
+- name: CaPSID pipeline | Make clean link to bowtie2
+  file: state=link src=/var/local/bowtie2-2.2.2 dest=/var/local/bowtie2
