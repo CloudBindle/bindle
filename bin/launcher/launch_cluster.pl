@@ -40,6 +40,7 @@ my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
 my $vb_ram = 12000;
 my $vb_cores = 2;
+my @ebs_vols = ();
 
 my $help = 0;
 
@@ -56,6 +57,7 @@ GetOptions (
   "skip-launch" => \$skip_launch,
   "vb-ram=i" => \$vb_ram,
   "vb-cores=i" => \$vb_cores,
+  "aws-ebs=s{1,}" => \@ebs_vols,
   "help" => \$help,
 );
 
@@ -454,6 +456,10 @@ sub prepare_files {
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
+    copy("templates/setup_volumes.pl", "$work_dir/$node/setup_volumes.pl");
+    copy("templates/setup_gluster_peers.pl", "$work_dir/$node/setup_gluster_peers.pl");
+    copy("templates/setup_gluster_service.pl", "$work_dir/$node/setup_gluster_service.pl");
+    copy("templates/setup_gluster_volumes.pl", "$work_dir/$node/setup_gluster_volumes.pl");
     # these are used for when the box is rebooted, it setups the /etc/hosts file for example
     replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
     replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
@@ -484,6 +490,27 @@ sub setup_vagrantfile {
     $configs->{VB_CORES} = $cores;
     $configs->{VB_RAM} = $ram;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
+    if (not exists $configs->{AWS_REGION}){
+	$configs->{AWS_REGION} = "us-east-1";
+    }
+    if (not exists $configs->{AWS_ZONE} or $configs->{AWS_ZONE} eq "nil" ){
+	$configs->{AWS_ZONE} = "nil";
+    }
+    else{
+	if ($configs->{AWS_ZONE} !~ /^"\S+"$/) { $configs->{AWS_ZONE} = "\"$configs->{AWS_ZONE}\""; }
+    }
+    $configs->{AWS_EBS_VOLS} = "";
+    if (scalar @ebs_vols > 0){
+	$configs->{AWS_EBS_VOLS} .= "aws.block_device_mapping = [";
+	my $count = 102;
+	foreach my $size (@ebs_vols){
+            my $current_name = chr($count);
+	    $configs->{AWS_EBS_VOLS} .= "{'DeviceName' => \"/dev/sd$current_name\", 'VirtualName' => \"block_storage\", 'Ebs.VolumeSize' => $size, 'Ebs.DeleteOnTermination' => true},";
+	    $count += 1;
+	}
+        chop($configs->{AWS_EBS_VOLS});
+	$configs->{AWS_EBS_VOLS} .= "]";
+    }
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better

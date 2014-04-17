@@ -11,6 +11,8 @@
 
 echo `date` 'Begin initializing hadoop filesystems' >> /tmp/hadoop-init.log
 
+# virtualbox instances come up with an invalid hostname which needs to be set before starting hdfs
+hostname %{HOST}
 HOST='%{HOST}'
 
 # remove the old 'master' entry
@@ -74,6 +76,8 @@ fi
 
 service hadoop-hdfs-namenode start
 service hadoop-hdfs-datanode start
+# virtualbox launches can take up to 40 seconds for hdfs to settle
+sleep 60
 
 # initialize HDFS for services
 sudo -u hdfs hadoop fs -mkdir /tmp

@@ -1,21 +1,30 @@
 use strict;
+use Getopt::Long;
 
 # PURPOSE:
-# This script attempts to format, mount, encrypt, and add volumes to HDFS.  You
+# This script attempts to format, mount, and encrypt all the volumes available . You
 # will be left with various devices mounted as /mnt/<devname>/ with a directory
 # called /mnt/<devname>/encrypted under which anything written will be
 # encrypted using ecryptfs with a random key. Anything outside of this
 # directory will not be encrypted. If ecryptfs is not installed the encrypted
 # directory is not created.
 # ASSUMPTIONS:
-# * hdfs is not running
-# * you have ecryptfs, mkfs.xfs, and hadoop installed
-# * you want all drives to be used for HDFS
+# * this script does not setup HDFS or Gluster
+# * you have ecryptfs and mkfs.xfs installed
 # TODO
-# * setup via hadoop config for hdfs no longer works!  need to improve this
 
+my $final_list;
+my $out_file = "mount_report.txt";
 my $list = `ls -1 /dev/sd* /dev/xv*`;
 my @list = split /\n/, $list;
+
+GetOptions (
+  "output=s" => \$out_file
+);
+
+
+# MAIN LOOP
+
 foreach my $dev (@list) {
   # skip if doesn't exist
   next if (!-e $dev || -l $dev);
@@ -24,41 +33,36 @@ foreach my $dev (@list) {
   # then extra device so can continue
   print "DEV: $dev\n";
   # if already mounted just add directory
-  if(mounted($dev)) {
-    print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
-    my $mount_path = find_mount_path($dev);
-    # if ecryptfs was success, the mount path gets encrypted added to it
-    if(setup_ecryptfs($mount_path)) {
-      $mount_path = $mount_path."/encrypted";
-    }
-    if (!-e "$mount_path/hadoop-hdfs/cache/hdfs/dfs/data") {
-      print "  MOUNT NOT IN HDFS SETTINGS\n";
-      system("mkdir -p $mount_path/hadoop-hdfs/cache/hdfs/dfs/data && chown -R hdfs:hdfs $mount_path/hadoop-hdfs");
-      add_to_config("$mount_path/hadoop-hdfs/cache/hdfs/dfs/data");
-    }
-  } else {
+  if(!mounted($dev)) {
     print "  NOT MOUNTED!\n";
-    my $format = system("bash -c 'mkfs.xfs -f $dev &> /dev/null'");
+    my $format = system("bash -c 'mkfs.xfs -i size=512 $dev &> /dev/null'");
     if ($format) { print "  UNABLE TO FORMAT!\n"; }
-    else {
-      print "  FORMATTED OK!\n";
-      $dev =~ /\/dev\/(\S+)/;
-      my $dev_name = $1;
-      if (!mounted($dev_name)) {
-        print "  MOUNTING BECAUSE NOT MOUNTED\n";
-        my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name'");
-        my $mount_path = "/mnt/$dev_name";
-        if (setup_ecryptfs("/mnt/$dev_name")) { $mount_path = $mount_path."/encrypted"; }
-        my $mount2 = system("mkdir -p $mount_path/hadoop-hdfs/cache/hdfs/dfs/data && chown -R hdfs:hdfs $mount_path/hadoop-hdfs");
-        if ($mount != 0 || $mount2 != 0) { print "  UNABLE TO MOUNT $dev on /mnt/$1\n"; }
-        else {
-          # <value>file:///var/lib/hadoop-hdfs/cache/${user.name}/dfs/data</value>
-          add_to_config("$mount_path/hadoop-hdfs/cache/hdfs/dfs/data");
-        }
-      }
-    }
+    else {  print "  FORMATTED OK!\n"; }
+    $dev =~ /\/dev\/(\S+)/;
+    my $dev_name = $1;
+    print "  MOUNTING BECAUSE NOT MOUNTED\n";
+    my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name' && chmod a+rwx /mnt/$dev_name");
+    if ($mount) { print "  UNABLE TO MOUNT $dev on /mnt/$dev_name\n"; }
+  } else {
+    print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
   }
+  my $mount_path = find_mount_path($dev);
+  # if ecryptfs was success, the mount path gets encrypted added to it
+  if(setup_ecryptfs($mount_path)) {
+    $mount_path = $mount_path."/encrypted";
+  }
+  # add to the list of mounted dirs
+  $final_list .= "$mount_path\n";
 }
+
+# OUTPUT REPORT
+
+open OUT, ">$out_file" or die "Can't open output file $out_file\n";
+print OUT $final_list;
+close OUT;
+
+
+# SUBROUTINES
 
 sub blacklist {
   my $dev = shift;
@@ -107,13 +111,19 @@ sub setup_ecryptfs {
   # attempt to find this tool
   my $result = system("which mount.ecryptfs");
   if ($result == 0) {
-    my @chars = ( "A" .. "Z", "a" .. "z", 0 .. 9 );
-    my $password = join("", @chars[ map { rand @chars } ( 1 .. 11 ) ]);
-    my $ecrypt_cmd = "mkdir -p $dir/encrypted && mount.ecryptfs $dir/encrypted $dir/encrypted -o ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough=n,ecryptfs_enable_filename_crypto=n,no_sig_cache,key=passphrase:passwd=$password";
-    $ecrypt_result = system($ecrypt_cmd);
-    if ($ecrypt_result) {
-       print "   ERROR: there was a problem running the ecrypt command $ecrypt_cmd\n";
-       return(0);
+    my $found = `mount | grep $dir/encrypted | grep 'type ecryptfs' | wc -l`;
+    chomp $found;
+    if ($found =~ /0/) {
+      my @chars = ( "A" .. "Z", "a" .. "z", 0 .. 9 );
+      my $password = join("", @chars[ map { rand @chars } ( 1 .. 11 ) ]);
+      my $ecrypt_cmd = "mkdir -p $dir/encrypted && mount.ecryptfs $dir/encrypted $dir/encrypted -o ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough=n,ecryptfs_enable_filename_crypto=n,no_sig_cache,key=passphrase:passwd=$password && chmod a+rwx $dir/encrypted";
+      $ecrypt_result = system($ecrypt_cmd);
+      if ($ecrypt_result) {
+         print "   ERROR: there was a problem running the ecrypt command $ecrypt_cmd\n";
+         return(0);
+      }
+    } else {
+      print "   ALREADY ENCRYPTED: this was already encrypted $dir so skipping.\n";
     }
   } else {
     print "   ERROR: can't find mount.ecryptfs so skipping encryption of the HDFS volume\n";
