@@ -1,0 +1,7 @@
+{
+	"general" : {
+		"LAUNCH_CMD": "vagrant up",
+		"BOX" : "Ubuntu_12.04",
+		"BOX_URL" : "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"
+	}
+}

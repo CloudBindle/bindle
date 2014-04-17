@@ -113,6 +113,7 @@ do not use your native package manager as shown below for Ubuntu:
 * Data::Dumper: should be installed by default with Perl
 * JSON: eg "sudo apt-get install libjson-perl" on Ubuntu 12.04
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
+* More perl libraries " sudo apt-get install libfile-slurp-perl libfile-remove-perl " 
 
 To check to see if you have these you do:
 

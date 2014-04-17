@@ -1,0 +1,7 @@
+{
+	"general" : {
+		"LAUNCH_CMD": "vagrant up --provider=vcloud",
+		"BOX" : "Ubuntu_12.04",
+		"BOX_URL" : "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
+	}
+}

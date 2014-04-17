@@ -1,0 +1,61 @@
+{
+	"general" : {
+		"PREPARE_FILES" : [
+			{
+				"action" : "autoreplace",
+				"input" :  "templates/status.cron",
+				"output" : "status.cron"
+			},
+			{
+				"action" : "autoreplace",
+				"input" :  "templates/seqware/seqware-webservice.xml",
+				"output" : "seqware-webservice.xml"
+			},
+			{
+				"action" : "autoreplace",
+				"input" :  "templates/seqware/seqware-portal.xml",
+				"output" : "seqware-portal.xml"
+			},
+			{
+				"action" : "copy",
+				"input" :  "templates/settings",
+				"output" : "settings"
+			},
+			{
+				"action" : "copy",
+				"input" :  "templates/user_data.txt",
+				"output" : "user_data.txt"
+			},
+			{
+				"action" : "copy",
+				"input" :  "templates/setup_hdfs_volumes.pl",
+				"output" : "setup_hdfs_volumes.pl"
+			},
+			{
+				"action" : "replace_host",
+				"input" :  "templates/hadoop-init-master",
+				"output" : "hadoop-init-master"
+			},
+			{
+				"action" : "replace_host",
+				"input" :  "templates/hadoop-init-worker",
+				"output" : "hadoop-init-worker"
+			},
+			{
+				"action" : "replace_host",
+				"input" :  "templates/sge-init-master",
+				"output" : "sge-init-master"
+			},
+			{
+				"action" : "copy",
+				"input" :  "templates/conf.worker.tar.gz",
+				"output" : "conf.worker.tar.gz"
+			},
+			{
+				"action" : "copy",
+				"input" :  "templates/conf.master.tar.gz",
+				"output" : "conf.master.tar.gz"
+			}
+		]
+	}
+}

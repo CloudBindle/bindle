@@ -1,12 +1,16 @@
 use strict;
+use warnings;
+
 use Getopt::Long;
 use Data::Dumper;
 use JSON;
 #use Template;
-use Config;
-$Config{useithreads} or die('Recompile Perl with threads to run this program.');
-use threads;
 use Storable 'dclone';
+
+use File::Slurp;
+use File::Remove 'remove';
+use File::Path 'make_path';
+use Config::Any::Merge;
 
 # VARS
 
@@ -27,13 +31,7 @@ use Storable 'dclone';
 # * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
-my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
-my $aws_key = '';
-my $aws_secret_key = '';
-my $launch_aws = 0;
-my $launch_vb = 0;
-my $launch_os = 0;
-my $launch_vcloud = 0;
+my $provider = "virtualbox";
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
@@ -47,10 +45,11 @@ my $help = 0;
 if (scalar(@ARGV) == 0) { $help = 1; }
 
 GetOptions (
-  "use-aws" => \$launch_aws,
-  "use-virtualbox" => \$launch_vb,
-  "use-openstack" => \$launch_os,
-  "use-vcloud" => \$launch_vcloud,
+  "provider=s" => \$provider,
+  "use-aws" => sub { $provider = 'aws'; warn("--use-aws is deprecated: use --provider=aws"); },
+  "use-virtualbox" => sub { $provider = 'virtualbox'; warn("--use-virtualbox is deprecated: use --provider=virtualbox"); },
+  "use-openstack" => sub { $provider = 'openstack'; warn("--use-openstack is deprecated: use --provider=openstack"); },
+  "use-vcloud" => sub { $provider = 'vcloud'; warn("--use-vcloud is deprecated: use --provider=vcloud"); },
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
   "skip-launch" => \$skip_launch,
@@ -59,21 +58,23 @@ GetOptions (
   "help" => \$help,
 );
 
-
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --provider=aws|virtualbox|openstack|vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
-run("mkdir -p $work_dir");
+make_path($work_dir);
 
 # config object used for find and replace
 my $configs = {};
 my $cluster_configs = {};
 # Use this temporary object to reconfigure the worker arrays to the format the original script expects
 my $temp_cluster_configs = ();
-($configs, $temp_cluster_configs) = read_json_config($json_config_file);
+my @config_files = ($json_config_file);
+unshift @config_files, "templates/launchers/${provider}-config.json";
+unshift @config_files, "templates/launchers/default-config.json";
+($configs, $temp_cluster_configs) = read_config(@config_files);
 
 foreach my $node_config (@{$temp_cluster_configs}){
   my @names = @{$node_config->{'name'}};
@@ -88,36 +89,12 @@ foreach my $node_config (@{$temp_cluster_configs}){
 
 #print Dumper($cluster_configs);
 
-# dealing with defaults from the config including various SeqWare-specific items
-if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
-if (!defined($configs->{'MAVEN_MIRROR'})) { $configs->{'MAVEN_MIRROR'} = ""; }
-
-
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
 # you can override for VirtualBox only via the json config
 # you can find boxes listed at http://www.vagrantbox.es/
-if ($launch_vb) {
-  $launch_cmd = "vagrant up";
 
-  # Allow a custom box to be specified
-  if (!defined($configs->{'BOX'})) { $configs->{'BOX'} = "Ubuntu_12.04"; }
-  if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"; }
-} elsif ($launch_os) {
-  $launch_cmd = "vagrant up --provider=openstack";
-  $configs->{'BOX'} = "dummy";
-  $configs->{'BOX_URL'} = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box";
-} elsif ($launch_aws) {
-  $launch_cmd = "vagrant up --provider=aws";
-  $configs->{'BOX'} = "dummy";
-  $configs->{'BOX_URL'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
-} elsif ($launch_vcloud) {
-  $launch_cmd = "vagrant up --provider=vcloud";
-  $configs->{'BOX'} = "pancancer_1";
-  $configs->{'BOX_URL'} = "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
-} else {
-  die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
-}
+$launch_cmd = $configs->{'LAUNCH_CMD'};
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
@@ -206,114 +183,91 @@ sub provision_instances {
   # this is putting in a variable for the /etc/hosts file
   my $host_str = figure_out_host_str($hosts);
   $configs->{'HOSTS'} = $host_str;
-  my $sge_host_str = figure_out_sge_host_str($hosts);
-  $configs->{'SGE_HOSTS'} = $sge_host_str;
   # FIXME: notice hard-coded to be "master"
   my $master_pip = $hosts->{master}{pip};
   $configs->{'MASTER_PIP'} = $hosts->{master}{pip};
   my $exports = make_exports_str($hosts);
   $configs->{'EXPORTS'} = $exports;
-  # DCC specific stuff
-  # for the settings.yml
-  $configs->{'DCC_PORTAL_SETTINGS_HOST_STR'} = make_dcc_portal_host_string($hosts);
-  # for the elasticsearch.yml
-  $configs->{'DCC_ES_HOSTS_STR'} = make_dcc_es_host_string($hosts); 
 
   # now process templates to remote destinations
   run_provision_files($cluster_configs, $hosts);
 
   # this runs over all hosts and calls the provision scripts in the correct order
   run_provision_script_list($cluster_configs, $hosts);
-
-}
-
-sub make_dcc_es_host_string {
-  my ($hosts) = @_;
-  my $host_str = "";
-  my $first = 1;
-  foreach my $host (keys %{$hosts}) {
-    my $pip = $hosts->{$host}{pip};
-    if ($first) { $first = 0; $host_str .= "\"$pip\""; }
-    else { $host_str .= ", \"$pip\""; }
-  }
-  return($host_str);
-}
-
-sub make_dcc_portal_host_string {
-  my ($hosts) = @_;
-  my $host_str = "";
-  foreach my $host (keys %{$hosts}) {
-    my $pip = $hosts->{$host}{pip};
-    $host_str .= "
-    - host: \"$pip\"
-      port: 9300";
-  }
-  return($host_str);
 }
 
 # processes and copies files to the specific hosts
 sub run_provision_files {
   my ($cluster_configs, $hosts) = @_;
-  my @all_threads;
+
+  my @processes = ();
   foreach my $host_name (sort keys %{$hosts}) {
-    my $scripts = $cluster_configs->{$host_name}{provision_files};
-    my $host = $hosts->{$host_name};
-    print "  PROVISIONING FILES TO HOST $host_name\n";
-    my $thr = threads->create(\&provision_files_thread, $host_name, $scripts, $host);
-    print "  LAUNCHED THREAD PROVISION FILES TO $host_name\n";
-    push (@all_threads, $thr);
+    push @processes, [\&run_provision_files_host, $cluster_configs, $host_name, $hosts->{$host_name}];
   }
-  # Now wait for the threads to finish; this will block if the thread isn't terminated
-  foreach my $thr (@all_threads){
-    $thr->join();
+  prun(@processes) or die( errplus() );
   }
+
+sub run_provision_files_host {
+  my ($cluster_configs, $host_name, $host) = @_;
+  my $scripts = $cluster_configs->{$host_name}{provision_files};
+  print "  PROVISIONING FILES TO HOST $host_name\n";
+  my $thr = provision_files_thread($host_name, $scripts, $host);
+  print "  LAUNCHED PROCESS PROVISION FILES TO $host_name\n";
 }
 
 sub provision_files_thread {
   my ($host_name, $scripts, $host) = @_;
-  print "    STARTING THREAD TO PROVISION FILES TO HOST $host_name\n";
+  print "    STARTING PROCESS TO PROVISION FILES TO HOST $host_name\n";
   # now run each of these scripts on this host
   foreach my $script (keys %{$scripts}) {
     print "  PROCESSING FILE FOR HOST: $host_name FILE: $script DEST: ".$scripts->{$script}."\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("mkdir -p $work_dir/scripts/");
+    make_path("$work_dir/scripts");
     my $tmp_script_name = "$work_dir/scripts/tmp_$host_name\_$script_name";
-    system("rm $tmp_script_name");
+    remove($tmp_script_name);
     # set the current host before processing file
     setup_os_config_scripts_list($script, $tmp_script_name);
     run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script}, $host_name);
-    system("rm $tmp_script_name");
+    remove($tmp_script_name);
+  }
+}
+
+# Process to handle provisioning. This is somewhat harder, as we have to know when to stop, and
+# we should really detect this before we fork a process, because that way we don't need to worry
+# about getting data back. 
+
+sub run_provision_script_list {
+  my ($cluster_configs, $hosts) = @_;
+
+  my @phases = ([]);
+  my $cont = 1;
+  my $curr_cell = 0;
+  while($cont) {
+    foreach my $host_name (sort keys %{$hosts}) {
+      my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
+      if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
+      else {
+        my $curr_scripts = $scripts->[$curr_cell];
+        push @{$phases[-1]}, [\&run_provision_script_host, $cluster_configs, $host_name, $hosts->{$host_name}, $curr_scripts, $curr_cell];
+      }
+    }
+    push @phases, [];
+    $curr_cell++;
+  }
+
+  foreach my $processes (@phases) {
+    if (@$processes) {
+      prun(@$processes) or die( errplus() );
+    }
   }
 }
 
 
-# this runs all the "second_pass_scripts" in the json for a given host
-sub run_provision_script_list {
-  my ($cluster_configs, $hosts) = @_;
-  my $cont = 1;
-  my $curr_cell = 0;
-
-  #print Dumper ($cluster_configs);
-
-  while($cont) {
-    my @all_threads = ();
-    foreach my $host_name (sort keys %{$hosts}) {
-      print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
-      my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
-      my $host = $hosts->{$host_name};
-      if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    
-      else {
-        my $curr_scripts = $scripts->[$curr_cell];
-        my $thr = threads->create(\&provision_script_list_thread, $host_name, $host, $curr_scripts, $curr_cell);
-        push(@all_threads, $thr);
-      }
-    }
-    foreach my $thr (@all_threads){
-      $thr->join();
-    }
-    $curr_cell++;
-  }
+sub run_provision_script_host {
+  my ($cluster_configs, $host_name, $host, $curr_scripts, $curr_cell) = @_;
+  print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
+  provision_script_list_thread($host_name, $host, $curr_scripts, $curr_cell);
 }
 
 sub provision_script_list_thread {
@@ -324,8 +278,8 @@ sub provision_script_list_thread {
     print "  RUNNING PASS FOR HOST: $host_name ROUND: $curr_cell SCRIPT: $script\n";
     $script =~ /\/([^\/]+)$/;
     my $script_name = $1;
-    system("mkdir -p $work_dir/scripts/");
-    system("rm $work_dir/scripts/config_script.$host_name\_$script_name");
+    make_path("$work_dir/scripts");
+    remove("$work_dir/scripts/config_script.$host_name\_$script_name");
     # set the current host before processing file
     $local_configs->{'HOST'} = $host_name;
     setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
@@ -382,54 +336,42 @@ sub setup_os_config_scripts_list {
   my @scripts = split /,/, $config_scripts;
   foreach my $script (@scripts) {
     autoreplace($script, "$output.temp", $configs); 
-    run("cat $output.temp >> $output");
-    run("rm $output.temp");
+    write_file($output, {append => 1}, read_file("$output.temp"));
+    remove("$output.temp");
   }
 }
 
 # this basically cats files together after doing an autoreplace
 # that fills in variables from the config part of the JSON
-sub setup_os_config_scripts() {
+sub setup_os_config_scripts {
   my ($configs, $output_dir, $output_file) = @_;
   foreach my $host (sort keys %{$configs}) {
-    run("mkdir $output_dir/$host");
+    make_path("$output_dir/$host");
     foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
       autoreplace($script, "$output_file.temp");
-      run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
-      run("rm $output_file.temp");
+      write_file("$output_dir/$host/$host\_$output_file", {append => 1}, read_file("$output_file.temp"));
+      remove("$output_file.temp");
     }
   }
 }
 
-
-sub read_config() {
-  my ($file, $config) = @_;
-  open IN, "<$file" or die "Can't open your vagrant launch config file: $file\n";
-  while (<IN>) {
-   chomp;
-   next if (/^#/);
-   if (/^\s*(\S+)\s*=\s*(.*)$/) {
-     $config->{$1} = $2;
-     #print "$1 \t $2\n";
-   }
-  }
-  close IN;
-}
-
-
 sub launch_instances {
-  my @all_threads;
+
+  my @processes = ();
   foreach my $node (sort keys %{$cluster_configs}) {  
-    print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
-    my $thr = threads->create(\&launch_instance, $node);
-    push (@all_threads, $thr);
+    push @processes, [\&launch_instance_process, $node];
   }
-  print "  ALL LAUNCH THREADS STARTED\n";
-  # Now wait for the threads to finish; this will block if the thread isn't terminated
-  foreach my $thr (@all_threads){
-    $thr->join();
+
+  print " STARTING LAUNCH PROCESSES\n";
+  prun(@processes) or die( errplus() );
+  print " ALL LAUNCH PROCESSES COMPLETED\n";
   }
-  print " ALL LAUNCH THREADS COMPLETED\n";
+
+sub launch_instance_process {
+  my ($node) = @_;
+  print "  STARTING PROCESS TO LAUNCH INSTANCE FOR NODE $node\n";
+  launch_instance($node);
+  print "  DONE PROCESS TO LAUNCH INSTANCE FOR NODE $node\n";
 }
 
 sub launch_instance {
@@ -443,34 +385,20 @@ sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
   setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir", $vb_ram, $vb_cores);
+  my @file_actions = @{$configs->{PREPARE_FILES}};
   foreach my $node (sort keys %{$cluster_configs}) {
-    # cron for SeqWare
-    autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
-    # various files used for SeqWare when installed and not built from source
-    autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/seqware-webservice.xml");
-    autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/seqware-portal.xml");
-    # settings, user data
-    copy("templates/settings", "$work_dir/$node/settings");
-    copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
-    # script for setting up hadoop hdfs
-    copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
-    # these are used for when the box is rebooted, it setups the /etc/hosts file for example
-    replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
-    replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
-    # this is used for the master SGE node to recover when the system is rebooted
-    # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
-    replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
-    # hadoop settings files
-    # FIXME: right now these config files have "master" hardcoded as the master node
-    # FIXME: break out into config driven provisioner
-    copy("templates/conf.worker.tar.gz", "$work_dir/$node/conf.worker.tar.gz");
-    copy("templates/conf.master.tar.gz", "$work_dir/$node/conf.master.tar.gz");
-    # DCC
-    # FIXME: break out into config driven provisioner
-    autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
-    # DCC validator
-    copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
-    copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
+    foreach my $action (@file_actions) {
+      my $action_type = $action->{action};
+      if ($action_type eq 'autoreplace') {
+        autoreplace($action->{input}, "$work_dir/$node/$action->{output}");
+      } elsif ($action_type eq 'copy') {
+        copy($action->{input}, "$work_dir/$node/$action->{output}");
+      } elsif ($action_type eq 'replace_host') {
+        replace($action->{input}, "$work_dir/$node/$action->{output}", '%{HOST}', $node);
+      } else {
+        die("Invalid action type: $action_type");
+      }
+    }
   }
 }
 
@@ -488,9 +416,9 @@ sub setup_vagrantfile {
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better
     autoreplace("$part", "$node_output.temp");
-    run("cat $node_output.temp >> $node_output");
-    run("rm $node_output.temp");
-    run("cat $end >> $node_output");
+    write_file($node_output, {append => 1}, read_file("$node_output.temp"));
+    remove("$node_output.temp");
+    write_file($node_output, {append => 1}, read_file($end));
     # hack to deal with empty network/floatIP
     my $full_output = `cat $node_output`;
     # HACK: this is a hack because we don't properly templatize the Vagrantfile... I'm doing this to eliminate empty os.network and os.floating_ip which cause problems on various OpenStack clouds
@@ -505,17 +433,15 @@ sub setup_vagrantfile {
 }
 
 # reads a JSON-based config
-sub read_json_config {
-  my ($config_file) = @_;
-  open IN, "<$config_file" or die;
-  my $json_txt = "";
-  while(<IN>) { 
-    next if (/^\s*#/);
-    $json_txt .= $_;
-  }
-  close IN;
-  my $temp_configs = decode_json($json_txt);
-  return($temp_configs->{general}, $temp_configs->{node_config});
+# SNW: Modified to use Config::Any::Merge, as this allows merging from multiple config files - 
+# this provides a more sane approach to defaulting should we ever choose to use it. And we
+# probably shouldn't anyway. As a bonus, we get to use a wider range of config files, including
+# YAML, which permits documentation. JSON doesn't strictly, so it's harder for model deployment. 
+# Not a huge fan of YAML btw, but for readability, it's a win over JSON. 
+sub read_config {
+  my @files = @_;
+  my $cfg = Config::Any::Merge->load_files({files => [@files], use_ext => 1});
+  return($cfg->{general}, $cfg->{node_config});
 }
 
 sub autoreplace {
@@ -524,8 +450,8 @@ sub autoreplace {
     $localconfigs = $configs;
   }
   print "AUTOREPLACE: $src $dest\n";
-  open IN, "<$src" or die "Can't open input file $src\n";
-  open OUT, ">$dest" or die "Can't open output file $dest\n";
+  open IN, "<", $src or die "Can't open input file $src\n";
+  open OUT, ">", $dest or die "Can't open output file $dest\n";
   while(<IN>) {
     foreach my $key (sort keys %{$localconfigs}) {
       my $value = $localconfigs->{$key};
@@ -540,8 +466,8 @@ sub autoreplace {
 sub replace {
   my ($src, $dest, $from, $to) = @_;
   print "REPLACE: $src, $dest, $from, $to\n";
-  open IN, "<$src" or die;
-  open OUT, ">$dest" or die;
+  open IN, "<", $src or die;
+  open OUT, ">", $dest or die;
   while(<IN>) {
     $_ =~ s/$from/$to/g;
     print OUT $_;
@@ -553,8 +479,8 @@ sub replace {
 sub copy {
   my ($src, $dest) = @_;
   print "COPYING: $src, $dest\n";
-  open IN, "<$src" or die;
-  open OUT, ">$dest" or die;
+  open IN, "<", $src or die;
+  open OUT, ">", $dest or die;
   while(<IN>) {
     print OUT $_;
   }
@@ -581,5 +507,89 @@ sub run {
   }
   print "RUNNING: $final_cmd\n";
   my $result = system($final_cmd);
-  if ($result != 0) { die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n"; }
+  if ($result != 0) { 
+    die "\nERROR!!! CMD $cmd RESULTED IN RETURN VALUE OF $result\n\n";
+  } else {
+    print "DONE: $final_cmd - status $result\n";
 }
+}
+
+###############################################################################################
+# Embedded version of Parallel::Simple v0.01, basically so that we can avoid the dependency on threads
+# in the initial version. This does a very similar thing, except more simply and with fork(). 
+# If you don't have a working fork(), you're screwed. 
+
+my $parallel_error;
+my $parallel_return_values;
+
+sub err { $parallel_error         }
+sub rv  { $parallel_return_values }
+ 
+sub errplus {
+    return unless ( defined $parallel_error );
+    "$parallel_error\n" . ( ref($parallel_return_values) =~ /HASH/ ?
+        join( '', map { "\t$_ => $parallel_return_values->{$_}\n" } sort keys %$parallel_return_values ) :
+        join( '', map { "\t$_ => $parallel_return_values->[$_]\n" } 0..$#$parallel_return_values )
+    );
+}
+ 
+sub prun {
+    ( $parallel_error, $parallel_return_values ) = ( undef, undef );         # reset globals
+    return 1 unless ( @_ );                                # return true if 0 args passed
+    my %options = %{pop @_} if ( ref($_[-1]) =~ /HASH/ );  # grab options, if specified
+    return 1 unless ( @_ );                                # return true if 0 code blocks passed
+ 
+    # normalize named and unnamed blocks into similar structure to simplify main loop
+    my $named  = ref($_[0]) ? 0 : 1;  # if first element is a subref, they're not named
+    my $i      = 0;                   # used to turn array into hash with array-like keys
+    my %blocks = $named ? @_ : map { $i++ => $_ } @_;
+ 
+    # fork children
+    my %child_registry;  # pid => { name => $name, return_value => $return_value }
+    while ( my ( $name, $block ) = each %blocks ) {
+        my $child = fork();
+        unless ( defined $child ) {
+            $parallel_error = "$!";
+            last;  # something's wrong; stop trying to fork
+        }
+        if ( $child == 0 ) {  # child
+            my ( $subref, @args ) = ref($block) =~ /ARRAY/ ? @$block : ( $block );
+            my $return_value = eval { $subref->( @args ) };
+            warn( $@ ) if ( $@ );  # print death message, because eval doesn't
+            exit( $@ ? 255 : $options{use_return} ? $return_value : 0 );
+        }
+        $child_registry{$child} = { name => $name, return_value => undef };
+    }
+ 
+    # wait for children to finish
+    my $successes = 0;
+    my $child;
+    do {
+        $child = waitpid( -1, 0 );
+        if ( $child > 0 and exists $child_registry{$child} ) {
+            $child_registry{$child}{return_value} = $? unless ( defined $child_registry{$child}{return_value} );
+            $successes++ if ( $? == 0 );
+            if ( $? > 0 and $options{abort_on_error} ) {
+                while ( my ( $pid, $child ) = each %child_registry ) {
+                    unless ( defined $child->{return_value} ) {
+                        kill( 9, $pid );
+                        $child->{return_value} = -1;
+                    }
+                }
+            }
+        }
+    } while ( $child > 0 );
+ 
+    # store return values using appropriate data type
+    $parallel_return_values = $named
+        ? { map { $_->{name} => $_->{return_value} } values %child_registry }
+        : [ map { $_->{return_value} } sort { $a->{name} <=> $b->{name} } values %child_registry ];
+ 
+    my $num_blocks = keys %blocks;
+    return 1 if ( $successes == $num_blocks );  # all good!
+ 
+    $parallel_error = "only $successes of $num_blocks blocks completed successfully";
+    return 0;  # sorry... better luck next time
+}
+
+1;
