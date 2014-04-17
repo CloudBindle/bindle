@@ -36,6 +36,8 @@ my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
+my $vb_ram = 12000;
+my $vb_cores = 2;
 
 my $help = 0;
 
@@ -51,12 +53,14 @@ GetOptions (
   "working-dir=s" => \$work_dir,
   "config-file=s" => \$json_config_file,
   "skip-launch" => \$skip_launch,
+  "vb-ram=i" => \$vb_ram,
+  "vb-cores=i" => \$vb_cores,
   "help" => \$help,
 );
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --provider=aws|virtualbox|openstack|vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --provider=aws|virtualbox|openstack|vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
@@ -281,7 +285,7 @@ sub provision_script_list_thread {
     setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
     run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo mkdir -p /vagrant_scripts", $host_name);
     run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo chmod a+rwx /vagrant_scripts", $host_name);
-    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
+    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash -i /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
   }
 }
 
@@ -380,7 +384,7 @@ sub launch_instance {
 sub prepare_files {
   my ($cluster_configs, $configs, $work_dir) = @_;
   # Vagrantfile, the core file used by Vagrant that defines each of our nodes
-  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir");
+  setup_vagrantfile("templates/Vagrantfile_start.template", "templates/Vagrantfile_part.template", "templates/Vagrantfile_end.template", $cluster_configs, $configs, "$work_dir", $vb_ram, $vb_cores);
   my @file_actions = @{$configs->{PREPARE_FILES}};
   foreach my $node (sort keys %{$cluster_configs}) {
     foreach my $action (@file_actions) {
@@ -400,11 +404,13 @@ sub prepare_files {
 
 # this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
-  my ($start, $part, $end, $cluster_configs, $configs, $work_dir) = @_;
+  my ($start, $part, $end, $cluster_configs, $configs, $work_dir, $ram, $cores) = @_;
   #print Dumper($cluster_configs);
   #print Dumper($configs);
   foreach my $node (sort keys %{$cluster_configs}) {
     $configs->{custom_hostname} = $node;
+    $configs->{VB_CORES} = $cores;
+    $configs->{VB_RAM} = $ram;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
@@ -413,6 +419,16 @@ sub setup_vagrantfile {
     write_file($node_output, {append => 1}, read_file("$node_output.temp"));
     remove("$node_output.temp");
     write_file($node_output, {append => 1}, read_file($end));
+    # hack to deal with empty network/floatIP
+    my $full_output = `cat $node_output`;
+    # HACK: this is a hack because we don't properly templatize the Vagrantfile... I'm doing this to eliminate empty os.network and os.floating_ip which cause problems on various OpenStack clouds
+    $full_output =~ s/os.network = "<FILLMEIN>"//;
+    $full_output =~ s/os.network = ""//;
+    $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
+    $full_output =~ s/os.floating_ip = ""//;
+    open VOUT, ">$node_output" or die;
+    print VOUT $full_output;
+    close VOUT;
   } 
 }
 
