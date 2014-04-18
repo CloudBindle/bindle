@@ -41,8 +41,8 @@ foreach my $dev (@list) {
     $dev =~ /\/dev\/(\S+)/;
     my $dev_name = $1;
     print "  MOUNTING BECAUSE NOT MOUNTED\n";
-    my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name' && chmod a+rwx /mnt/$dev_name");
-    if ($mount) { print "  UNABLE TO MOUNT $dev on /mnt/$dev_name\n"; }
+    my $mount = system("bash -c 'mkdir -p /$dev_name && mount $dev /$dev_name' && chmod a+rwx /$dev_name");
+    if ($mount) { print "  UNABLE TO MOUNT $dev on /$dev_name\n"; }
   } else {
     print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
   }
