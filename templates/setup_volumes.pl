@@ -66,7 +66,12 @@ close OUT;
 
 sub blacklist {
   my $dev = shift;
-  if ($dev =~ /sda/ || $dev =~ /hda/ || $dev =~ /xvda/) {
+  if ($dev =~ /sda/ || $dev =~ /hda/ || $dev =~ /xvda/ ||
+   $dev =~ /sdb/ || $dev =~ /hdb/ || $dev =~ /xvdb/ ||
+   $dev =~ /sdc/ || $dev =~ /hdc/ || $dev =~ /xvdc/ ||
+   $dev =~ /sdd/ || $dev =~ /hdd/ || $dev =~ /xvdd/ ||
+   $dev =~ /sde/ || $dev =~ /hde/ || $dev =~ /xvde/
+  ) {
     print "  BLACKLIST DEV $dev\n";
     return(1);
   }
