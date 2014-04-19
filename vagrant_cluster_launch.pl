@@ -425,6 +425,9 @@ sub launch_instances {
     print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
     my $thr = threads->create(\&launch_instance, $node);
     push (@all_threads, $thr);
+    # attempt to prevent RequestLimitExceeded on Amazon by sleeping between thread launch 
+    # http://docs.aws.amazon.com/AWSEC2/latest/APIReference/api-error-codes.html
+    sleep 10;
   }
   print "  ALL LAUNCH THREADS STARTED\n";
   # Now wait for the threads to finish; this will block if the thread isn't terminated
