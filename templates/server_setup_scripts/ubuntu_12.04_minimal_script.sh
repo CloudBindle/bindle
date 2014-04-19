@@ -33,7 +33,7 @@ fi
 # basic tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install curl unzip -y
+apt-get install curl unzip attr -y
 
 # ulimit
 echo "fs.file-max = 1623050" >> /etc/sysctl.conf
