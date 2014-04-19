@@ -35,6 +35,9 @@ while(<DIRS>) {
 }
 close DIRS;
 
+# disable built-in NFS server so it doesn't interfer with other NFS exports
+$cmd .= "; gluster volume set gv0 nfs.disable on";
+# turn on the volume
 $cmd .= "; gluster volume start gv0";
 
 if (system($cmd)) {
