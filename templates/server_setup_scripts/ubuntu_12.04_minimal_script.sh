@@ -116,9 +116,9 @@ fi
 # setup ephemeral and EBS volumes that are attached to this system
 apt-get update
 apt-get -q -y --force-yes install ecryptfs-utils xfsprogs
-perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt
+perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt %{GLUSTER_DEVICE_BLACKLIST} %{GLUSTER_DEVICE_WHITELIST}
 
 # now setup volumes for use with gluster
 apt-get -q -y --force-yes install glusterfs-server
-perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt
+perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt 
 

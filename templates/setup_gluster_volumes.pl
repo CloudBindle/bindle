@@ -11,10 +11,12 @@ use Getopt::Long;
 
 my $dir_map;
 my $output;
+my $blacklist;
+my $whitelist;
 
 GetOptions (
   "dir-map=s" => \$dir_map,
-  "output=s" => \$output
+  "output=s" => \$output,
 );
 
 my $out_txt;
