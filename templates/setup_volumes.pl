@@ -48,9 +48,11 @@ foreach my $dev (@list) {
   }
   my $mount_path = find_mount_path($dev);
   # if ecryptfs was success, the mount path gets encrypted added to it
-  if(setup_ecryptfs($mount_path)) {
-    $mount_path = $mount_path."/encrypted";
-  }
+  # HACK
+  # turn off encryption for now
+  #if(setup_ecryptfs($mount_path)) {
+  #  $mount_path = $mount_path."/encrypted";
+  #}
   # add to the list of mounted dirs
   $final_list .= "$mount_path\n";
 }

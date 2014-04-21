@@ -16,7 +16,9 @@ GetOptions (
   "dir-map=s" => \$dir_map,
 );
 
-my $cmd = "gluster peer status; gluster volume info; gluster volume status; gluster volume create gv0 replica 2 transport tcp";
+#my $cmd = "gluster peer status; gluster volume info; gluster volume status; gluster volume create gv0 replica 2 transport tcp";
+# turn off replicate for now
+my $cmd = "gluster peer status; gluster volume info; gluster volume status; gluster volume create gv0 transport tcp";
 
 open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
 while(<DIRS>) {
