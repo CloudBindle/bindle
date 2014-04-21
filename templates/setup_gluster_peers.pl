@@ -25,6 +25,11 @@ while(<IN>) {
   print "CMD: $cmd\n";
   if (system($cmd)) {
     print "Problems peering with '$cmd'\n";
+    sleep 5;
+    if (system($cmd)) {
+      my $output = `$cmd`;
+      print "Tried again but still problems peering with '$cmd' output is '$output'\n";
+    }
   }
 }
 close IN;
