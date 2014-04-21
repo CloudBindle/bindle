@@ -31,6 +31,7 @@ while(<IN>) {
       print "Tried again but still problems peering with '$cmd' output is '$output'\n";
     }
   }
+  sleep 5;
 }
 close IN;
 
