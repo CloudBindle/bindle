@@ -1,0 +1,16 @@
+<!-- fool netbeans into letting me open this project -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.bindle</groupId>
+  <artifactId>Bindle</artifactId>
+  <packaging>rar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>Bindle</name>
+  <url>http://maven.apache.org</url>
+  <build>
+      <sourceDirectory>.</sourceDirectory>
+  </build>
+</project>
