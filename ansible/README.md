@@ -24,6 +24,10 @@ seqware-bindle
 
 Use the regular Bindle to start VMs and then run the following script to generate an inventory file
 
-   sh ../bin/ansible-bridge/create_inventory.sh ../target-os3 > inventory
-   ansible-playbook -v -i inventory seqware-install.yml 
+   cp templates/sample_configs/vagrant_cluster_launch.blank.json.template vagrant_cluster_launch.json
 
+Customize as needed, example with openstack
+
+   perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target-os3
+   bash bin/ansible-bridge/create_inventory.sh target-os3 > inventory
+   ansible-playbook -v -i inventory ansible/seqware-install.yml 
