@@ -1,0 +1,38 @@
+---
+# file: roles/seqware-master/tasks/main.yml
+
+- name: SeqWare | Install Hadoop for a master
+  apt: pkg=hadoop-0.20-mapreduce-jobtracker state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-client state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-hdfs-namenode state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue-server state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue-plugins state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hue-oozie state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=oozie state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=oozie-client state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase-master state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Install zookeeper
+  apt: pkg=zookeeper state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=zookeeper-server state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Initialize zookeeper
+  command: service zookeeper-server init creates=/var/lib/zookeeper
+
+- name: SeqWare | Start zookeeper
+  service: name=zookeeper-server state=started
+
+- name: SeqWare | Install tomcat
+  apt: pkg=tomcat7-common state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=tomcat7 state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Install apache2
+  apt: pkg=apache2 state=present update_cache=yes cache_valid_time=3600
+  
+- name: SeqWare | Set user groups
+  user: name=mapred groups=seqware append=yes state=present
+  user: name=seqware groups=mapred append=yes state=present
+
+  

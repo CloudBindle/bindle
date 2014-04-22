@@ -22,6 +22,9 @@ This currently works only with Virtualbox.
 seqware-bindle
 ==============
 
+Note: You may need to turn off strict host key checking 
+http://docs.ansible.com/intro_getting_started.html#host-key-checking
+
 Use the regular Bindle to start VMs and then run the following script to generate an inventory file
 
    cp templates/sample_configs/vagrant_cluster_launch.blank.json.template vagrant_cluster_launch.json

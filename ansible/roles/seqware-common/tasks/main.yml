@@ -1,0 +1,60 @@
+---
+# file: roles/seqware-common/tasks/main.yml
+- name: SeqWare | Add Hadoop repository
+  lineinfile: 
+    line: 'deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib'
+    dest: /etc/apt/sources.list.d/cloudera.list
+    state: present
+    create: yes
+  register: hadooprepo
+
+- name: SeqWare | Add Hadoop repository
+  lineinfile: 
+    line: 'deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib'
+    dest: /etc/apt/sources.list.d/cloudera.list
+    state: present
+    create: yes
+  register: hadooprepo
+
+- name: SeqWare | Add signing key
+  apt_key: url=http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key state=present
+  register: hadooprepo
+
+- apt: update_cache=yes
+  when: hadooprepo.changed
+
+- name: SeqWare | Create mountable home
+  command: mkdir -p /mnt/home creates=/mnt/home
+
+- name: SeqWare | Add user
+  user: 
+    home: '/mnt/home/seqware'
+    createhome: yes
+    name: 'seqware'
+    shell: '/bin/bash'
+    
+- name: SeqWare | Add mapred group
+  group: name=mapred state=present
+
+- name: SeqWare | Add seqware group
+  group: name=seqware state=present
+
+- name: SeqWare | Create home link
+  command: ln -s ~seqware /home/seqware creates=/home/seqware
+
+- name: SeqWare | Install dependencies
+  apt: pkg=libasound2 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=libxi6 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=libxt6 state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=language-pack-en state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=git state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=maven state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=sysv-rc-conf state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=xfsprogs state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Copy resources
+  copy: 
+    src: hadoop-files
+    dest: /etc/hadoop/
+
+  

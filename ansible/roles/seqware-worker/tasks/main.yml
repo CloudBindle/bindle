@@ -1,0 +1,14 @@
+---
+# file: roles/seqware-worker/tasks/main.yml
+
+- name: SeqWare | Install Hadoop for a worker
+  apt: pkg=hadoop-0.20-mapreduce-tasktracker state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-hdfs-datanode state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hadoop-client state=present update_cache=yes cache_valid_time=3600
+  apt: pkg=hbase-regionserver state=present update_cache=yes cache_valid_time=3600
+
+- name: SeqWare | Set user groups
+  user: name=mapred groups=seqware append=yes state=present
+  user: name=seqware groups=mapred append=yes state=present
+
+  

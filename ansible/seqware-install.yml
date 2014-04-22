@@ -15,6 +15,18 @@
   sudo: True
   roles:
     - role: common
+    
+# Not sure why, but I needed this to create a /etc/hosts that actually works with the Ubuntu image here on openstack
+- hosts: all
+  sudo: True
+  # Idempotent way to build a /etc/hosts file with Ansible using your Ansible hosts inventory for a source.
+  # Will include all hosts the playbook is run on.
+  # Inspired from http://xmeblog.blogspot.com/2013/06/ansible-dynamicaly-update-etchosts.html
+  tasks:
+  - name: Build hosts file for all hosts
+    lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} {{item}}" state=present
+    when: hostvars[item].ansible_default_ipv4.address is defined
+    with_items: groups['all']
 
 # The grid master depends on the hosts file, as we need to know at least who we
 # are by this stage. 
@@ -33,4 +45,9 @@
 - hosts: master 
   sudo: True
   roles:
-    - role: postgres
+    - role: seqware-master
+    
+- hosts: worker 
+  sudo: True
+  roles:
+    - role: seqware-worker
