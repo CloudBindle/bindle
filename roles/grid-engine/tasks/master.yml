@@ -1,0 +1,63 @@
+---
+- name: SGE | Install gridengine-client
+  apt: pkg=gridengine-client state=present update_cache=yes cache_valid_time=3600
+
+- name: SGE | Install gridengine-qmon
+  apt: pkg=gridengine-qmon state=present update_cache=yes cache_valid_time=3600
+
+- name: SGE | Install gridengine-master 
+  apt: pkg=gridengine-master state=present update_cache=yes cache_valid_time=3600
+
+- name: SGE | Configure master
+  command: qconf -as {{ inventory_hostname }}
+
+# Be careful when adding the user. First get he current list, and only add if it isn't
+# already present.
+- name: SGE | Check current user list
+  shell: qconf -su users | grep -E '^entries' | cut -f2 -d ' '
+  register: sge_current_users
+
+- name: SGE | Add the capsid user
+  command: qconf -au capsid users
+  when: not 'capsid' in sge_current_users.stdout.split(',')
+
+# Again, we don't want to do this if it already exists
+- name: SGE | Check current host groups
+  command: qconf -shgrpl
+  ignore_errors: yes
+  register: sge_current_host_groups
+
+- name: SGE | Build host group configuration
+  template: src=ahgrp.j2 dest=/tmp/sge_ahgrp
+  when: not '@allhosts' in sge_current_host_groups.stdout_lines
+
+- name: SGE | Add the host group configuration
+  command: qconf -Ahgrp /tmp/sge_ahgrp
+  when: not '@allhosts' in sge_current_host_groups.stdout_lines
+
+# Again, we don't want to do this if it already exists
+- name: SGE | Check current queues
+  command: qconf -sql
+  ignore_errors: yes
+  register: sge_current_queues
+
+- name: SGE | Build main queue
+  template: src=aq.j2 dest=/tmp/sge_aq
+  when: not 'main.q' in sge_current_queues.stdout_lines
+
+- name: SGE | Add main queue
+  command: qconf -Aq /tmp/sge_aq
+  when: not 'main.q' in sge_current_queues.stdout_lines
+
+- name: SGE | Add attribute specifications
+  command: qconf -aattr {{ item.obj_spec }} {{ item.attr_name }} {{ item.val }} {{ item.obj_instance }}
+  with_items:
+    - { obj_spec: 'hostgroup', attr_name: 'hostlist', val: 'master', obj_instance: '@allhosts' }
+    - { obj_spec: 'queue', attr_name: 'hostlist', val: '@allhosts', obj_instance: 'main.q'}
+    - { obj_spec: 'queue', attr_name: 'slots', val: '4', obj_instance: 'main.q'}
+    - { obj_spec: 'hostgroup', attr_name: 'hostlist', val: 'master', obj_instance: '@allhosts' }
+
+# Now we need to add the execution hosts. This requires us to create files for each execution
+# host, and then add them one at a time. Back to templating again. We also need to have a list 
+# of worker nodes. This is the first step.
+

@@ -34,6 +34,7 @@
   roles:
     - role: java
     - role: pipeline
+    - { role: grid-engine, grid_engine_master: False }
 
 - hosts: database 
   sudo: True
