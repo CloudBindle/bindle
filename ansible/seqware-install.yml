@@ -1,0 +1,36 @@
+--- 
+# file: seqware-install.yml
+# This file is used for installing a seqware cluster
+
+# This play runs first, and gathers a complete set of properties for everything
+- hosts: all
+  sudo: True
+  tasks:
+    setup:
+      filter: '*'
+
+# Next, let's generate common files, such as the hosts file. This requires the
+# previous setup to have been run in a separate play, it seemed
+- hosts: all
+  sudo: True
+  roles:
+    - role: common
+
+# The grid master depends on the hosts file, as we need to know at least who we
+# are by this stage. 
+- hosts: master 
+  sudo: True
+  roles:
+    - { role: java, java_provider: Cloudera }
+    - { role: grid-engine, grid_engine_master: True }
+
+- hosts: worker 
+  sudo: True
+  roles:
+    - { role: java, java_provider: Cloudera }
+    - { role: grid-engine, grid_engine_master: False }
+
+- hosts: master 
+  sudo: True
+  roles:
+    - role: postgres

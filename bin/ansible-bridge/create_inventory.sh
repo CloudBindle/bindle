@@ -21,6 +21,8 @@ function handleType {
 			    cd $d; 
 			    vagrant ssh-config > ssh-config.txt ; 
 			    # this is ugly, need someone more experienced in bash/sed
+                            echo -n `cat ssh-config.txt | sed -n "s/Host\s\([^']\+\)/\1/p" | sed -e 's/^ *//' -e 's/ *$//'` | tr '\n' ' ';
+			    echo -n "	ansible_ssh_host=";
 			    echo -n `cat ssh-config.txt | sed -n "s/HostName\s\([^']\+\)/\1/p" | sed -e 's/^ *//' -e 's/ *$//'` | tr '\n' ' ';
 			    echo -n "	ansible_ssh_user=";
 			    echo -n `cat ssh-config.txt | sed -n "s/User\s\([^']\+\)/\1/p" | sed -e 's/^ *//' -e 's/ *$//'` | tr '\n' ' ' ;
@@ -36,3 +38,6 @@ function handleType {
 handleType master $working_dir
 handleType worker $working_dir
 
+echo "[all_groups:children]"
+echo "master"
+echo "worker"

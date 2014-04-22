@@ -1,0 +1,35 @@
+---
+- name: install postgres pkgs
+  apt: pkg={{ item }} state=present
+  with_items:
+    - libpq-dev
+    - postgresql
+    - python-psycopg2
+
+- name: setup pg_hba file
+  copy: src=pg_hba.conf dest=/etc/postgresql/9.1/main/pg_hba.conf owner=postgres group=postgres mode=0640
+  register: pg_file
+
+- name: reload postgres if it changed
+  service: name=postgresql state=reloaded enabled=yes
+  when: pg_file.changed
+
+- name: make a db user
+  sudo_user: postgres
+  postgresql_user: user=seqware password=seqware role_attr_flags=CREATEDB,NOSUPERUSER
+
+- name: make a db
+  sudo_user: postgres
+  postgresql_db: db=test_seqware_meta_db owner=seqware
+
+- name: setup seqware as the owner of the public schema
+  sudo_user: postgres
+  postgresql_privs: database=test_seqware_meta_db state=present privs=ALL type=schema objs=public role=seqware
+
+- name: setup seqware as postgres role 
+  sudo_user: postgres
+  postgresql_privs: database=postgres privs=ALL type=database obj=test_seqware_meta_db role=seqware
+
+- name: setup seqware as postgres role 
+  sudo_user: postgres
+  postgresql_privs: database=postgres type=group objs=postgres role=seqware admin_option=yes
