@@ -1,38 +1,84 @@
 ---
 # file: roles/seqware-master/tasks/main.yml
 
-- name: SeqWare | Install Hadoop for a master
-  apt: pkg=hadoop-0.20-mapreduce-jobtracker state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hadoop-client state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hadoop-hdfs-namenode state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hue state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hue-server state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hue-plugins state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hue-oozie state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=oozie state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=oozie-client state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hbase state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hbase-master state=present update_cache=yes cache_valid_time=3600
+- name: SeqWare - Master | Install Hadoop for a master
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items: 
+    - hadoop-0.20-mapreduce-jobtracker
+    - hadoop-client
+    - hadoop-hdfs-namenode
+    - hue
+    - hue-server
+    - hue-plugins
+    - hue-oozie
+    - oozie
+    - oozie-client
+    - hbase
+    - hbase-master
+    - tree
 
-- name: SeqWare | Install zookeeper
-  apt: pkg=zookeeper state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=zookeeper-server state=present update_cache=yes cache_valid_time=3600
+- name: SeqWare - Master | Install zookeeper
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items: 
+    - zookeeper
+    - zookeeper-server 
 
-- name: SeqWare | Initialize zookeeper
+- name: SeqWare - Master | Initialize zookeeper
   command: service zookeeper-server init creates=/var/lib/zookeeper
 
-- name: SeqWare | Start zookeeper
+- name: SeqWare - Master | Start zookeeper
   service: name=zookeeper-server state=started
 
-- name: SeqWare | Install tomcat
-  apt: pkg=tomcat7-common state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=tomcat7 state=present update_cache=yes cache_valid_time=3600
+- name: SeqWare - Master | Install tomcat
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items: 
+    - tomcat7-common
+    - tomcat7
 
-- name: SeqWare | Install apache2
+- name: SeqWare - Master | Install apache2
   apt: pkg=apache2 state=present update_cache=yes cache_valid_time=3600
   
-- name: SeqWare | Set user groups
+- name: SeqWare - Master | Set user groups
   user: name=mapred groups=seqware append=yes state=present
   user: name=seqware groups=mapred append=yes state=present
 
+- name: SeqWare - Master | Copy resources
+  copy: 
+    src: hadoop-files/conf.my_cluster
+    dest: /etc/hadoop/
+  register: hadoopconfig
   
+- name: SeqWare - Master | Set up Hadoop configuration
+  command: 'update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.my_cluster 50'
+  when: hadoopconfig.changed
+
+- name: SeqWare - Master | Set up Hadoop configuration
+  command: 'update-alternatives --set hadoop-conf /etc/hadoop/conf.my_cluster'
+  when: hadoopconfig.changed
+
+- name: Format the namenode
+  shell: creates=/usr/lib/hadoop/namenode.formatted su - hdfs -c "hadoop namenode -format" && touch /usr/lib/hadoop/namenode.formatted
+  register: namenode_format
+
+- name: SeqWare - Master | Start HDFS
+  service: name=hadoop-hdfs-namenode state=started
+  
+  #hmmm, no module for hadoop file operations
+- name: SeqWare - Master | Setup HDFS Shared Storage
+  sudo: yes
+  sudo_user: hdfs
+  command: $item
+  when: namenode_format.changed
+  with_items: 
+    - hadoop fs -mkdir /tmp
+    - hadoop fs -chmod -R 1777 /tmp
+    - hadoop fs -mkdir -p /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
+    - hadoop fs -chmod 1777 /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
+    - hadoop fs -chown -R mapred /var/lib/hadoop-hdfs/cache/mapred
+    - hadoop fs -mkdir /tmp/mapred/system
+    - hadoop fs -chown mapred:hadoop /tmp/mapred/system
+    - hadoop fs -mkdir -p /tmp/hadoop-mapred/mapred
+    - hadoop fs -chmod -R a+wrx /tmp/hadoop-mapred/mapred
+  
+#- name: SeqWare - Master | Start JobTracker
+#  service: name=hadoop-0.20-mapreduce-jobtracker state=started

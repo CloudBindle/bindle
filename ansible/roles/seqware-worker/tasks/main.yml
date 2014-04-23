@@ -1,14 +1,31 @@
 ---
 # file: roles/seqware-worker/tasks/main.yml
 
-- name: SeqWare | Install Hadoop for a worker
-  apt: pkg=hadoop-0.20-mapreduce-tasktracker state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hadoop-hdfs-datanode state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hadoop-client state=present update_cache=yes cache_valid_time=3600
-  apt: pkg=hbase-regionserver state=present update_cache=yes cache_valid_time=3600
+- name: SeqWare - Worker | Install Hadoop for a worker
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items: 
+    - hadoop-0.20-mapreduce-tasktracker 
+    - hadoop-hdfs-datanode
+    - hadoop-client
+    - hbase-regionserver
 
-- name: SeqWare | Set user groups
+- name: SeqWare - Worker | Set user groups
   user: name=mapred groups=seqware append=yes state=present
   user: name=seqware groups=mapred append=yes state=present
 
+- name: SeqWare - Worker | Copy resources
+  copy: 
+    src: hadoop-files/conf.my_cluster
+    dest: /etc/hadoop/
+  register: hadoopconfig
   
+- name: SeqWare - Worker | Set up Hadoop configuration
+  command: 'update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.my_cluster 50'
+  when: hadoopconfig.changed
+
+- name: SeqWare - Worker | Set up Hadoop configuration
+  command: 'update-alternatives --set hadoop-conf /etc/hadoop/conf.my_cluster'
+  when: hadoopconfig.changed
+  
+- name: SeqWare - Worker | Start HDFS
+  service: name=hadoop-hdfs-datanode state=started

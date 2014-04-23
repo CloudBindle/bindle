@@ -12,9 +12,11 @@
 
 - name: Java | Set up Java
   command: 'update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java 2000'
+  when: dpkg_result.changed
 
 - name: Java | Set up Java
   command: 'update-alternatives --set java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java'
+  when: dpkg_result.changed
 
 - name: Java | Set JAVA_HOME
   lineinfile: 
