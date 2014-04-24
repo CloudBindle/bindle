@@ -9,9 +9,11 @@
     - hadoop-client
     - hbase-regionserver
 
+# This code is duplicated and should be refactored to a shared task, but still run after the dependencies above
 - name: SeqWare - Worker | Set user groups
   user: name=mapred groups=seqware append=yes state=present
   user: name=seqware groups=mapred append=yes state=present
+  user: name=mapred groups=hadoop append=yes state=present
 
 - name: SeqWare - Worker | Copy resources
   copy: 
@@ -29,3 +31,6 @@
   
 - name: SeqWare - Worker | Start HDFS
   service: name=hadoop-hdfs-datanode state=started
+  
+- name: SeqWare - Master | Start TaskTracker
+  service: name=hadoop-0.20-mapreduce-tasktracker state=started

@@ -41,6 +41,7 @@
 - name: SeqWare - Master | Set user groups
   user: name=mapred groups=seqware append=yes state=present
   user: name=seqware groups=mapred append=yes state=present
+  user: name=mapred groups=hadoop append=yes state=present
 
 - name: SeqWare - Master | Copy resources
   copy: 
@@ -80,5 +81,13 @@
     - hadoop fs -mkdir -p /tmp/hadoop-mapred/mapred
     - hadoop fs -chmod -R a+wrx /tmp/hadoop-mapred/mapred
   
-#- name: SeqWare - Master | Start JobTracker
-#  service: name=hadoop-0.20-mapreduce-jobtracker state=started
+- name: SeqWare - Master | Start JobTracker
+  service: name=hadoop-0.20-mapreduce-jobtracker state=started
+  
+- name: SeqWare - Master | Hue
+  file: state=link src=/usr/lib/hadoop/lib dest=/usr/share/hue/desktop/libs/hadoop/java-lib/hue*jar
+  
+- name: SeqWare - Master | Hue 
+  service: name=hue state=started
+
+  
