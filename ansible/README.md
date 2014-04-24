@@ -35,4 +35,4 @@ Customize as needed, example with openstack
    bash bin/ansible-bridge/create_inventory.sh target-os3 > inventory
    ansible-playbook -v -i inventory ansible/seqware-install.yml 
 
-This has been tested with Openstack
+This has been tested with Openstack with a two machine cluster
