@@ -34,3 +34,5 @@ Customize as needed, example with openstack
    perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target-os3
    bash bin/ansible-bridge/create_inventory.sh target-os3 > inventory
    ansible-playbook -v -i inventory ansible/seqware-install.yml 
+
+This has been tested with Openstack
