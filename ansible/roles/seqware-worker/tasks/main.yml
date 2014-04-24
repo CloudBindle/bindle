@@ -56,13 +56,8 @@
 
 # setup NFS here later along with shared NFS home
 
-# this can be refactored to share code with master
-# need to template stuff and move stuff out to bindle that we can
-- name: SeqWare - Worker | Copy init script
-  copy: 
-    src: hadoop-init-worker
-    dest: /etc/init.d/hadoop-init
-  register: hadoop_init
+- name: SeqWare - Worker | Template init script
+  template: src=hadoop-init-worker.j2 dest=/etc/init.d/hadoop-init
     
 - name: SeqWare - Worker | Set up init script permissions
   file: path=/etc/init.d/hadoop-init owner=root group=root mode=0755

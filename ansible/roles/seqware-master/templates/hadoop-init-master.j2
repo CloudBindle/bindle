@@ -12,8 +12,8 @@
 echo `date` 'Begin initializing hadoop filesystems' >> /tmp/hadoop-init.log
 
 # virtualbox instances come up with an invalid hostname which needs to be set before starting hdfs
-hostname %{HOST}
-HOST='%{HOST}'
+hostname {{ ansible_hostname }}
+HOST='{{ ansible_hostname }}'
 
 # remove the old 'master' entry
 cat /etc/hosts | grep -v $HOST > /tmp/hosts
@@ -24,12 +24,8 @@ echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ 
 cp /tmp/hosts /etc/hosts
 
 # shutdown hadoop services
-service hbase-regionserver stop
-service hbase-thrift stop
 service hbase-master stop
-service hadoop-0.20-mapreduce-tasktracker stop
 service hadoop-0.20-mapreduce-jobtracker stop
-service hadoop-hdfs-datanode stop
 service hadoop-hdfs-namenode stop
 
 stat /mnt/seqware-oozie
@@ -75,7 +71,6 @@ sudo -u hdfs hadoop namenode -format -force
 fi
 
 service hadoop-hdfs-namenode start
-service hadoop-hdfs-datanode start
 # virtualbox launches can take up to 40 seconds for hdfs to settle
 sleep 60
 
@@ -98,10 +93,7 @@ sudo -u hdfs hadoop fs -chown -R seqware /user/seqware
 
 # start hadoop services
 service hadoop-0.20-mapreduce-jobtracker start
-service hadoop-0.20-mapreduce-tasktracker start
 service hbase-master start
-service hbase-thrift start
-service hbase-regionserver start
 
 echo `date` 'Completed initializing hadoop filesystems' >> /tmp/hadoop-init.log
 

@@ -181,12 +181,8 @@
 #  service: name=nfs-kernel-server state=restarted
  # when: nfs_setup.changed
 
-# need to template stuff and move stuff out to bindle that we can
-- name: SeqWare - Master | Copy init script
-  copy: 
-    src: hadoop-init-master
-    dest: /etc/init.d/hadoop-init
-  register: hadoop_init
+- name: SeqWare - Master | Template init script
+  template: src=hadoop-init-master.j2 dest=/etc/init.d/hadoop-init
     
 - name: SeqWare - Master | Set up init script permissions
   file: path=/etc/init.d/hadoop-init owner=root group=root mode=0755

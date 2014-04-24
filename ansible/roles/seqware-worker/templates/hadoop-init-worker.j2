@@ -11,7 +11,7 @@
 
 echo `date` 'Begin initializing hadoop filesystems' >> /tmp/hadoop-init.log
 
-HOST='%{HOST}'
+HOST='{{ ansible_hostname }}'
 
 # remove the old 'master' entry
 cat /etc/hosts | grep -v $HOST > /tmp/hosts
