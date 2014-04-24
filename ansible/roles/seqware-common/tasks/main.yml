@@ -70,3 +70,10 @@
      - { state: 'directory', path: '/data/1/mapred', owner: 'mapred', group: 'mapred', recurse: 'yes', mode: '0700' }
      - { state: 'directory', path: '/data/1/mapred/local', owner: 'mapred', group: 'mapred', recurse: 'yes', mode: '0700' }
      - { state: 'directory', path: '/tmp/hadoop-mapred', owner: 'mapred', group: 'mapred', recurse: 'yes', mode: '0777' }
+     
+- name: SeqWare - Common | Set up SeqWare directories
+  file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} recurse={{ item.recurse }} mode={{ item.mode}}
+  with_items:
+     - { state: 'directory', path: '/mnt/seqware-oozie', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }
+     - { state: 'directory', path: '/usr/tmp/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }
+     - { state: 'directory', path: '/mnt/datastore', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }

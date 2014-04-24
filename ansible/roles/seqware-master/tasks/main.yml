@@ -3,6 +3,7 @@
 
 - name: SeqWare - Master | Install Hadoop for a master
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  register: oozie_installed
   with_items: 
     - hadoop-0.20-mapreduce-jobtracker
     - hadoop-client
@@ -90,4 +91,106 @@
 - name: SeqWare - Master | Hue 
   service: name=hue state=started
 
+- name: SeqWare - Master | Make Oozie database user
+  sudo_user: postgres
+  postgresql_user: user=oozie password=oozie role_attr_flags=NOSUPERUSER,INHERIT,CREATEDB,NOCREATEROLE state=present encrypted=yes
   
+- name: SeqWare - Master | Make Oozie database in postgres
+  sudo_user: postgres
+  postgresql_db: db=oozie owner=oozie encoding='UTF-8' lc_collate='en_US.UTF-8' lc_ctype='en_US.UTF-8'  state=present template='template0'
+  
+  # TODO: make this idempotent by using proper file modules 
+- name: SeqWare - Master | Oozie 
+  when: oozie_installed.changed
+  command: $item
+  with_items:
+    - wget -q http://extjs.com/deploy/ext-2.2.zip
+    - unzip ext-2.2.zip
+    - mv ext-2.2 /var/lib/oozie/
+    - perl -pi -e "s/org.apache.derby.jdbc.EmbeddedDriver/org.postgresql.Driver/;" /etc/oozie/conf/oozie-site.xml
+    - perl -pi -e "s/jdbc:derby:.*create=true/jdbc:postgresql:\/\/localhost:5432\/oozie/;" /etc/oozie/conf/oozie-site.xml
+    - perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.username<\/name>[.\s]*<value>sa<\/value>/<name>oozie.service.JPAService.jdbc.username<\/name><value>oozie<\/value>/;" /etc/oozie/conf/oozie-site.xml
+    - perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.password<\/name>[.\s]*<value> <\/value>/<name>oozie.service.JPAService.jdbc.password<\/name><value>oozie<\/value>/;" /etc/oozie/conf/oozie-site.xml
+    - sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
+    
+- name: SeqWare - Master | Oozie
+  service: name=oozie state=started
+
+# TODO: need hdfs-site.xml configured properly using alternatives, but for now just copy it 
+- name: SeqWare - Master | Copy HBase Config
+  copy: 
+    src: hadoop-files/conf.my_cluster/hbase-site.xml
+    dest: /etc/hbase/conf/hbase-site.xml
+  register: hbaseconfig
+  
+#hmmm, no module for hadoop file operations
+- name: SeqWare - Master | Setup HBase Shared Storage
+  sudo: yes
+  sudo_user: hdfs
+  command: $item
+  when: hbaseconfig.changed
+  with_items: 
+    - hadoop fs -mkdir /hbase
+    - hadoop fs -chown hbase /hbase
+
+- name: SeqWare - Master | HBase
+  service: name=hbase-master state=started
+  
+- name: SeqWare - Master | Setup daemons to start on boot
+  service: name={{ item }} state=started enabled=yes
+  with_items: 
+    - apache2
+    - cron
+    - hadoop-hdfs-namenode
+    - hadoop-0.20-mapreduce-jobtracker
+    - hue
+    - oozie
+    - postgresql
+    - hbase-master
+     
+- name: SeqWare - Master | Create oozie working dir link
+  file: state=link src=/mnt/seqware-oozie dest=/usr/tmp/seqware-oozie owner=seqware group=seqware
+
+- name: SeqWare - Master | Create datastore link
+  file: state=link src=/mnt/datastore dest=/datastore owner=seqware group=seqware
+  
+## Setup NFS before seqware
+# see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
+#- name: SeqWare - Master | Setup NFS
+#  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+#  register: nfs_installed
+#  with_items: 
+#    - rpcbind nfs-kernel-server
+#    - nfs-kernel-server
+
+# Need to figure out how to do %{EXPORTS} in ansible
+#- name: SeqWare - Master | Setup NFS
+#  sudo: yes
+#  command: $item
+#  when: nfs_installed.changed
+#  register: nfs_setup
+#  with_items: 
+#    - echo '%{EXPORTS}' >> /etc/exports
+#    - exportfs -ra
+# 
+#- name: SeqWare - Master | NFS Restart
+#  service: name=portmap state=restarted
+#  when: nfs_setup.changed
+#  
+#- name: SeqWare - Master | NFS Restart
+#  service: name=nfs-kernel-server state=restarted
+ # when: nfs_setup.changed
+
+# need to template stuff and move stuff out to bindle that we can
+- name: SeqWare - Master | Copy init script
+  copy: 
+    src: hadoop-init-master
+    dest: /etc/init.d/hadoop-init
+  register: hadoop_init
+    
+- name: SeqWare - Master | Set up init script permissions
+  file: path=/etc/init.d/hadoop-init owner=root group=root mode=0755
+
+- name: SeqWare - Master | Setup init script for boot
+  service: name=hadoop-init enabled=yes
+

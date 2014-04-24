@@ -10,6 +10,7 @@
     - hbase-regionserver
 
 # This code is duplicated and should be refactored to a shared task, but still run after the dependencies above
+# Need to figure out how to share tasks as opposed to roles
 - name: SeqWare - Worker | Set user groups
   user: name=mapred groups=seqware append=yes state=present
   user: name=seqware groups=mapred append=yes state=present
@@ -34,3 +35,37 @@
   
 - name: SeqWare - Master | Start TaskTracker
   service: name=hadoop-0.20-mapreduce-tasktracker state=started
+
+# This is duplicated from common, need to share tasks
+# TODO: need hdfs-site.xml configured properly using alternatives, but for now just copy it 
+- name: SeqWare - Worker | Copy HBase Config
+  copy: 
+    src: hadoop-files/conf.my_cluster/hbase-site.xml
+    dest: /etc/hbase/conf/hbase-site.xml
+  register: hbaseconfig
+  
+- name: SeqWare - Worker | HBase
+  service: name=hbase-regionserver state=started
+
+- name: SeqWare - Worker | Setup daemons to start on boot
+  service: name={{ item }} state=started enabled=yes
+  with_items: 
+    - cron
+    - hadoop-hdfs-datanode
+    - hadoop-0.20-mapreduce-tasktracker
+
+# setup NFS here later along with shared NFS home
+
+# this can be refactored to share code with master
+# need to template stuff and move stuff out to bindle that we can
+- name: SeqWare - Worker | Copy init script
+  copy: 
+    src: hadoop-init-worker
+    dest: /etc/init.d/hadoop-init
+  register: hadoop_init
+    
+- name: SeqWare - Worker | Set up init script permissions
+  file: path=/etc/init.d/hadoop-init owner=root group=root mode=0755
+
+- name: SeqWare - Worker | Setup init script for boot
+  service: name=hadoop-init enabled=yes
