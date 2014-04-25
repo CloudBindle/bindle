@@ -1,6 +1,6 @@
 ---
-# file: roles/seqware-common/tasks/main.yml
-- name: SeqWare - Common | Add Hadoop repository
+# file: roles/seqware-common-infrastructure/tasks/main.yml
+- name:  Add Hadoop repository
   lineinfile: 
     line: 'deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib'
     dest: /etc/apt/sources.list.d/cloudera.list
@@ -9,7 +9,7 @@
     mode: 0755
   register: hadooprepo
 
-- name: SeqWare - Common | Add Hadoop repository
+- name:  Add Hadoop repository
   lineinfile: 
     line: 'deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib'
     dest: /etc/apt/sources.list.d/cloudera.list
@@ -18,36 +18,36 @@
     mode: 0755
   register: hadooprepo
 
-- name: SeqWare - Common | Add signing key
+- name:  Add signing key
   apt_key: url=http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key state=present
   register: hadooprepo
 
 - apt: update_cache=yes
   when: hadooprepo.changed
 
-- name: SeqWare - Common | Create mountable home
+- name:  Create mountable home
   file: state=directory path=/mnt/home
 
-- name: SeqWare - Common | Add user
+- name:  Add user
   user: 
     home: '/mnt/home/seqware'
     createhome: yes
     name: 'seqware'
     shell: '/bin/bash'
 
-- name: SeqWare - Common | Add mapred user
+- name:  Add mapred user
   user: name=mapred state=present
     
-- name: SeqWare - Common | Add mapred group
+- name:  Add mapred group
   group: name=mapred state=present
 
-- name: SeqWare - Common | Add seqware group
+- name:  Add seqware group
   group: name=seqware state=present
 
-- name: SeqWare - Common | Create home link
+- name:  Create home link
   file: state=link src=~seqware dest=/home/seqware owner=seqware
 
-- name: SeqWare - Common | Install dependencies
+- name:  Install dependencies
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   with_items: 
     - libasound2 
@@ -59,10 +59,10 @@
     - sysv-rc-conf
     - xfsprogs
     
-- name: SeqWare - Common | Setup Data directory on mnt
+- name:  Setup Data directory on mnt
   file: state=link src=/mnt dest=/data 
   
-- name: SeqWare - Common | Set up Hadoop HDFS Local Storage
+- name:  Set up Hadoop HDFS Local Storage
   file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} recurse={{ item.recurse }} mode={{ item.mode}}
   with_items:
      - { state: 'directory', path: '/data/1/dfs/nn', owner: 'hdfs', group: 'hdfs', recurse: 'yes', mode: '0700' }
@@ -71,7 +71,7 @@
      - { state: 'directory', path: '/data/1/mapred/local', owner: 'mapred', group: 'mapred', recurse: 'yes', mode: '0700' }
      - { state: 'directory', path: '/tmp/hadoop-mapred', owner: 'mapred', group: 'mapred', recurse: 'yes', mode: '0777' }
      
-- name: SeqWare - Common | Set up SeqWare directories
+- name:  Set up SeqWare directories
   file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} recurse={{ item.recurse }} mode={{ item.mode}}
   with_items:
      - { state: 'directory', path: '/mnt/seqware-oozie', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }

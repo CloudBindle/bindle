@@ -35,7 +35,7 @@
   roles:
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: True }
-    - { role: seqware-master }
+    - { role: seqware-master-infrastructure }
     - { role: seqware-code }
 
 - hosts: worker 
@@ -43,4 +43,4 @@
   roles:
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: False }
-    - { role: seqware-worker }
+    - { role: seqware-worker-infrastructure }

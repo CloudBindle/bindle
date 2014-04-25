@@ -1,7 +1,7 @@
 ---
-# file: roles/seqware-worker/tasks/main.yml
+# file: roles/seqware-worker-infrastructure/tasks/main.yml
 
-- name: SeqWare - Worker | Install Hadoop for a worker
+- name:  Install Hadoop for a worker
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   with_items: 
     - hadoop-0.20-mapreduce-tasktracker 
@@ -11,57 +11,57 @@
 
 # This code is duplicated and should be refactored to a shared task, but still run after the dependencies above
 # Need to figure out how to share tasks as opposed to roles
-- name: SeqWare - Worker | Set user groups
+- name:  Set user groups
   user: name=mapred groups=seqware append=yes state=present
   user: name=seqware groups=mapred append=yes state=present
   user: name=mapred groups=hadoop append=yes state=present
 
-- name: SeqWare - Worker | Copy resources
+- name:  Copy resources
   copy: 
     src: hadoop-files/conf.my_cluster
     dest: /etc/hadoop/
   register: hadoopconfig
   
-- name: SeqWare - Worker | Set up Hadoop configuration
+- name:  Set up Hadoop configuration
   command: 'update-alternatives --install /etc/hadoop/conf hadoop-conf /etc/hadoop/conf.my_cluster 50'
   when: hadoopconfig.changed
 
-- name: SeqWare - Worker | Set up Hadoop configuration
+- name:  Set up Hadoop configuration
   command: 'update-alternatives --set hadoop-conf /etc/hadoop/conf.my_cluster'
   when: hadoopconfig.changed
   
-- name: SeqWare - Worker | Start HDFS
+- name:  Start HDFS
   service: name=hadoop-hdfs-datanode state=started
   
-- name: SeqWare - Worker | Start TaskTracker
+- name:  Start TaskTracker
   service: name=hadoop-0.20-mapreduce-tasktracker state=started
 
 # This is duplicated from common, need to share tasks
 # TODO: need hdfs-site.xml configured properly using alternatives, but for now just copy it 
-- name: SeqWare - Worker | Copy HBase Config
+- name:  Copy HBase Config
   copy: 
     src: hadoop-files/conf.my_cluster/hbase-site.xml
     dest: /etc/hbase/conf/hbase-site.xml
   register: hbaseconfig
   
-- name: SeqWare - Worker | HBase
+- name:  HBase
   service: name=hbase-regionserver state=started
 
-- name: SeqWare - Worker | Setup daemons to start on boot
+- name:  Setup daemons to start on boot
   service: name={{ item }} state=started enabled=yes
   with_items: 
     - cron
     - hadoop-hdfs-datanode
     - hadoop-0.20-mapreduce-tasktracker
 
-- name: SeqWare - Worker | Install NFS
+- name:  Install NFS
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   register: nfs_installed
   with_items: 
     - rpcbind
     - nfs-common
     
-- name: SeqWare - Worker | Setup NFS - hosts.deny
+- name:  Setup NFS - hosts.deny
   lineinfile: 
     dest: /etc/hosts.deny
     create: yes
@@ -69,7 +69,7 @@
     state: present
     insertafter: EOF
 
-- name: SeqWare - Worker | Setup NFS - hosts.allow
+- name:  Setup NFS - hosts.allow
   lineinfile: 
     dest: /etc/hosts.allow
     create: yes
@@ -77,7 +77,7 @@
     state: present
     insertafter: EOF
 
-- name: SeqWare - Worker | Mount NFS
+- name:  Mount NFS
   mount: name={{ item.name }} state=mounted src={{ item.src }} fstype=nfs4
   with_items:
      - { name: '/home', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/home' }
@@ -85,11 +85,11 @@
      - { name: '/mnt/seqware-oozie', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/mnt/seqware-oozie' }
      - { name: '/mnt/datastore', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/mnt/datastore' }
 
-- name: SeqWare - Worker | Template init script
+- name:  Template init script
   template: src=hadoop-init-worker.j2 dest=/etc/init.d/hadoop-init
     
-- name: SeqWare - Worker | Set up init script permissions
+- name:  Set up init script permissions
   file: path=/etc/init.d/hadoop-init owner=root group=root mode=0755
 
-- name: SeqWare - Worker | Setup init script for boot
+- name:  Setup init script for boot
   service: name=hadoop-init enabled=yes

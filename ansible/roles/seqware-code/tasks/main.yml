@@ -1,7 +1,7 @@
 ---
 # file: roles/seqware-code/tasks/main.yml
 
-- name: SeqWare - Code | Set up SeqWare working directories
+- name:  Set up SeqWare working directories
   file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} recurse={{ item.recurse }} mode={{ item.mode}} group={{ item.group }}
   with_items:
      - { state: 'directory', path: '~seqware/bin', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
@@ -10,11 +10,11 @@
      - { state: 'directory', path: '~seqware/logs', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
      - { state: 'directory', path: '~seqware/released-bundles', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
      - { state: 'directory', path: '~seqware/workflow-dev', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
-     - { state: 'directory', path: '~seqware/.seqware', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
+     - { state: 'directory', path: '~seqware/.seqware/self-installs', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
      - { state: 'directory', path: '~seqware/gitroot/seqware', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
      
   #hmmm, no module for hadoop file operations
-- name: SeqWare - Code | Setup HDFS User Directories
+- name:  Setup HDFS User Directories
   sudo: yes
   sudo_user: hdfs
   command: $item
@@ -23,7 +23,7 @@
     - hadoop fs -mkdir -p /user/seqware
     - hadoop fs -chown -R seqware /user/seqware
     
-- name: SeqWare - Code | Template seqware settings
+- name:  Template seqware settings
   template: src=settings.j2 dest=~seqware/.seqware/settings mode=0640
   
 # I'm still checking out since I will need the SQL schema file for example
@@ -31,7 +31,7 @@
   git: repo=https://github.com/SeqWare/seqware.git dest=~seqware/gitroot/seqware
 
 # setup bash profile for seqware
-- name: SeqWare - Code | Bash profile
+- name:  Bash profile
   lineinfile: 
     dest: ~seqware/.bash_profile
     create: yes
@@ -39,7 +39,7 @@
     state: present
     insertafter: EOF
     
-- name: SeqWare - Code | Make everything owned by seqware
+- name:  Make everything owned by seqware
   file: path=~seqware state=directory owner=seqware group=seqware recurse=yes
 
 - include: 'git.yml'
@@ -48,3 +48,5 @@
 - include: 'artifactory.yml'
   when: seqware_provider == "artifactory"
 
+- name:  Make everything owned by seqware
+  file: path=~seqware state=directory owner=seqware group=seqware recurse=yes
