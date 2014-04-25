@@ -33,7 +33,7 @@
 - name: SeqWare - Worker | Start HDFS
   service: name=hadoop-hdfs-datanode state=started
   
-- name: SeqWare - Master | Start TaskTracker
+- name: SeqWare - Worker | Start TaskTracker
   service: name=hadoop-0.20-mapreduce-tasktracker state=started
 
 # This is duplicated from common, need to share tasks
@@ -54,7 +54,36 @@
     - hadoop-hdfs-datanode
     - hadoop-0.20-mapreduce-tasktracker
 
-# setup NFS here later along with shared NFS home
+- name: SeqWare - Worker | Install NFS
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  register: nfs_installed
+  with_items: 
+    - rpcbind
+    - nfs-common
+    
+- name: SeqWare - Worker | Setup NFS - hosts.deny
+  lineinfile: 
+    dest: /etc/hosts.deny
+    create: yes
+    line: 'rpcbind : ALL' 
+    state: present
+    insertafter: EOF
+
+- name: SeqWare - Worker | Setup NFS - hosts.allow
+  lineinfile: 
+    dest: /etc/hosts.allow
+    create: yes
+    line: 'rpcbind : {{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}' 
+    state: present
+    insertafter: EOF
+
+- name: SeqWare - Worker | Mount NFS
+  mount: name={{ item.name }} state=mounted src={{ item.src }} fstype=nfs4
+  with_items:
+     - { name: '/home', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/home' }
+     - { name: '/mnt/home', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/mnt/home' }
+     - { name: '/mnt/seqware-oozie', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/mnt/seqware-oozie' }
+     - { name: '/mnt/datastore', src: '{{ hostvars["master"]["ansible_eth0"]["ipv4"]["address"] }}:/mnt/datastore' }
 
 - name: SeqWare - Worker | Template init script
   template: src=hadoop-init-worker.j2 dest=/etc/init.d/hadoop-init

@@ -154,32 +154,28 @@
 - name: SeqWare - Master | Create datastore link
   file: state=link src=/mnt/datastore dest=/datastore owner=seqware group=seqware
   
-## Setup NFS before seqware
-# see https://help.ubuntu.com/community/SettingUpNFSHowTo#NFS_Server
-#- name: SeqWare - Master | Setup NFS
-#  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
-#  register: nfs_installed
-#  with_items: 
-#    - rpcbind nfs-kernel-server
-#    - nfs-kernel-server
+- name: SeqWare - Master | Install NFS
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items: 
+    - rpcbind
+    - nfs-kernel-server
+  
+- name: SeqWare - Master | Template NFS exports
+  template: src=exports.j2 dest=/etc/exports
+  register: nfs_setup
 
-# Need to figure out how to do %{EXPORTS} in ansible
-#- name: SeqWare - Master | Setup NFS
-#  sudo: yes
-#  command: $item
-#  when: nfs_installed.changed
-#  register: nfs_setup
-#  with_items: 
-#    - echo '%{EXPORTS}' >> /etc/exports
-#    - exportfs -ra
-# 
-#- name: SeqWare - Master | NFS Restart
-#  service: name=portmap state=restarted
-#  when: nfs_setup.changed
-#  
-#- name: SeqWare - Master | NFS Restart
-#  service: name=nfs-kernel-server state=restarted
- # when: nfs_setup.changed
+- name: SeqWare - Master | Setup NFS
+  sudo: yes
+  command: exportfs -ra
+  when: nfs_setup.changed
+  
+- name: SeqWare - Master | NFS Restart
+  service: name=portmap state=restarted
+  when: nfs_setup.changed
+  
+- name: SeqWare - Master | NFS Restart
+  service: name=nfs-kernel-server state=restarted
+  when: nfs_setup.changed
 
 - name: SeqWare - Master | Template init script
   template: src=hadoop-init-master.j2 dest=/etc/init.d/hadoop-init
