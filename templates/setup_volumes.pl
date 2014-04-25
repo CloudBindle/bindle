@@ -17,19 +17,30 @@ my $final_list;
 my $out_file = "mount_report.txt";
 my $list = `ls -1 /dev/sd* /dev/xv*`;
 my @list = split /\n/, $list;
+my $blacklist;
+my $whitelist;
+my $blist = {};
+my $wlist = {};
 
 GetOptions (
-  "output=s" => \$out_file
+  "output=s" => \$out_file,
+  "whitelist=s" => \$whitelist,
+  "blacklist=s" => \$blacklist,
 );
 
 
 # MAIN LOOP
 
+$blist = read_list($blacklist);
+$wlist = read_list($whitelist);
+
 foreach my $dev (@list) {
   # skip if doesn't exist
   next if (!-e $dev || -l $dev);
   # skip if the root partition
-  next if (blacklist($dev));
+  next if (blacklist($dev, $blist));
+  # true if empty or it's on the whitelist
+  next if (!whitelist($dev, $wlist));
   # then extra device so can continue
   print "DEV: $dev\n";
   # if already mounted just add directory
@@ -41,8 +52,8 @@ foreach my $dev (@list) {
     $dev =~ /\/dev\/(\S+)/;
     my $dev_name = $1;
     print "  MOUNTING BECAUSE NOT MOUNTED\n";
-    my $mount = system("bash -c 'mkdir -p /mnt/$dev_name && mount $dev /mnt/$dev_name' && chmod a+rwx /mnt/$dev_name");
-    if ($mount) { print "  UNABLE TO MOUNT $dev on /mnt/$dev_name\n"; }
+    my $mount = system("bash -c 'mkdir -p /$dev_name && mount $dev /$dev_name' && chmod a+rwx /$dev_name");
+    if ($mount) { print "  UNABLE TO MOUNT $dev on /$dev_name\n"; }
   } else {
     print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
   }
@@ -64,9 +75,27 @@ close OUT;
 
 # SUBROUTINES
 
+# TODO
+sub read_list {
+  return({});
+}
+
+# TODO
+sub whitelist {
+  my ($dev, $hash) = @_;
+  return(1);
+}
+
 sub blacklist {
   my $dev = shift;
-  if ($dev =~ /sda/ || $dev =~ /hda/ || $dev =~ /xvda/) {
+  my $hash = shift;
+  # TODO: right now blacklist all but sdf or above which we add as EBS volumes
+  if ($dev =~ /sda/ || $dev =~ /hda/ || $dev =~ /xvda/ ||
+   $dev =~ /sdb/ || $dev =~ /hdb/ || $dev =~ /xvdb/ ||
+   $dev =~ /sdc/ || $dev =~ /hdc/ || $dev =~ /xvdc/ ||
+   $dev =~ /sdd/ || $dev =~ /hdd/ || $dev =~ /xvdd/ ||
+   $dev =~ /sde/ || $dev =~ /hde/ || $dev =~ /xvde/
+  ) {
     print "  BLACKLIST DEV $dev\n";
     return(1);
   }

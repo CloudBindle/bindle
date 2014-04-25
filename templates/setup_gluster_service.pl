@@ -16,25 +16,33 @@ GetOptions (
   "dir-map=s" => \$dir_map,
 );
 
-my $cmd = "gluster volume create gv0 replica 2 transport tcp";
+#my $cmd = "gluster peer status; gluster volume info; gluster volume status; gluster volume create gv0 replica 2 transport tcp";
+# turn off replicate for now
+my $cmd = "gluster peer status; gluster volume info; gluster volume status; sleep 10; gluster volume create gv0 transport tcp";
 
-open IN, "<$host" or die "Cannot open file $host\n";
-while(<IN>) {
+open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
+while(<DIRS>) {
   chomp;
-  my @a = split /\s+/;
-  if (scalar(@a) == 2) {
-    my $hostname = $a[1]; 
-    open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
-    while(<DIRS>) {
-      chomp;
-      my $dir = $_;
+  my $dir = $_;
+  open IN, "<$host" or die "Cannot open file $host\n";
+  while(<IN>) {
+    chomp;
+    my @a = split /\s+/;
+    if (scalar(@a) == 2) {
+      my $hostname = $a[1];
       $cmd .= " $hostname:$dir";
     }
-    close DIRS;
   }
+  close IN;
 }
-close IN;
-$cmd .= "; gluster volume start gv0";
+close DIRS;
+
+# disable built-in NFS server so it doesn't interfer with other NFS exports
+$cmd .= "; gluster volume set gv0 nfs.disable on";
+# turn on the volume
+$cmd .= "; sleep 10; gluster volume start gv0; sleep 10; gluster peer status; gluster volume info; gluster volume status;";
+
+print "GLUSTER SETUP WITH COMMAND: $cmd\n";
 
 if (system($cmd)) {
   print "Problems creating volume with command '$cmd'\n";

@@ -25,7 +25,15 @@ while(<IN>) {
   print "CMD: $cmd\n";
   if (system($cmd)) {
     print "Problems peering with '$cmd'\n";
+    print " Will try restarting daemon...\n";
+    system("/etc/init.d/glusterfs-server restart");
+    sleep 15;
+    if (system($cmd)) {
+      my $output = `$cmd`;
+      print "Tried again but still problems peering with '$cmd' output is '$output'\n";
+    }
   }
+  sleep 5;
 }
 close IN;
 

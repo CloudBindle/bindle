@@ -425,6 +425,9 @@ sub launch_instances {
     print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
     my $thr = threads->create(\&launch_instance, $node);
     push (@all_threads, $thr);
+    # attempt to prevent RequestLimitExceeded on Amazon by sleeping between thread launch 
+    # http://docs.aws.amazon.com/AWSEC2/latest/APIReference/api-error-codes.html
+    sleep 10;
   }
   print "  ALL LAUNCH THREADS STARTED\n";
   # Now wait for the threads to finish; this will block if the thread isn't terminated
@@ -502,6 +505,7 @@ sub setup_vagrantfile {
     $configs->{AWS_EBS_VOLS} = "";
     if (scalar @ebs_vols > 0){
 	$configs->{AWS_EBS_VOLS} .= "aws.block_device_mapping = [";
+        # starts at "f=102"
 	my $count = 102;
 	foreach my $size (@ebs_vols){
             my $current_name = chr($count);

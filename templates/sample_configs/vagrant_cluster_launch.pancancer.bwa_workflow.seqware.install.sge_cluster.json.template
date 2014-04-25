@@ -34,11 +34,16 @@
     # could also use cc1.4xlarge or c1.xlarge or m1.xlarge or m3.xlarge or m1.large
     # our full integration test work just fine on m1.xlarge so we use that
     "AWS_INSTANCE_TYPE": "m1.xlarge",
+    #"AWS_REGION": "eu-west-1",
+    #"AWS_ZONE": "eu-west-1a",
     "AWS_SSH_KEY_NAME": "<FILLMEIN e.g. key-1>",
     "AWS_SSH_USERNAME": "ubuntu",
     "AWS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
+    # blacklist option to prevent volumes from being part of gluster
+    "GLUSTER_DEVICE_BLACKLIST": "--blacklist b c d e",
+    "GLUSTER_DEVICE_WHITELIST": "--whitelist f g h i",
     # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
-    "SEQWARE_VERSION": "1.0.11"
+    "SEQWARE_VERSION": "1.0.13"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -55,7 +60,10 @@
       ], 
       # NOTE: this is an array of arrays, all the scripts in the array in the first cell of the outer array are run across the full cluster, then the second...
       "second_pass_scripts": [
-        [ "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
+        [ "templates/server_setup_scripts/ubuntu_12.04_hosts_script.sh" ],
+        [ "templates/server_setup_scripts/ubuntu_12.04_gluster_peers.sh" ],
+        [ "templates/server_setup_scripts/ubuntu_12.04_gluster_service.sh",
+          "templates/server_setup_scripts/ubuntu_12.04_master_script.sh" ],
         [ ],
         # NOTE: the master script will be run along with the worker setup scripts (see below) then, finally, our test script for SeqWare that launches various integration tests will run
 	[ "templates/server_setup_scripts/seqware/ubuntu_12.04_gridengine_script.sh",
@@ -70,14 +78,17 @@
       ]
     },
     {
-      "name": ["worker1", "worker2"],
+      # must have total of even nodes for gluster replication to work
+      "name": ["worker1"],
       "type": "worker",
-      "floatip": ["<FILLMEIN>", "<FILLMEIN>"],
+      "floatip": ["<FILLMEIN>"],
       "first_pass_scripts": [
         "templates/server_setup_scripts/ubuntu_12.04_minimal_script.sh"
       ], 
       # NOTE: the first array is empty meaning the master script will run on the master node, then in the next pass the worker scripts will run on the worker nodes, then, in the last pass of provisioning, the master node will run SeqWare integration tests
       "second_pass_scripts": [
+        [ "templates/server_setup_scripts/ubuntu_12.04_hosts_script.sh" ],
+        [ "templates/server_setup_scripts/ubuntu_12.04_gluster_peers.sh" ],
         [ ],
         [ "templates/server_setup_scripts/ubuntu_12.04_worker_script.sh"],
         [ ],
