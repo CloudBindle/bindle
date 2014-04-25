@@ -1,0 +1,22 @@
+- name:  Install tomcat7
+  apt: name=tomcat7 state=present update_cache=yes cache_valid_time=3600
+  
+# handle user database
+- include: populatedb.yml database=seqware_meta_db
+    
+# handle test database
+- include: populatedb.yml database=test_seqware_meta_db
+    
+# link up jars and xml config files
+- name:  Link up jars and xml config files
+  file: state=hard src={{ item.src }} dest={{ item.dest }} owner=tomcat7
+  with_items:
+     - { src: '~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.war', dest: '/var/lib/tomcat7/webapps/SeqWareWebService.war' }
+     - { src: '~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.xml', dest: '/etc/tomcat7/Catalina/localhost/SeqWareWebService.xml' }
+     - { src: '~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.war', dest: '/var/lib/tomcat7/webapps/SeqWarePortal.war' }
+     - { src: '~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.xml', dest: '/etc/tomcat7/Catalina/localhost/SeqWarePortal.xml' }
+  register: tomcatconf
+  
+- name:  Tomcat restart
+  service: name=tomcat7 state=restarted
+  when: tomcatconf.changed

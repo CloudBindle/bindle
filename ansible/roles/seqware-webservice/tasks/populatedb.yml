@@ -1,0 +1,16 @@
+- name:  Register  {{ database }} database relations
+  sudo: yes
+  sudo_user: seqware
+  command: psql {{ database }} --command "\dt"
+  register: database_state
+  changed_when: False
+
+# will need to parameterize this if we ever want the webservice to be on a different host
+- name: create  {{ database }} database for users
+  sudo: yes
+  sudo_user: seqware
+  when: "database_state.stdout.find('No relations found.') != -1"
+  command: $item
+  with_items: 
+    - psql -f ~seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db.sql  {{ database }}
+    - psql -f ~seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db_data.sql  {{ database }}

@@ -32,14 +32,19 @@
 # are by this stage. 
 - hosts: master 
   sudo: True
+  vars:
+    seqware_version: "1.0.14"
   roles:
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: True }
     - { role: seqware-master-infrastructure }
     - { role: seqware-code }
+    - { role: seqware-webservice }
 
 - hosts: worker 
   sudo: True
+  vars: 
+    seqware_version: "1.0.14"
   roles:
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: False }

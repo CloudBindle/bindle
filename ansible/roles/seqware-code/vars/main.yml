@@ -2,5 +2,3 @@
 # file: roles/seqware-code/vars/main.yml
 
 seqware_provider: "artifactory"
-
-seqware_version: "1.0.14"

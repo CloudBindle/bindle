@@ -11,7 +11,7 @@
     type="javax.sql.DataSource"
     name="jdbc/SeqWareMetaDB"
     description="Seqware Hibernate"
-    url="jdbc:postgresql://localhost:5432/test_seqware_meta_db"
+    url="jdbc:postgresql://localhost:5432/seqware_meta_db"
     username="seqware"
     password="seqware"
   />

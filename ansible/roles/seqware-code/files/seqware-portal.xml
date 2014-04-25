@@ -20,7 +20,7 @@
 		driverClassName="org.postgresql.Driver"
 		username="seqware"
 		password="seqware"
-		url="jdbc:postgresql://localhost:5432/test_seqware_meta_db"
+		url="jdbc:postgresql://localhost:5432/seqware_meta_db"
 	/>
 	<Parameter name="path.to.upload.directory" value="/datastore/uploads"/>
 	<Parameter name="true.protocols" value="http://,https://,s3://,ftp://"/>

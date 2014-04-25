@@ -37,9 +37,9 @@
 - name:  Copy xml portal config
   copy: 
     src: seqware-portal.xml
-    dest: ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}
+    dest: ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.xml
     
 - name:  Copy xml webservice config
   copy: 
     src: seqware-webservice.xml
-    dest: ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}
+    dest: ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.xml
