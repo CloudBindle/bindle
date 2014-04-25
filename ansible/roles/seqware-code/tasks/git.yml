@@ -1,0 +1,17 @@
+---
+# file: roles/seqware-code/tasks/git.yml
+
+- name: SeqWare - Code - Git | Cloning gitflow
+  git: repo=https://github.com/datasift/gitflow dest=~seqware/gitroot/gitflow
+  register: hubflow
+
+- name: SeqWare - Code - Git | Installing gitflow
+  command: ~seqware/gitroot/gitflow/install.sh
+  when: hubflow.changed
+  
+- name: SeqWare - Code - Git | Installing gitflow for SeqWare Code
+  command: chdir=~seqware/gitroot/seqware git hf init
+  register: gitflow_init
+  changed_when: "gitflow_init.stdout.find('Already initialized for hubflow.') != -1"
+
+

@@ -1,0 +1,21 @@
+---
+# file: roles/seqware-code/tasks/artifactory.yml
+
+- name: SeqWare - Code | Set up SeqWare code directories
+  file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} recurse={{ item.recurse }} mode={{ item.mode}} group={{ item.group }}
+  with_items:
+     - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-distribution/target/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
+     - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-webservice/target/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
+     - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-portal/target/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
+     - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-pipeline/target/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }
+     - { state: 'directory', path: '~seqware/.m2/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0700' }    
+
+- name: SeqWare - Code | Download SeqWare jars
+  get_url: url={{ item.url }} dest={{ item.dest }} owner=seqware
+  with_items:
+     - { url: 'http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-distribution/{{ seqware_version }}/seqware-distribution-{{ seqware_version }}-full.jar', dest: '~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-{{ seqware_version }}-full.jar' }
+     - { url: 'http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-portal/{{ seqware_version }}/seqware-portal-{{ seqware_version }}.war', dest: '~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.war' }
+     - { url: 'http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-webservice/{{ seqware_version }}/seqware-webservice-{{ seqware_version }}.war', dest: '~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.war' }
+     - { url: 'https://github.com/SeqWare/seqware/releases/download/{{ seqware_version }}/seqware', dest: '~seqware/gitroot/seqware/seqware-pipeline/target/seqware'}
+     - { url: 'https://github.com/SeqWare/seqware/releases/download/{{ seqware_version }}/archetype-catalog.xml', dest: '~seqware/.m2/archetype-catalog.xml'}
+

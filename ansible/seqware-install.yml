@@ -36,6 +36,7 @@
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: True }
     - { role: seqware-master }
+    - { role: seqware-code }
 
 - hosts: worker 
   sudo: True
