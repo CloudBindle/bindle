@@ -102,6 +102,7 @@
   # TODO: make this idempotent by using proper file modules 
 - name: SeqWare - Master | Oozie 
   when: oozie_installed.changed
+  notify: restart oozie
   command: $item
   with_items:
     - wget -q http://extjs.com/deploy/ext-2.2.zip
@@ -113,8 +114,61 @@
     - perl -0pi -e "s/<name>oozie.service.JPAService.jdbc.password<\/name>[.\s]*<value> <\/value>/<name>oozie.service.JPAService.jdbc.password<\/name><value>oozie<\/value>/;" /etc/oozie/conf/oozie-site.xml
     - sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
     
-- name: SeqWare - Master | Oozie
+- name: SeqWare - Master | Oozie started for variable registration 
   service: name=oozie state=started
+
+- name: SeqWare - Master | Register Oozie SGE Home Dir
+  shell: 'ps -fww -u oozie | grep -oE "\-Doozie\.home\.dir=\S+" | grep -oE "/\S+"'
+  register: oozie_home_dir
+  changed_when: False
+  
+- name: SeqWare - Master | Register Oozie SGE Conf Dir
+  shell: 'ps -fww -u oozie | grep -oE "\-Doozie\.config\.dir=\S+" | grep -oE "/\S+"'
+  register: oozie_conf_dir
+  changed_when: False
+
+- name: SeqWare - Master | Register qsub path
+  command: which qsub
+  register: qsub_path
+  changed_when: False
+  
+- name: SeqWare - Master | Copy Oozie Config
+  copy: 
+    src: oozie-site.xml
+    dest: '{{ oozie_conf_dir.stdout }}/oozie-site.xml'
+  notify: restart oozie
+
+- name: SeqWare - Master | Create Oozie web dir
+  file: state=directory path={{ oozie_home_dir.stdout }}/webapps/oozie/WEB-INF/lib 
+  
+- name: SeqWare - Master | Download Oozie-SGE 
+  get_url: url={{ item.url }} dest={{ oozie_home_dir.stdout }}/webapps/oozie/WEB-INF/lib mode=0555
+  with_items:
+     - { url: 'http://wrench.res.oicr.on.ca/artifactory/seqware-dependencies/io/seqware/oozie-sge/1.0.2/oozie-sge-1.0.2.jar' }
+     - { url: 'http://repo1.maven.org/maven2/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar' }
+  notify: restart oozie
+
+- name: SeqWare - Master | Oozie SGE Logging
+  lineinfile: 
+    dest: '{{ oozie_conf_dir.stdout }}/oozie-log4j.properties'
+    create: no
+    line: log4j.logger.io.seqware.oozie.action.sge=DEBUG, oozie
+    state: present
+    insertafter: EOF
+  notify: restart oozie
+  
+- name: SeqWare - Master | Oozie Sudoers
+  lineinfile: 
+    dest: /etc/sudoers
+    create: no
+    line: $item
+    state: present
+    insertafter: EOF
+  with_items: 
+      - 'oozie ALL=(ALL) NOPASSWD: {{ qsub_path.stdout  }}'
+      - 'oozie ALL=(ALL) NOPASSWD: ALL'
+      - 'seqware ALL=(ALL) NOPASSWD: ALL'
+  notify: restart oozie
 
 # TODO: need hdfs-site.xml configured properly using alternatives, but for now just copy it 
 - name: SeqWare - Master | Copy HBase Config

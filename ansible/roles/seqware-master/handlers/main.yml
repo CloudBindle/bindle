@@ -13,4 +13,6 @@
   with_items:
     - hadoop-0.20-mapreduce-jobtrackerha
     - hadoop-hdfs-namenode:browse confirm wa
-
+    
+- name: restart oozie
+  service: name=oozie state=restarted
