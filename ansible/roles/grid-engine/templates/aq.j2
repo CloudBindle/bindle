@@ -1,7 +1,7 @@
 qname                 main.q
-hostlist              NONE
+hostlist              @allhosts
 seq_no                0
-load_thresholds       np_load_avg=1.75
+load_thresholds       np_load_avg={{ ansible_processor_count }}
 suspend_thresholds    NONE
 nsuspend              1
 suspend_interval      00:05:00
@@ -12,7 +12,8 @@ qtype                 BATCH INTERACTIVE
 ckpt_list             NONE
 pe_list               make
 rerun                 FALSE
-slots                 1
+slots                 {{ ansible_processor_count }}{% for host in groups['all_groups'] %},[{{ host }}={{ ansible_processor_count }}] {% endfor %}
+
 tmpdir                /tmp
 shell                 /bin/csh
 prolog                NONE

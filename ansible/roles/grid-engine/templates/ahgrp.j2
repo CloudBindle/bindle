@@ -1,2 +1,2 @@
 group_name @allhosts
-hostlist NONE
+hostlist {% for host in groups['all_groups'] %} {{ host }} {% endfor %}

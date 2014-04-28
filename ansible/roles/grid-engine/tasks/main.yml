@@ -54,6 +54,20 @@
 - name: SGE | Add the capsid user
   command: qconf -au capsid users
   when: grid_engine_master == True and not 'capsid' in sge_current_users.stdout.split(',')
+  
+# loop through and template worker hosts
+- name: SGE | Generate execution host templates
+  template: src=execution_host.j2 dest=/etc/gridengine/templates/sge_execution_host_{{ item }}.sh mode=0555
+  with_items: groups['worker']
+  register: execution_host_template
+  when: grid_engine_master == True
+
+# loop through and setup worker hosts, if this was better it would modify existing hosts as well instead of ignoring errors
+- name: SGE | Add worker hosts as execution hosts
+  shell: export EDITOR=/etc/gridengine/templates/sge_execution_host_{{ item }}.sh && qconf -ae
+  with_items: groups['worker']
+  when: grid_engine_master == True and execution_host_template.changed
+  ignore_errors: yes
 
 # Again, we don't want to do this if it already exists, never counts as a change registering variables
 - name: SGE | Check current host groups
@@ -63,12 +77,13 @@
   register: sge_current_host_groups
   changed_when: false
 
-- name: SGE | Build host group configuration
-  template: src=ahgrp.j2 dest=/tmp/sge_ahgrp
+# The template now handles the hostlist properly
+- name: SGE | Template host group configuration
+  template: src=ahgrp.j2 dest=/etc/gridengine/templates/sge_ahgrp
   when: grid_engine_master == True and not '@allhosts' in sge_current_host_groups.stdout_lines
 
 - name: SGE | Add the host group configuration
-  command: qconf -Ahgrp /tmp/sge_ahgrp
+  command: qconf -Ahgrp /etc/gridengine/templates/sge_ahgrp
   when: grid_engine_master == True and not '@allhosts' in sge_current_host_groups.stdout_lines
 
 # Again, we don't want to do this if it already exists
@@ -79,87 +94,38 @@
   register: sge_current_queues
   changed_when: false
 
-- name: SGE | Build main queue
-  template: src=aq.j2 dest=/tmp/sge_aq
+# template handles hostlist, worker queue slots, target load average
+- name: SGE | Template main queue
+  template: src=aq.j2 dest=/etc/gridengine/templates/sge_aq
   when: grid_engine_master == True and not 'main.q' in sge_current_queues.stdout_lines
+  register: main_queue_template
 
 - name: SGE | Add main queue
-  command: qconf -Aq /tmp/sge_aq
-  when: grid_engine_master == True and not 'main.q' in sge_current_queues.stdout_lines
+  command: qconf -Aq /etc/gridengine/templates/sge_aq
+  when: grid_engine_master == True and (not 'main.q' in sge_current_queues.stdout_lines or main_queue_template.changed )
 
-- name: SGE | Add attribute specifications
-  command: qconf -aattr {{ item.obj_spec }} {{ item.attr_name }} {{ item.val }} {{ item.obj_instance }}
-  when: grid_engine_master == True
-  register: sge_attribute_specifications
-  changed_when: "'No modification' not in sge_attribute_specifications.stdout"
-  with_items:
-    - { obj_spec: 'hostgroup', attr_name: 'hostlist', val: 'master', obj_instance: '@allhosts' }
-    - { obj_spec: 'queue', attr_name: 'hostlist', val: '@allhosts', obj_instance: 'main.q'}
-    - { obj_spec: 'queue', attr_name: 'slots', val: '{{ ansible_processor_count }}', obj_instance: 'main.q'}
-    - { obj_spec: 'hostgroup', attr_name: 'hostlist', val: 'master', obj_instance: '@allhosts' }
-  
-
-# loop through and template worker hosts
-- name: SGE | Generate execution host templates
-  template: src=execution_host.j2 dest=/etc/gridengine/templates/sge_execution_host_{{ item }}.sh mode=0555
-  with_items: groups['worker']
-  register: execution_host_template
-  when: grid_engine_master == True
-
-# loop through and setup worker hosts 
-- name: SGE | Add worker hosts as execution hosts
-  shell: export EDITOR=/etc/gridengine/templates/sge_execution_host_{{ item }}.sh && qconf -ae
-  with_items: groups['worker']
-  when: grid_engine_master == True and execution_host_template.changed
-  
-# template hostlist
-- name: SGE | Generate hostlist
-  template: src=hostlist.j2 dest=/etc/gridengine/templates/hostlist.sh mode=0555
-  register: hostlist
-  when: grid_engine_master == True
-
-- name: SGE | Update hostlist
-  shell: export EDITOR=/etc/gridengine/templates/hostlist.sh && qconf -ahgrp @allhosts
-  when: grid_engine_master == True and hostlist.changed
+# Again, we don't want to do this if it already exists
+- name: SGE | Check parallel environment
+  command: qconf -sp serial
   ignore_errors: yes
-  
-- name: SGE | Update hostlist (in a different way?)
-  shell: export EDITOR=/etc/gridengine/templates/hostlist.sh && qconf -mhgrp @allhosts
-  when: grid_engine_master == True and hostlist.changed
-  ignore_errors: yes
-  
-- name: SGE | Update queue hostlist or something
-  command: qconf -aattr queue hostlist @allhosts main.q
-  when: grid_engine_master == True and hostlist.changed
-  ignore_errors: yes
-
-- name: SGE | Add worker queue slots
-  command: qconf -aattr queue slots "[{{ item }}={{ ansible_processor_count }}]" main.q 
-  with_items: groups['worker']
   when: grid_engine_master == True
-  
-# Setup what looks like a target load
-- name: SGE | Setup target load
-  command: qconf -mattr queue load_thresholds "np_load_avg={{ ansible_processor_count }}" main.q
-  when: grid_engine_master == True
-  
-- name: SGE | Add worker consumable memory in bytes 
-  command: qconf -rattr exechost complex_values h_vmem={{ ansible_memtotal_mb * 1048576  }} {{ item }}
-  with_items: groups['worker']
-  when: grid_engine_master == True
+  register: sge_parallel_env
+  changed_when: false
 
 # setup "serial" parallel environment
 - name: SGE | Template serial file
   template: src=serial_profile.j2 dest=/etc/gridengine/templates/sge_serial_profile
   register: serial_profile
-  when: grid_engine_master == True
+  when: grid_engine_master == True 
   
+# Again, if this was better, we would re-create the environment if there were changes in the template
 - name: SGE | Setup serial profile environment
   command: $item
   with_items:
       - qconf -Ap /etc/gridengine/templates/sge_serial_profile
       - qconf -aattr queue pe_list serial main.q
   when: grid_engine_master == True and serial_profile.changed
+  ignore_errors: yes
 
 - name:  SGE | Setup worker act_qmaster line
   lineinfile: 
@@ -175,5 +141,5 @@
   when: worker_setup.changed
   
 - name:  SGE | Ensure worker is started in general
-  service: name=gridengine-exec state=started
+  service: name=gridengine-exec state=started pattern=/usr/lib/gridengine/sge_execd
   when: grid_engine_master == False

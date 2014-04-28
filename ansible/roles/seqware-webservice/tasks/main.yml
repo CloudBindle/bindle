@@ -6,15 +6,23 @@
     
 # handle test database
 - include: populatedb.yml database=test_seqware_meta_db
-    
-# link up jars and xml config files
-- name:  Link up jars and xml config files
-  file: state=hard src={{ item.src }} dest={{ item.dest }} owner=tomcat7
+
+# link up jars and xml config files, fetch and then copy because hard linking always detects a change and soft-linking has permissions issues
+- name:  Fetch jars and xml config files
+  fetch: fail_on_missing=yes src={{ item.src }} dest=/tmp/fetched/{{ ansible_eth0.ipv4.address }}/ flat=yes
   with_items:
-     - { src: '~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.war', dest: '/var/lib/tomcat7/webapps/SeqWareWebService.war' }
-     - { src: '~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.xml', dest: '/etc/tomcat7/Catalina/localhost/SeqWareWebService.xml' }
-     - { src: '~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.war', dest: '/var/lib/tomcat7/webapps/SeqWarePortal.war' }
-     - { src: '~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.xml', dest: '/etc/tomcat7/Catalina/localhost/SeqWarePortal.xml' }
+     - { src: '/mnt/home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.war' }
+     - { src: '/mnt/home/seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.xml' }
+     - { src: '/mnt/home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.war' }
+     - { src: '/mnt/home/seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.xml' }
+
+- name:  Copy up jars and xml config files
+  copy: src={{ item.src }} dest={{ item.dest }} owner=tomcat7
+  with_items:
+     - { src: '/tmp/fetched/{{ ansible_eth0.ipv4.address }}/seqware-webservice-{{ seqware_version }}.war', dest: '/var/lib/tomcat7/webapps/SeqWareWebService.war' }
+     - { src: '/tmp/fetched/{{ ansible_eth0.ipv4.address }}/seqware-webservice-{{ seqware_version }}.xml', dest: '/etc/tomcat7/Catalina/localhost/SeqWareWebService.xml' }
+     - { src: '/tmp/fetched/{{ ansible_eth0.ipv4.address }}/seqware-portal-{{ seqware_version }}.war', dest: '/var/lib/tomcat7/webapps/SeqWarePortal.war' }
+     - { src: '/tmp/fetched/{{ ansible_eth0.ipv4.address }}/seqware-portal-{{ seqware_version }}.xml', dest: '/etc/tomcat7/Catalina/localhost/SeqWarePortal.xml' }
   register: tomcatconf
   
 - name:  Tomcat restart

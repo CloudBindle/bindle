@@ -2,3 +2,7 @@
 # file: roles/seqware-code/vars/main.yml
 
 seqware_provider: "artifactory"
+
+seqware_branch_cmd: "git checkout develop"
+seqware_build_cmd: "mvn clean install -DskipTests"
+seqware_it_cmd: "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat'"
