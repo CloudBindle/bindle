@@ -363,6 +363,7 @@ There are several items you need to take care of post-provisioning to ensure you
     * change the OOZIE_WORK_DIR variable to a shared gluster directory such as /glusterfs/data/ICGC1/scratch, BioNimbus will tell you where this should be
     * create a directory on HDFS in /user/$USERNAME, chown this directory to your usesrname
     * copy the seqware cronjob to your own user directory, modify the scripts to have your paths, install the cronjob
+    * install the workflow(s) you want, these may already be in your released-bundles directory e.g. "seqware bundle install --zip Workflow_Bundle_BWA_2.2.0_SeqWare_1.0.13.zip"
 
 After these changes you should have a working SeqWare environment set to run workflows as your user.
 
