@@ -1,145 +1,24 @@
 ---
 # file: roles/grid-engine/tasks/main.yml
+
+# common tasks follow
 - name: SGE | Install gridengine-client
   apt: pkg=gridengine-client state=present update_cache=yes cache_valid_time=3600
   
 - name: SGE | Install gridengine-common
   apt: pkg=gridengine-common state=present update_cache=yes cache_valid_time=3600
 
-- name: SGE | Install gridengine-qmon
-  apt: pkg=gridengine-qmon state=present update_cache=yes cache_valid_time=3600
-  when: grid_engine_master == True
-
 - name: SGE | Install gridengine-exec
   apt: pkg=gridengine-exec state=present update_cache=yes cache_valid_time=3600
-
-- name: SGE | Install gridengine-master 
-  apt: pkg=gridengine-master state=present update_cache=yes cache_valid_time=3600
-  when: grid_engine_master == True
-
-- name: SGE | Configure master
-  command: qconf -as {{ inventory_hostname }}
-  when: grid_engine_master == True
-  register: configure_master_as
-  changed_when: not 'already exists' in configure_master_as.stderr
-
-# Add the user on both master and worker nodes
+  
+  # Add the user on both master and worker nodes
 - name: SGE | Create user capsid
   user: name=capsid comment="CaPSID worker" state=present
   
-- name: SGE | Make a directory for our SGE templates
-  file: state=directory path=/etc/gridengine/templates mode=0744
-  when: grid_engine_master == True
-  
-# setup memory as a consumable resource
-- name: SGE | Template memory configuration file
-  template: src=sc.j2 dest=/etc/gridengine/templates/sge_sc
-  register: memory_template
-  when: grid_engine_master == True
-  
-- name: SGE | Setup memory as consumable resource
-  command: qconf -Mc /etc/gridengine/templates/sge_sc
-  when: grid_engine_master == True and memory_template.changed
-  register: memory_consumable
-  changed_when: not 'Complex attribute configuration has not been changed' in memory_consumable.stderr
-
-# Be careful when adding the user. First get he current list, and only add if it isn't
-# already present.
-- name: SGE | Check current user list
-  shell: qconf -su users | grep -E "^entries" | cut -f2 -d " "
-  when: grid_engine_master == True
-  register: sge_current_users
-  changed_when: false
-
-- name: SGE | Add the capsid user
-  command: qconf -au capsid users
-  when: grid_engine_master == True and not 'capsid' in sge_current_users.stdout.split(',')
-  
-# loop through and template worker hosts
-- name: SGE | Generate execution host templates
-  template: src=execution_host.j2 dest=/etc/gridengine/templates/sge_execution_host_{{ item }}.sh mode=0555
-  with_items: groups['worker']
-  register: execution_host_template
+ 
+# role specific tasks follow
+- include: 'master.yml'
   when: grid_engine_master == True
 
-# loop through and setup worker hosts, if this was better it would modify existing hosts as well instead of ignoring errors
-- name: SGE | Add worker hosts as execution hosts
-  shell: export EDITOR=/etc/gridengine/templates/sge_execution_host_{{ item }}.sh && qconf -ae
-  with_items: groups['worker']
-  when: grid_engine_master == True and execution_host_template.changed
-  ignore_errors: yes
-
-# Again, we don't want to do this if it already exists, never counts as a change registering variables
-- name: SGE | Check current host groups
-  command: qconf -shgrpl
-  ignore_errors: yes
-  when: grid_engine_master == True
-  register: sge_current_host_groups
-  changed_when: false
-
-# The template now handles the hostlist properly
-- name: SGE | Template host group configuration
-  template: src=ahgrp.j2 dest=/etc/gridengine/templates/sge_ahgrp
-  when: grid_engine_master == True and not '@allhosts' in sge_current_host_groups.stdout_lines
-
-- name: SGE | Add the host group configuration
-  command: qconf -Ahgrp /etc/gridengine/templates/sge_ahgrp
-  when: grid_engine_master == True and not '@allhosts' in sge_current_host_groups.stdout_lines
-
-# Again, we don't want to do this if it already exists
-- name: SGE | Check current queues
-  command: qconf -sql
-  ignore_errors: yes
-  when: grid_engine_master == True
-  register: sge_current_queues
-  changed_when: false
-
-# template handles hostlist, worker queue slots, target load average
-- name: SGE | Template main queue
-  template: src=aq.j2 dest=/etc/gridengine/templates/sge_aq
-  when: grid_engine_master == True and not 'main.q' in sge_current_queues.stdout_lines
-  register: main_queue_template
-
-- name: SGE | Add main queue
-  command: qconf -Aq /etc/gridengine/templates/sge_aq
-  when: grid_engine_master == True and (not 'main.q' in sge_current_queues.stdout_lines or main_queue_template.changed )
-
-# Again, we don't want to do this if it already exists
-- name: SGE | Check parallel environment
-  command: qconf -sp serial
-  ignore_errors: yes
-  when: grid_engine_master == True
-  register: sge_parallel_env
-  changed_when: false
-
-# setup "serial" parallel environment
-- name: SGE | Template serial file
-  template: src=serial_profile.j2 dest=/etc/gridengine/templates/sge_serial_profile
-  register: serial_profile
-  when: grid_engine_master == True 
-  
-# Again, if this was better, we would re-create the environment if there were changes in the template
-- name: SGE | Setup serial profile environment
-  command: $item
-  with_items:
-      - qconf -Ap /etc/gridengine/templates/sge_serial_profile
-      - qconf -aattr queue pe_list serial main.q
-  when: grid_engine_master == True and serial_profile.changed
-  ignore_errors: yes
-
-- name:  SGE | Setup worker act_qmaster line
-  lineinfile: 
-    line: 'master'
-    dest: /var/lib/gridengine/default/common/act_qmaster
-    state: present
-    create: yes
-  register: worker_setup
-  when: grid_engine_master == False
-  
-- name:  SGE | Restart worker when setup changed
-  service: name=gridengine-exec state=restarted
-  when: worker_setup.changed
-  
-- name:  SGE | Ensure worker is started in general
-  service: name=gridengine-exec state=started pattern=/usr/lib/gridengine/sge_execd
+- include: 'worker.yml'
   when: grid_engine_master == False

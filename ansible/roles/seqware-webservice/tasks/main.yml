@@ -7,7 +7,10 @@
 # handle test database
 - include: populatedb.yml database=test_seqware_meta_db
 
-# link up jars and xml config files, fetch and then copy because hard linking always detects a change and soft-linking has permissions issues
+# this part sucks
+# We are doing a fetch and then copy because hard linking always detects a change and redeploys
+# soft-linking requires the tomcat7 user to have permission into the seqware directory which is not ideal
+# there is no module for copying from one place on the remote file system to another, so fetching and then pushing again is the current approach
 - name:  Fetch jars and xml config files
   fetch: fail_on_missing=yes src={{ item.src }} dest=/tmp/fetched/{{ ansible_eth0.ipv4.address }}/ flat=yes
   with_items:
