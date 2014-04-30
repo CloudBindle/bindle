@@ -201,12 +201,6 @@
     - oozie
     - postgresql
     - hbase-master
-     
-- name:  Create oozie working dir link
-  file: state=link src=/mnt/seqware-oozie dest=/usr/tmp/seqware-oozie owner=seqware group=seqware
-
-- name:  Create datastore link
-  file: state=link src=/mnt/datastore dest=/datastore owner=seqware group=seqware
   
 - name:  Install NFS
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600

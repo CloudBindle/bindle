@@ -9,9 +9,11 @@
      - { state: 'directory', path: '~seqware/crons', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/logs', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/released-bundles', owner: 'seqware', group: 'seqware', mode: '0700' }
+     - { state: 'directory', path: '~seqware/provisioned-bundles', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/workflow-dev', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/.seqware/self-installs', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/gitroot/seqware', owner: 'seqware', group: 'seqware', mode: '0700' }
+     - { state: 'directory', path: '~seqware/.m2/', owner: 'seqware', group: 'seqware', mode: '0700' }    
      
 - name: Check state of HDFS User Directories
   command: hadoop fs -ls /user/seqware
@@ -36,7 +38,7 @@
 - name: SeqWare - Code - Git | Cloning seqware
   sudo: yes
   sudo_user: seqware
-  git: repo=https://github.com/SeqWare/seqware.git dest=~seqware/gitroot/seqware 
+  git: update=no repo=https://github.com/SeqWare/seqware.git dest=~seqware/gitroot/seqware version={{ seqware_repo_version }}
 
 # setup bash profile for seqware
 - name:  Bash profile
@@ -54,9 +56,6 @@
 - include: 'artifactory.yml'
   when: seqware_provider == "artifactory"
   
-- name:  Set up SeqWare script permissions
-  file: path=~seqware/bin/seqware mode=0700 state=file
-  
 - name:  Setup script path in bash profile
   lineinfile: 
     dest: ~seqware/.bash_profile
@@ -64,13 +63,3 @@
     line: 'export PATH=$PATH:~seqware/bin'
     state: present
     insertafter: EOF
-
-- name:  Copy xml portal config
-  copy: 
-    src: seqware-portal.xml
-    dest: ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.xml
-    
-- name:  Copy xml webservice config
-  copy: 
-    src: seqware-webservice.xml
-    dest: ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.xml

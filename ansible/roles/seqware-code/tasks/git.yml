@@ -9,9 +9,17 @@
   command: ~seqware/gitroot/gitflow/install.sh
   when: hubflow.changed
   
+  # not ideal, but we ignore errors since this dies when working with changes in the tree 
 - name: Installing gitflow for SeqWare Code
   command: chdir=~seqware/gitroot/seqware git hf init
   register: gitflow_init
   changed_when: "gitflow_init.stdout.find('Already initialized for hubflow.') != -1"
-
-
+  ignore_errors: yes
+  
+- name: Build normally and create a build log
+  sudo: yes
+  sudo_user: seqware
+  shell: chdir=~seqware/gitroot/seqware creates=~seqware/gitroot/seqware/build.log {{ seqware_build_cmd }} 2>&1 | tee build.log
+  
+- name: Setup seqware CLI
+  file: path=~seqware/bin/seqware src=~seqware/gitroot/seqware/seqware-pipeline/target/seqware state=link owner=seqware  mode=0700

@@ -77,3 +77,9 @@
      - { state: 'directory', path: '/mnt/seqware-oozie', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }
      - { state: 'directory', path: '/usr/tmp/', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }
      - { state: 'directory', path: '/mnt/datastore', owner: 'seqware', group: 'seqware', recurse: 'yes', mode: '0777' }
+     
+- name:  Create oozie working dir link
+  file: state=link src=/mnt/seqware-oozie dest=/usr/tmp/seqware-oozie owner=seqware group=seqware
+
+- name:  Create datastore link
+  file: state=link src=/mnt/datastore dest=/datastore owner=seqware group=seqware

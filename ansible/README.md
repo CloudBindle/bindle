@@ -36,3 +36,8 @@ Customize as needed, example with openstack in the root directory
    ansible-playbook -v -i inventory ansible/seqware-install.yml 
 
 This has been tested with Openstack with a two machine cluster
+
+Override parameters (such as using build and install for SeqWare using git rather than artifactory in the following
+
+   ansible-playbook -v -i inventory ansible/seqware-install.yml    --extra-vars "seqware_provider=git" 
+   ansible-playbook -v -i inventory ansible/seqware-install.yml    --extra-vars "seqware_provider=git run_integration_tests=True" 

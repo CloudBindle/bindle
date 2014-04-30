@@ -18,8 +18,6 @@
 # are by this stage. 
 - hosts: master 
   sudo: True
-  vars:
-    seqware_version: "1.0.14"
   roles:
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: True }
@@ -29,9 +27,15 @@
 
 - hosts: worker 
   sudo: True
-  vars: 
-    seqware_version: "1.0.14"
   roles:
     - { role: java, java_provider: Cloudera }
     - { role: grid-engine, grid_engine_master: False }
     - { role: seqware-worker-infrastructure }
+    
+- hosts: master 
+  sudo: yes
+  sudo_user: seqware
+  vars: 
+      run_integration_tests: false
+  roles:
+    - { role: seqware-integration-tests, when: "{{ run_integration_tests }} == True" }

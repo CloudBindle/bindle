@@ -7,9 +7,7 @@
      - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-distribution/target/', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-webservice/target/', owner: 'seqware', group: 'seqware', mode: '0700' }
      - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-portal/target/', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-pipeline/target/', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/.m2/', owner: 'seqware', group: 'seqware', mode: '0700' }    
-     
+     - { state: 'directory', path: '~seqware/gitroot/seqware/seqware-pipeline/target/', owner: 'seqware', group: 'seqware', mode: '0700' }     
 
 - name:  Download SeqWare jars
   get_url: url={{ item.url }} dest={{ item.dest }} owner=seqware
@@ -22,3 +20,13 @@
      - { url: 'http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-distribution/{{ seqware_version }}/seqware-distribution-{{ seqware_version }}-full.jar', dest: '~seqware/jars/seqware-distribution-{{ seqware_version }}-full.jar' }
      - { url: 'http://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-distribution/{{ seqware_version }}/seqware-distribution-{{ seqware_version }}-full.jar', dest: '~seqware/.seqware/self-installs/seqware-distribution-{{ seqware_version }}-full.jar' }
      - { url: 'https://github.com/SeqWare/seqware/releases/download/{{ seqware_version }}/seqware', dest: '~seqware/bin/seqware'}
+     
+- name:  Copy xml portal config
+  copy: 
+    src: seqware-portal.xml
+    dest: ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-{{ seqware_version }}.xml
+    
+- name:  Copy xml webservice config
+  copy: 
+    src: seqware-webservice.xml
+    dest: ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-{{ seqware_version }}.xml
