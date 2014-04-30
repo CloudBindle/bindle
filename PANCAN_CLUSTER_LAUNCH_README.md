@@ -335,22 +335,23 @@ information that is particular to each.
 The Embassy Cloud at EBI uses vCloud.  The Vagrant vCloud plugin has limited
 functionality and, therefore, only single nodes can be launched there.
 
-### Notes for BioNimbus PDC (OpenStack)
+### Notes for BioNimbus PDC2 (OpenStack)
 
-BioNimbus uses OpenStack and the Vagrant OpenStack plugin is quite stable however the PDC environment is in flux. You
+BioNimbus uses OpenStack and the Vagrant OpenStack plugin is quite stable however the PDC2 environment is in flux. You
 can launch VM clusters or single nodes.
 
 When you launch the cluster you need to do the following differently from the examples above:
 
     # install the open stack vagrant plugin
     $ vagrant plugin install vagrant-openstack-plugin
+    # make sure you apply the rsync fix described in the README.md
 
     # example launching a host 
     $ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
 There are several items you need to take care of post-provisioning to ensure you have a working cluster:
 
-* generate your keypair using the web conole 
+* generate your keypair using the web conole (or add the public key using command line tools: "nova keypair-add brian-pdc-3 > brian-pdc-3.pem; chmod 600 brian-pdc-3.pem; ssh-keygen -f brian-pdc-3.pem -y >> ~/.ssh/authorized_keys"). 
 * make sure you patch the rsync issue, see README.md for this project
 * you need to run SeqWare workflows as your own user not seqware. This has several side effects:
     * when you launch your cluster, login to the master node
@@ -358,8 +359,13 @@ There are several items you need to take care of post-provisioning to ensure you
     * make the following directories in your home directory: provisioned-bundles, released-bundles, crons, logs, jars, workflow-dev, and .seqware
     * copy the seqware binary to somewhere on your user path
     * copy the .bash_profile contents from the seqware account to your account 
+    * copy the .seqware/settings file from the seqware account to your account, modify paths
+    * change the OOZIE_WORK_DIR variable to a shared gluster directory such as /glusterfs/data/ICGC1/scratch, BioNimbus will tell you where this should be
     * create a directory on HDFS in /user/$USERNAME, chown this directory to your usesrname
     * copy the seqware cronjob to your own user directory, modify the scripts to have your paths, install the cronjob
+    * install the workflow(s) you want, these may already be in your released-bundles directory e.g. "seqware bundle install --zip Workflow_Bundle_BWA_2.2.0_SeqWare_1.0.13.zip"
+
+After these changes you should have a working SeqWare environment set to run workflows as your user.
 
 ### Notes for OICR (OpenStack)
 

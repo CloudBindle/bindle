@@ -58,7 +58,7 @@ sudo -u hdfs hadoop namenode -format -force
 for x in `cd /etc/init.d ; ls hadoop-hdfs-*` ; do sudo service $x start ; done
 
 # setup various HDFS directories
-sudo -u hdfs hadoop fs -mkdir /tmp 
+sudo -u hdfs hadoop fs -mkdir /tmp
 sudo -u hdfs hadoop fs -chmod -R 1777 /tmp
 sudo -u hdfs hadoop fs -mkdir -p /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
 sudo -u hdfs hadoop fs -chmod 1777 /var/lib/hadoop-hdfs/cache/mapred/mapred/staging
@@ -117,7 +117,7 @@ service hue restart
 for i in apache2 cron hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; sysv-rc-conf $i on; done
 
 # enforce Java 7 use for tomcat
-sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/lib\/jvm\/java-7-oracle-cloudera/;" /etc/default/tomcat7 
+sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/lib\/jvm\/java-7-oracle-cloudera/;" /etc/default/tomcat7
 
 
 # configure dirs for seqware
@@ -125,7 +125,7 @@ sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/
 # is the ephemeral disk on Amazon instances
 mkdir -p /mnt/seqware-oozie
 # mount gluster here
-# TODO: I think at this point the bricks are made, this call will need to create the shared volume and then mount it
+# this call will mount the shared gluster disk for clusters or simply fail if not using gluster in single node mode
 mount -t glusterfs master:/gv0 /mnt/seqware-oozie
 chmod a+rx /mnt
 chmod a+rwx /mnt/seqware-oozie
@@ -155,4 +155,3 @@ cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
 chown root:root /etc/init.d/hadoop-init
 chmod 755 /etc/init.d/hadoop-init
 sysv-rc-conf hadoop-init on
-
