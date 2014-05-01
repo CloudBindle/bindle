@@ -466,6 +466,32 @@ each server being launched (for a cluster) or just master.log if you launched a
 node.  You can use "tail -f <logname>" to watch the progress of building your
 VMs.
 
+## Bindle 2.0 and Ansible
+
+For Bindle2, we will be moving more and more functionality out of the Bash scripts and into Ansible playbooks parameterized with different variables. 
+In practice this means that you will only have a small "stub" json template and most of the work is done via ansible. 
+The ansible playbook will run after any bash scripts that you have configured. 
+
+For now, the various nodes only run a single first pass script "templates/server\_setup\_scripts/ubuntu\_12.04\_dummy\_script.sh" and the bulk of the configuration 
+is done via parameters to the playbook. For example:
+
+    "ANSIBLE_PLAYBOOK": "ansible/seqware-install.yml --extra-vars \"seqware_provider=git run_integration_tests=True m2_mirror_url=http://wrench2.res.oicr.on.ca/artifactory/repo \""
+
+This builds and installs from git, will run the integration tests and sets up the VM using a local maven mirror at wrench2. 
+
+    "ANSIBLE_PLAYBOOK": "ansible/seqware-install.yml --extra-vars \"seqware_repo_version=70af5669c02aee7f41163a090936aee438eeff08 seqware_provider=git run_integration_tests=True m2_mirror_url=http://wrench2.res.oicr.on.ca/artifactory/repo \""
+
+This builds and installs from git but using a specific commit (rather than the default of develop). 
+
+    "ANSIBLE_PLAYBOOK": "ansible/seqware-install.yml --extra-vars \"seqware_version=1.0.14 seqware_provider=artifactory  \""
+
+This installs from artifactory (avoiding building) and will use SeqWare 1.0.14.
+
+    "ANSIBLE_PLAYBOOK": "ansible/seqware-install.yml --extra-vars \"seqware_version=1.0.14 single_node=True seqware_provider=artifactory \""
+    
+This does the same but installs using only a single node (rather than a master with associated slave nodes). 
+
+
 ## Controlling the VM
 
 Once the vagrant_cluster_launch.pl script finishes running you will have one or

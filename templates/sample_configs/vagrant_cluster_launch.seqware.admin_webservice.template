@@ -1,7 +1,10 @@
 # ABOUT
-# the general section contains variables used throughout templates
-# the node_config section defines the nodes of the cluster
-# comments starting with '#' are removed before parsing
+# The general section contains variables used throughout templates.
+# The node_config section defines the nodes of the cluster.
+# Comments starting with '#' are removed before parsing.
+#
+# This template is simply used to create a two node cluster, database 
+# and web service to demonstrate creation of the seqware-admin-webservice 
 {
   # GENERAL CONFIG
   # will likely make these lower-case in the future
@@ -31,11 +34,7 @@
     "AWS_SSH_USERNAME": "ubuntu",
     "AWS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
     # SEQWARE
-    "SEQWARE_IT_CMD": "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat,!embeddedHBase'",
-    "SEQWARE_BUILD_CMD": "mvn clean install -DskipTests",
-    # NOTE: you can checkout whatever branch you like, see our GitHub site
-    # NOTE: you can setup a Maven mirror by adding the variable m2_maven_mirror
-    "ANSIBLE_PLAYBOOK": "ansible/seqware-install.yml --extra-vars \"seqware_version=1.0.14 single_node=True seqware_provider=git \""
+    "ANSIBLE_PLAYBOOK": "ansible/seqware-admin-webservice-install.yml --extra-vars \"seqware_version=1.0.14 seqware_provider=artifactory \""
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -43,10 +42,18 @@
   "node_config": [
     # NOTE: the master node is assumed to be called "master" (for now), things will break if named something else
     {
-      "name": ["master"],
-      "type": "master",
+      "name": ["dbserver"],
+      "type": "dbserver",
       "floatip": ["<FILLMEIN>"],
       # NOTE: you can have multiple scripts but they are cat'd together and run as a single provision step when the box first boots
+      "first_pass_scripts": [
+        "templates/server_setup_scripts/ubuntu_12.04_dummy_script.sh"
+      ] 
+    },
+    {
+      "name": ["webserver"],
+      "type": "webserver",
+      "floatip": ["<FILLMEIN>"],
       "first_pass_scripts": [
         "templates/server_setup_scripts/ubuntu_12.04_dummy_script.sh"
       ] 
