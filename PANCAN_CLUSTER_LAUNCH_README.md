@@ -366,6 +366,8 @@ There are several items you need to take care of post-provisioning to ensure you
     * install the workflow(s) you want, these may already be in your released-bundles directory e.g. "seqware bundle install --zip Workflow_Bundle_BWA_2.2.0_SeqWare_1.0.13.zip"
     * probably want to manually install the BWA workflow rather than via provisioning so can install as your user (or you need to update the SeqWare metadb to point to the right place).
 
+    update workflow set current_working_dir =  '/glusterfs/netapp/homes1/BOCONNOR/provisioned-bundles/Workflow_Bundle_BWA_2.2.0_SeqWare_1.0.13' where workflow_id = 50;
+
 After these changes you should have a working SeqWare environment set to run workflows as your user.
 
 ### Notes for OICR (OpenStack)
