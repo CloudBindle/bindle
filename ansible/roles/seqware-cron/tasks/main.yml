@@ -1,0 +1,20 @@
+---
+# file: roles/seqware-cron/tasks/git.yml
+
+- name:  Set up SeqWare cron and log directory
+  file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }}
+  with_items:
+     - { state: 'directory', path: '~seqware/logs', owner: 'seqware', group: 'seqware', mode: '0700' }
+     - { state: 'directory', path: '~seqware/crons', owner: 'seqware', group: 'seqware', mode: '0700' }
+  
+- name:  Template status cron
+  template: src=status.j2 dest=~seqware/crons/status.cron owner=seqware
+  
+- name:  Template file provenance cron
+  template: src=file_provenance.j2 dest=~seqware/crons/file_provenance.cron owner=seqware
+  
+- name: Setup status cron
+  cron: name="status cron" job="~seqware/crons/status.cron >> ~seqware/logs/status.log" state=present user=seqware 
+  
+- name: Setup file provenance cron
+  cron: name="file provenance" job="~seqware/crons/file_provenance.cron >> ~seqware/logs/file_provenance.log" state=present user=seqware special_time=hourly
