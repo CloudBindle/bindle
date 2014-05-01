@@ -35,6 +35,10 @@
 - name:  Template seqware settings
   template: src=settings.j2 dest=~seqware/.seqware/settings mode=0640 owner=seqware
   
+- name:  Template maven mirror if defined
+  template: src=m2_settings.j2 dest=~seqware/.m2/settings.xml mode=0640 owner=seqware
+  when: m2_mirror_url is defined
+  
 # I'm still checking out since I will need the SQL schema file for example
 - name: SeqWare - Code - Git | Cloning seqware
   sudo: yes

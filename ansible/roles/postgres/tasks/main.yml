@@ -14,12 +14,12 @@
   copy: src=postgresql.conf dest=/etc/postgresql/9.1/main/postgresql.conf owner=postgres group=postgres mode=0640
   register: postgresconf
 
-- name: reload postgres if it changed
-  service: name=postgresql state=reloaded enabled=yes
+- name: restart postgres if it changed
+  service: name=postgresql state=restarted enabled=yes
   when: pg_file.changed
   
-- name: reload postgres if it changed
-  service: name=postgresql state=reloaded enabled=yes
+- name: restart postgres if it changed
+  service: name=postgresql state=restarted enabled=yes
   when: postgresconf.changed
 
 - name: make a db user

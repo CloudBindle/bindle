@@ -68,6 +68,10 @@
 
 - name:  Start HDFS
   service: name=hadoop-hdfs-namenode state=started
+
+- name:  Start HDFS datanode
+  service: name=hadoop-hdfs-datanode state=started
+  when: single_node
   
   #hmmm, no module for hadoop file operations
 - name:  Setup HDFS Shared Storage

@@ -27,7 +27,8 @@
     <property><name>oozie.service.LiteWorkflowStoreService.user.retry.max</name><value>30</value></property>
     <property><name>oozie.action.retries.max</name><value>30</value></property>
     <property><name>oozie.service.WorkflowAppService.WorkflowDefinitionMaxLength</name><value>10000000</value></property>
-
+    <property><name>oozie.service.LiteWorkflowStoreService.user.retry.error.code.ext</name><value>SGE82,SGE137</value></property>
+    <property><name>oozie.validate.ForkJoin</name><value>false</value></property>
 
     <property>
         <name>oozie.service.ActionService.executor.ext.classes</name>
