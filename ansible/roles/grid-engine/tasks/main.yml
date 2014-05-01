@@ -18,7 +18,7 @@
  
 # role specific tasks follow
 - include: 'master.yml'
-  when: grid_engine_master == True
+  when: grid_engine_master
 
 - include: 'worker.yml'
-  when: grid_engine_master == False
+  when: single_node or not grid_engine_master

@@ -1,5 +1,13 @@
 - name:  Install tomcat7
   apt: name=tomcat7 state=present update_cache=yes cache_valid_time=3600
+
+- name: Enforce Java 7 use for tomcat
+  lineinfile: 
+    dest: /etc/default/tomcat7
+    regexp: '#JAVA_HOME=/usr/lib/jvm/openjdk-6-jdk'
+    line: 'JAVA_HOME=/usr/lib/jvm/java-7-oracle-cloudera'
+    state: present
+  register: tomcat7_java7
   
 # handle user database
 - include: populatedb.yml database=seqware_meta_db
@@ -35,4 +43,4 @@
   
 - name:  Tomcat restart
   service: name=tomcat7 state=restarted
-  when: tomcatconf.changed
+  when: tomcatconf.changed or tomcat7_java7.changed

@@ -227,6 +227,8 @@ sub provision_instances {
   # this runs over all hosts and calls the provision scripts in the correct order
   run_provision_script_list($cluster_configs, $hosts);
 
+  # now call ansible if configured
+  run_ansible_playbook($cluster_configs, $hosts);
 }
 
 sub make_dcc_es_host_string {
@@ -289,6 +291,46 @@ sub provision_files_thread {
   }
 }
 
+# this generates an ansible inventory and runs ansible
+sub run_ansible_playbook {
+  my ($cluster_configs, $hosts) = @_;
+
+  # this could use a specific set module
+  my %type_set = ();
+  foreach my $host_name (sort keys %{$hosts}) {
+    $type_set{$cluster_configs->{$host_name}{type}} = 1;
+  }
+
+  open (INVENTORY, '>', "$work_dir/inventory") or die "Could not open inventory file for writing";
+
+  foreach my $type (keys %type_set){
+    print INVENTORY "[$type]\n";
+    foreach my $host_name (sort keys %{$hosts}) {
+      my $cluster_config = $cluster_configs->{$host_name};
+      my $host = $hosts->{$host_name};
+      if ($type ne $cluster_config->{type}){
+        next; 
+      }
+      print INVENTORY "$host_name\tansible_ssh_host=$host->{ip}\tansible_ssh_user=$host->{user}\tansible_ssh_private_key_file=$host->{key}\n";
+    } 
+  }
+  print INVENTORY "[all_groups:children]\n";
+  foreach my $type (keys %type_set) {
+    print INVENTORY "$type\n";
+  }
+  close (INVENTORY); 
+
+
+  if (not exists $configs->{ANSIBLE_PLAYBOOK}){
+	  return 0;
+  }
+  # run playbook command
+  my $command = "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}";
+  print "Ansible command: $command";
+  system($command);
+}
+
+
 
 # this runs all the "second_pass_scripts" in the json for a given host
 sub run_provision_script_list {
@@ -302,6 +344,11 @@ sub run_provision_script_list {
     my @all_threads = ();
     foreach my $host_name (sort keys %{$hosts}) {
       print "  PROVISIONING HOST $host_name FOR PASS $curr_cell\n";
+      # check whether there actually are second pass scripts
+      if (not exists $cluster_configs->{$host_name}{second_pass_scripts}){
+	$cont = 0;
+        next; 
+      }
       my $scripts = $cluster_configs->{$host_name}{second_pass_scripts};
       my $host = $hosts->{$host_name};
       if ($curr_cell >= scalar(@{$scripts})) { $cont = 0; }    

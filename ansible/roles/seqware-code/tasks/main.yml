@@ -19,6 +19,7 @@
   command: hadoop fs -ls /user/seqware
   register: hdfs_user_dir
   changed_when: false
+  ignore_errors: yes
 
   #hmmm, no module for hadoop file operations
 - name:  Setup HDFS User Directories

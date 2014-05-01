@@ -37,6 +37,9 @@
 
 - name:  Add mapred user
   user: name=mapred state=present
+  
+- name:  Add hdfs user
+  user: name=hdfs state=present
     
 - name:  Add mapred group
   group: name=mapred state=present
@@ -44,6 +47,16 @@
 - name:  Add seqware group
   group: name=seqware state=present
 
+- name:  Add hadoop group
+  group: name=hadoop state=present
+  
+- name:  Set user groups
+  user: name={{ item.name }} groups={{ item.groups }} append=yes state=present
+  with_items:
+      - { name: 'mapred', groups: 'seqware,hadoop' }
+      - { name: 'seqware', groups: 'seqware,hadoop,mapred' }
+      - { name: 'hdfs', groups: 'hadoop,mapred' }
+  
 - name:  Create home link
   file: state=link src=~seqware dest=/home/seqware owner=seqware
 

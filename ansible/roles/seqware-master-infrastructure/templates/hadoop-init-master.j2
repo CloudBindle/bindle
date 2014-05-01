@@ -28,6 +28,12 @@ service hbase-master stop
 service hadoop-0.20-mapreduce-jobtracker stop
 service hadoop-hdfs-namenode stop
 
+{% if single_node %}
+service hbase-regionserver stop
+service hadoop-0.20-mapreduce-tasktracker stop
+service hadoop-hdfs-datanode stop
+{% endif %} 
+
 stat /mnt/seqware-oozie
 if [ $? != 0 ]; then
 mkdir -p /mnt/seqware-oozie
@@ -71,6 +77,9 @@ sudo -u hdfs hadoop namenode -format -force
 fi
 
 service hadoop-hdfs-namenode start
+{% if single_node %}
+service hadoop-hdfs-datanode start
+{% endif %} 
 # virtualbox launches can take up to 40 seconds for hdfs to settle
 sleep 60
 
@@ -93,7 +102,13 @@ sudo -u hdfs hadoop fs -chown -R seqware /user/seqware
 
 # start hadoop services
 service hadoop-0.20-mapreduce-jobtracker start
+{% if single_node %}
+service hadoop-0.20-mapreduce-tasktracker start
+{% endif %} 
 service hbase-master start
+{% if single_node %}
+service hbase-regionserver start
+{% endif %}
 
 echo `date` 'Completed initializing hadoop filesystems' >> /tmp/hadoop-init.log
 

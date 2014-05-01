@@ -17,6 +17,15 @@
     - hbase
     - hbase-master
     - tree
+    
+- name:  Install Hadoop for a single-node master
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items: 
+    - hadoop-0.20-mapreduce-tasktracker 
+    - hadoop-hdfs-datanode
+    - hadoop-client
+    - hbase-regionserver
+  when: single_node
 
 - name:  Install zookeeper
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
@@ -25,7 +34,7 @@
     - zookeeper-server 
 
 - name:  Initialize zookeeper
-  command: service zookeeper-server init creates=/var/lib/zookeeper
+  command: service zookeeper-server init creates=/var/lib/zookeeper/version-2
 
 - name:  Start zookeeper
   service: name=zookeeper-server state=started
@@ -38,11 +47,6 @@
 
 - name:  Install apache2
   apt: pkg=apache2 state=present update_cache=yes cache_valid_time=3600
-  
-- name:  Set user groups
-  user: name=mapred groups=seqware append=yes state=present
-  user: name=seqware groups=mapred append=yes state=present
-  user: name=mapred groups=hadoop append=yes state=present
 
 - name:  Copy resources
   copy: 
@@ -84,6 +88,10 @@
   
 - name:  Start JobTracker
   service: name=hadoop-0.20-mapreduce-jobtracker state=started
+
+- name:  Start TaskTracker
+  service: name=hadoop-0.20-mapreduce-tasktracker state=started
+  when: single_node
   
 - name:  Hue
   file: state=link src=/usr/lib/hadoop/lib dest=/usr/share/hue/desktop/libs/hadoop/java-lib/hue*jar
@@ -201,6 +209,13 @@
     - oozie
     - postgresql
     - hbase-master
+
+- name:  Setup single-node daemons to start on boot
+  service: name={{ item }} state=started enabled=yes
+  with_items: 
+    - hadoop-hdfs-datanode
+    - hadoop-0.20-mapreduce-tasktracker
+  when: single_node == True
   
 - name:  Install NFS
   apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
