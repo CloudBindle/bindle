@@ -40,7 +40,8 @@
   roles:
     - { role: seqware-integration-tests, when: "{{ run_integration_tests }} == True" }
     
-- hosts: all
+- hosts: master
   sudo: True
   roles:
     - { role: seqware-cron }
+    - { role: seqware-helloworld }

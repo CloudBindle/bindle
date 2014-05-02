@@ -13,6 +13,12 @@
 - name:  Template file provenance cron
   template: src=file_provenance.j2 dest=~seqware/crons/file_provenance.cron owner=seqware
   
+- name:  Set up SeqWare cron permissions
+  file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }}
+  with_items:
+     - { state: 'file', path: '~seqware/crons/status.cron', owner: 'seqware', group: 'seqware', mode: '0700' }
+     - { state: 'file', path: '~seqware/crons/file_provenance.cron', owner: 'seqware', group: 'seqware', mode: '0700' }
+  
 - name: Setup status cron
   cron: name="status cron" job="~seqware/crons/status.cron >> ~seqware/logs/status.log" state=present user=seqware 
   
