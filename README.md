@@ -468,6 +468,14 @@ VMs.
 
 ## Bindle 2.0 and Ansible
 
+This feature was tested with ansible 1.5.4. Install this on Ubuntu using 
+
+    sudo apt-get install ansible
+    ansible --version
+
+Note: You may need to turn off strict host key checking 
+http://docs.ansible.com/intro_getting_started.html#host-key-checking
+
 For Bindle2, we will be moving more and more functionality out of the Bash scripts and into Ansible playbooks parameterized with different variables. 
 In practice this means that you will only have a small "stub" json template and most of the work is done via ansible. 
 The ansible playbook will run after any bash scripts that you have configured. 
@@ -489,7 +497,7 @@ This installs from artifactory (avoiding building) and will use SeqWare 1.0.14.
 
     "ANSIBLE_PLAYBOOK": "ansible/seqware-install.yml --extra-vars \"seqware_version=1.0.14 single_node=True seqware_provider=artifactory \""
     
-This does the same but installs using only a single node (rather than a master with associated slave nodes). 
+This does the same but installs using only a single node (rather than a master with associated slave nodes).
 
 
 ## Controlling the VM
