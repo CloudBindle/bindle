@@ -54,7 +54,8 @@
   user: name={{ item.name }} groups={{ item.groups }} append=yes state=present
   with_items:
       - { name: 'mapred', groups: 'seqware,hadoop' }
-      - { name: 'seqware', groups: 'seqware,hadoop,mapred' }
+      - { name: 'seqware', groups: 'mapred' }
+      - { name: 'seqware', groups: 'hadoop' }
       - { name: 'hdfs', groups: 'hadoop,mapred' }
   
 - name:  Create home link

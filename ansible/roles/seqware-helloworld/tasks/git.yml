@@ -1,6 +1,6 @@
 ---
 # file: roles/seqware-helloworld/tasks/git.yml
-
+    
 - name:  Download SeqWare archetype catalog
   get_url: url={{ item.url }} dest={{ item.dest }} owner=seqware
   with_items:
@@ -22,15 +22,21 @@
     chdir=~seqware/workflow-dev/HelloWorld creates=~seqware/workflow-dev/HelloWorld/target/HelloWorld-1.0-SNAPSHOT.jar
     mvn install
     
+- name: Determine Seqware Version 
+  sudo_user: seqware
+  shell: 'ls ~/.seqware/self-installs/seqware-distribution-*-full.jar | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?" | head -1'
+  register: det_seqware_version
+  changed_when: false
+    
   # not sure why seqware script doesn't work without a path here
 - name: Package the workflow
   sudo_user: seqware
   shell: >
-    chdir=~seqware/workflow-dev/HelloWorld creates=~seqware/workflow-dev/HelloWorld/*.zip
+    chdir=~seqware/workflow-dev/HelloWorld creates=~seqware/workflow-dev/HelloWorld/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_{{ det_seqware_version.stdout }}.zip
     /home/seqware/bin/seqware bundle package --dir target/Workflow_Bundle_HelloWorld*
     
 - name: Install the workflow
   sudo_user: seqware
   shell: >
-    chdir=~seqware/workflow-dev/HelloWorld creates=~seqware/provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_*/Workflow_Bundle_HelloWorld/1.0-SNAPSHOT/metadata.xml
-    /home/seqware/bin/seqware bundle install --zip Workflow_Bundle_HelloWorld*.zip
+    chdir=~seqware/workflow-dev/HelloWorld creates=~seqware/provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_{{ det_seqware_version.stdout }}/Workflow_Bundle_HelloWorld/1.0-SNAPSHOT/metadata.xml
+    /home/seqware/bin/seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_{{ det_seqware_version.stdout }}.zip

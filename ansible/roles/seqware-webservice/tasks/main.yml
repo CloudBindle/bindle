@@ -1,13 +1,9 @@
 - name:  Install tomcat7
   apt: name=tomcat7 state=present update_cache=yes cache_valid_time=3600
 
-- name: Enforce Java 7 use for tomcat
-  lineinfile: 
-    dest: /etc/default/tomcat7
-    regexp: '#JAVA_HOME=/usr/lib/jvm/openjdk-6-jdk'
-    line: 'JAVA_HOME=/usr/lib/jvm/java-7-oracle-cloudera'
-    state: present
-  register: tomcat7_java7
+- name: Template Java 7 and memory size for tomcat
+  template: src=tomcat7.j2 dest=/etc/default/tomcat7
+  notify: restart tomcat7
   
 # handle user database
 - include: populatedb.yml database=seqware_meta_db
@@ -24,11 +20,13 @@
   copy: 
     src: seqware-portal.xml
     dest: /etc/tomcat7/Catalina/localhost/SeqWarePortal.xml
+  notify: restart tomcat7
     
 - name:  Copy xml webservice config
   copy: 
     src: seqware-webservice.xml
     dest: /etc/tomcat7/Catalina/localhost/SeqWareWebService.xml
+  notify: restart tomcat7
 
 # this part sucks
 # We are doing a fetch and then copy because hard linking always detects a change and redeploys
@@ -45,8 +43,4 @@
   with_items:
      - { src: '/tmp/fetched/{{ ansible_eth0.ipv4.address }}/seqware-webservice-{{ det_seqware_version.stdout }}.war', dest: '/var/lib/tomcat7/webapps/SeqWareWebService.war' }
      - { src: '/tmp/fetched/{{ ansible_eth0.ipv4.address }}/seqware-portal-{{ det_seqware_version.stdout }}.war', dest: '/var/lib/tomcat7/webapps/SeqWarePortal.war' }
-  register: tomcatconf
-  
-- name:  Tomcat restart
-  service: name=tomcat7 state=restarted
-  when: tomcatconf.changed or tomcat7_java7.changed
+  notify: restart tomcat7

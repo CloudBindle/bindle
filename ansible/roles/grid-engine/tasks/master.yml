@@ -55,14 +55,12 @@
 - name: SGE | Single node execution host templates
   template: src=execution_host.j2 dest=/etc/gridengine/templates/sge_execution_host_master.sh mode=0555
   register: execution_host_template
-  when: not single_node
+  when: single_node
 
-# loop through and setup worker hosts, if this was better it would modify existing hosts as well instead of ignoring errors
-- name: SGE | Single node host as execution hosts
+- name: SGE | Single node host as execution host
   shell: export EDITOR=/etc/gridengine/templates/sge_execution_host_master.sh && qconf -ae
   when: execution_host_template.changed
   ignore_errors: yes
-  when: not single_node
 
 # Again, we don't want to do this if it already exists, never counts as a change registering variables
 - name: SGE | Check current host groups
