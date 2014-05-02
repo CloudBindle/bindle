@@ -41,7 +41,7 @@ my $skip_launch = 0;
 my $vb_ram = 12000;
 my $vb_cores = 2;
 my @ebs_vols = ();
-
+my $run_ansible = 0;
 my $help = 0;
 
 # check for help
@@ -58,13 +58,14 @@ GetOptions (
   "vb-ram=i" => \$vb_ram,
   "vb-cores=i" => \$vb_cores,
   "aws-ebs=s{1,}" => \@ebs_vols,
+  "run-ansible" => \$run_ansible,
   "help" => \$help,
 );
 
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--run-ansible] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
@@ -93,6 +94,10 @@ foreach my $node_config (@{$temp_cluster_configs}){
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
 if (!defined($configs->{'MAVEN_MIRROR'})) { $configs->{'MAVEN_MIRROR'} = ""; }
+
+if ($run_ansible){
+    exit run_ansible_command();
+}
 
 
 # define the "boxes" used for each provider
@@ -228,7 +233,7 @@ sub provision_instances {
   run_provision_script_list($cluster_configs, $hosts);
 
   # now call ansible if configured
-  run_ansible_playbook($cluster_configs, $hosts);
+  return run_ansible_playbook($cluster_configs, $hosts);
 }
 
 sub make_dcc_es_host_string {
@@ -325,9 +330,13 @@ sub run_ansible_playbook {
 	  return 0;
   }
   # run playbook command
+  return run_ansible_command();
+}
+
+sub run_ansible_command{
   my $command = "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}";
   print "Ansible command: $command";
-  system($command);
+  return system($command);
 }
 
 

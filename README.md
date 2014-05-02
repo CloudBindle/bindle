@@ -499,6 +499,12 @@ This installs from artifactory (avoiding building) and will use SeqWare 1.0.14.
     
 This does the same but installs using only a single node (rather than a master with associated slave nodes).
 
+### Re-running Ansible
+
+Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issues. You can re-run ansible-enabled deployments via the following command to the launcher script which provides a working-dir and a config-file. 
+
+    perl bin/launcher/launch_cluster.pl --working-dir target-os-cluster --config-file vagrant_cluster_launch.json  --run-ansible
+
 
 ## Controlling the VM
 
