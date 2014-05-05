@@ -47,6 +47,7 @@
 
 # setup bash profile for seqware
 - name:  Bash profile
+  sudo: yes
   lineinfile: 
     dest: ~seqware/.bash_profile
     create: yes
@@ -62,9 +63,11 @@
   when: seqware_provider == "artifactory"
   
 - name:  Setup script path in bash profile
+  sudo: yes
   lineinfile: 
     dest: ~seqware/.bash_profile
     create: yes
     line: 'export PATH=$PATH:~seqware/bin'
     state: present
     insertafter: EOF
+    owner: seqware
