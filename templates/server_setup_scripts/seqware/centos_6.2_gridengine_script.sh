@@ -15,10 +15,19 @@ yum -y install gridengine-client gridengine-common gridengine-exec gridengine-ma
 /etc/init.d/gridengine-exec start
 
 # configure
-export HOST=`hostname`
+#export HOST=`hostname`
+hostname master
+export HOST=master
 sudo -u sgeadmin qconf -am seqware
 qconf -au seqware users
 qconf -as $HOST
+
+# Set up memory as a consumable resource
+TMPSC=/tmp/sc.tmp
+qconf -sc | grep -v 'h_vmem' > $TMPSC
+echo "h_vmem              h_vmem     MEMORY      <=    YES         YES        0        0" >> $TMPSC
+qconf -Mc $TMPSC
+rm $TMPSC
 
 # this is interactive... how do I load from a file?
 cat >/tmp/qconf-editor.sh <<EOF
@@ -53,10 +62,47 @@ qconf -mq main.q
 
 qconf -aattr queue hostlist @allhosts main.q
 
-qconf -aattr queue slots "[$HOST=1]" main.q
+qconf -aattr queue slots "[$hostName=`nproc`]" main.q
+
+qconf -mattr queue load_thresholds "np_load_avg=`nproc`" main.q
+
+# Set the amount of memory as the total memory on the system
+qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` $hostName
+
+# Create profile for "serial" parallel environment
+TMPPROFILE=/tmp/serial.profile
+echo "pe_name           serial
+slots             9999
+user_lists        NONE
+xuser_lists       NONE
+start_proc_args   /bin/true
+stop_proc_args    /bin/true
+allocation_rule   \$pe_slots
+control_slaves    FALSE
+job_is_first_task TRUE
+urgency_slots     min
+accounting_summary FALSE" > $TMPPROFILE
+qconf -Ap $TMPPROFILE
+qconf -aattr queue pe_list serial main.q
+rm $TMPPROFILE
 
 # restart
 /etc/init.d/gridengine-exec stop
+sleep 4
+/etc/init.d/gridengine-master stop
+sleep 4
+pkill -9 sge_execd
+pkill -9 sge_qmaster
+sleep 4
 /etc/init.d/gridengine-master restart
-/etc/init.d/gridengine-exec start
+/etc/init.d/gridengine-exec restart
 
+# change seqware engine to oozie-sge
+perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie-sge/' /vagrant/settings
+#perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings
+
+# Add sge-init-master startup script
+cp /vagrant/sge-init-master /etc/init.d/sge-init
+chown root:root /etc/init.d/sge-init
+chmod 755 /etc/init.d/sge-init
+sysv-rc-conf sge-init on

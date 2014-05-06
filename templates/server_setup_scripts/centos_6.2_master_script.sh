@@ -1,15 +1,5 @@
 #!/bin/bash -vx
 
-# first, fix the /etc/hosts file since SGE wants reverse lookup to work
-cp /etc/hosts /tmp/hosts
-echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
-cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
-
-# setup hosts
-# NOTE: the hostname seems to already be set at least on BioNimubs OS
-echo '%{HOSTS}' >> /etc/hosts
-hostname master
-
 # general yum
 #yum update
 
@@ -18,13 +8,13 @@ yum -y install git xfsprogs
 yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 # install maven (for CentOS)
-wget http://mirrors.gigenet.com/apache/maven/maven-3/3.0.5/binaries/apache-maven-3.0.5-bin.tar.gz
-tar -zxvf apache-maven-3.0.5-bin.tar.gz -C /opt/
+wget http://mirrors.gigenet.com/apache/maven/maven-3/3.2.1/binaries/apache-maven-3.2.1-bin.tar.gz
+tar -zxvf apache-maven-3.2.1-bin.tar.gz -C /opt/
 if [ -f /etc/profile.d/maven.sh ];
 then
 	echo '#!/bin/bash' > /etc/profile.d/maven.sh
 fi
-echo 'export M2_HOME=/opt/apache-maven-3.0.5' >> /etc/profile.d/maven.sh
+echo 'export M2_HOME=/opt/apache-maven-3.2.1' >> /etc/profile.d/maven.sh
 echo 'export M2=$M2_HOME/bin' >> /etc/profile.d/maven.sh
 echo 'PATH=$M2:$PATH' >> /etc/profile.d/maven.sh
 chmod a+x /etc/profile.d/maven.sh
@@ -43,7 +33,7 @@ service zookeeper-server start
 yum -y install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-yum -y install tomcat6-common tomcat6 httpd
+yum -y install tomcat7-common tomcat7 httpd
 
 # install postgresql
 sudo sed -i 's/- Base$/- Base\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
@@ -115,9 +105,11 @@ service hue start
 
 # setup Oozie
 sudo -u oozie /usr/lib/oozie/bin/ooziedb.sh create -run
+cd /tmp
 wget -q http://extjs.com/deploy/ext-2.2.zip
 unzip ext-2.2.zip
 mv ext-2.2 /var/lib/oozie/
+cd -
 
 # setup oozie with postgres
 sudo -u postgres psql --command "CREATE ROLE oozie LOGIN ENCRYPTED PASSWORD 'oozie' NOSUPERUSER INHERIT CREATEDB NOCREATEROLE;"
@@ -143,20 +135,35 @@ service hbase-regionserver start
 service hue restart
 
 # setup daemons to start on boot
-for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql-9.3 tomcat6 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql-9.3 tomcat7 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+
+# enforce Java 7 use for tomcat
+sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/java\/latest/;" /etc/default/tomcat7
 
 # configure dirs for seqware
-mkdir -p /usr/tmp/seqware-oozie 
+# note these are placed on /mnt since that
+# is the ephemeral disk on Amazon instances
+mkdir -p /mnt/seqware-oozie
+# mount gluster here
+# this call will mount the shared gluster disk for clusters or simply fail if not using gluster in single node mode
+mount -t glusterfs master:/gv0 /mnt/seqware-oozie
+chmod a+rx /mnt
+chmod a+rwx /mnt/seqware-oozie
+chown -R seqware:seqware /mnt/seqware-oozie
+# usr
+mkdir -p /usr/tmp/
+#mkdir -p /usr/tmp/seqware-oozie
 chmod -R a+rwx /usr/tmp/
-chown -R seqware:seqware /usr/tmp/seqware-oozie
-chmod -R a+rx /home/seqware
+#chown -R seqware:seqware /usr/tmp/seqware-oozie
+#chmod -R a+rx /home/seqware
+ln -s /mnt/seqware-oozie /usr/tmp/seqware-oozie
 
+# datastore
 mkdir -p /mnt/datastore
 chmod a+rx /mnt
 chmod a+rwx /mnt/datastore
 ln -s /mnt/datastore /datastore
 chown seqware:seqware /mnt/datastore
-#chmod 774 /mnt/datastore
 
 ## Setup NFS before seqware
 # see http://www.howtoforge.com/setting-up-an-nfs-server-and-client-on-centos-6.3
