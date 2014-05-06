@@ -6,3 +6,5 @@ seqware_version: "1.0.14"
 
 seqware_repo_version: "develop"
 seqware_build_cmd: "mvn clean install -DskipTests"
+
+user_name: "seqware"

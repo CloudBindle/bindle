@@ -4,23 +4,23 @@
 - name:  Set up SeqWare cron and log directory
   file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }}
   with_items:
-     - { state: 'directory', path: '~seqware/logs', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/crons', owner: 'seqware', group: 'seqware', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/logs', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/crons', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
   
 - name:  Template status cron
-  template: src=status.j2 dest=~seqware/crons/status.cron owner=seqware
+  template: src=status.j2 dest=~{{ user_name }}/crons/status.cron owner={{ user_name }}
   
 - name:  Template file provenance cron
-  template: src=file_provenance.j2 dest=~seqware/crons/file_provenance.cron owner=seqware
+  template: src=file_provenance.j2 dest=~{{ user_name }}/crons/file_provenance.cron owner={{ user_name }}
   
 - name:  Set up SeqWare cron permissions
   file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }}
   with_items:
-     - { state: 'file', path: '~seqware/crons/status.cron', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'file', path: '~seqware/crons/file_provenance.cron', owner: 'seqware', group: 'seqware', mode: '0700' }
+     - { state: 'file', path: '~{{ user_name }}/crons/status.cron', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'file', path: '~{{ user_name }}/crons/file_provenance.cron', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
   
 - name: Setup status cron
-  cron: name="status cron" job="~seqware/crons/status.cron >> ~seqware/logs/status.log" state=present user=seqware 
+  cron: name="status cron" job="~{{ user_name }}/crons/status.cron >> ~{{ user_name }}/logs/status.log" state=present user={{ user_name }} 
   
 - name: Setup file provenance cron
-  cron: name="file provenance" job="~seqware/crons/file_provenance.cron >> ~seqware/logs/file_provenance.log" state=present user=seqware special_time=hourly
+  cron: name="file provenance" job="~{{ user_name }}/crons/file_provenance.cron >> ~{{ user_name }}/logs/file_provenance.log" state=present user={{ user_name }} special_time=hourly

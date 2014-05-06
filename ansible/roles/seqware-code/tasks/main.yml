@@ -1,22 +1,29 @@
 ---
 # file: roles/seqware-code/tasks/main.yml
 
+- name:  Add user
+  user: 
+    home: '/mnt/home/{{ user_name }}'
+    createhome: yes
+    name: '{{ user_name }}'
+    shell: '/bin/bash'
+
 - name:  Set up SeqWare working directories
   file: path={{ item.path }} state={{ item.state }} owner={{ item.owner }} mode={{ item.mode}} group={{ item.group }}
   with_items:
-     - { state: 'directory', path: '~seqware/bin', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/jars', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/crons', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/logs', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/released-bundles', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/provisioned-bundles', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/workflow-dev', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/.seqware/self-installs', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/gitroot/seqware', owner: 'seqware', group: 'seqware', mode: '0700' }
-     - { state: 'directory', path: '~seqware/.m2/', owner: 'seqware', group: 'seqware', mode: '0700' }    
+     - { state: 'directory', path: '~{{ user_name }}/bin', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/jars', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/crons', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/logs', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/released-bundles', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/provisioned-bundles', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/workflow-dev', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/.seqware/self-installs', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/gitroot/seqware', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }
+     - { state: 'directory', path: '~{{ user_name }}/.m2/', owner: '{{ user_name }}', group: '{{ user_name }}', mode: '0700' }    
      
 - name: Check state of HDFS User Directories
-  command: hadoop fs -ls /user/seqware
+  command: hadoop fs -ls /user/{{ user_name }}
   register: hdfs_user_dir
   changed_when: false
   ignore_errors: yes
@@ -28,33 +35,33 @@
   command: $item
   ignore_errors: yes
   with_items: 
-    - hadoop fs -mkdir -p /user/seqware
-    - hadoop fs -chown -R seqware /user/seqware
+    - hadoop fs -mkdir -p /user/{{ user_name }}
+    - hadoop fs -chown -R {{ user_name }} /user/{{ user_name }}
   when: "'No such file or directory' in hdfs_user_dir.stdout"
     
 - name:  Template seqware settings
-  template: src=settings.j2 dest=~seqware/.seqware/settings mode=0640 owner=seqware
+  template: src=settings.j2 dest=~{{ user_name }}/.seqware/settings mode=0640 owner={{ user_name }}
   
 - name:  Template maven mirror if defined
-  template: src=m2_settings.j2 dest=~seqware/.m2/settings.xml mode=0640 owner=seqware
+  template: src=m2_settings.j2 dest=~{{ user_name }}/.m2/settings.xml mode=0640 owner={{ user_name }}
   when: m2_mirror_url is defined
   
 # I'm still checking out since I will need the SQL schema file for example
 - name: SeqWare - Code - Git | Cloning seqware
   sudo: yes
-  sudo_user: seqware
-  git: update=no repo=https://github.com/SeqWare/seqware.git dest=~seqware/gitroot/seqware version={{ seqware_repo_version }}
+  sudo_user: "{{ user_name }}"
+  git: update=no repo=https://github.com/SeqWare/seqware.git dest=~{{ user_name }}/gitroot/seqware version={{ seqware_repo_version }}
 
 # setup bash profile for seqware
 - name:  Bash profile
   sudo: yes
   lineinfile: 
-    dest: ~seqware/.bash_profile
+    dest: ~{{ user_name }}/.bash_profile
     create: yes
     line: 'export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=512m"'
     state: present
     insertafter: EOF
-    owner: seqware
+    owner: "{{ user_name }}"
     
 - include: 'git.yml'
   when: seqware_provider == "git"
@@ -65,9 +72,30 @@
 - name:  Setup script path in bash profile
   sudo: yes
   lineinfile: 
-    dest: ~seqware/.bash_profile
+    dest: ~{{ user_name }}/.bash_profile
     create: yes
-    line: 'export PATH=$PATH:~seqware/bin'
+    line: 'export PATH=$PATH:~{{ user_name }}/bin'
     state: present
     insertafter: EOF
-    owner: seqware
+    owner: "{{ user_name }}"
+    
+# need to setup user as a sudoer in oozie 
+- name:  Oozie Sudoers
+  lineinfile: 
+    dest: /etc/sudoers
+    create: no
+    line: $item
+    state: present
+    insertafter: EOF
+  with_items: 
+      - '{{ user_name }} ALL=(ALL) NOPASSWD: ALL'
+  notify: restart oozie
+  
+- name:  Set user groups
+  user: name={{ item.name }} groups={{ item.groups }} append=yes state=present
+  with_items:
+      - { name: '{{ user_name }}', groups: 'mapred' }
+      - { name: '{{ user_name }}', groups: 'hadoop' }
+      
+- name:  Create home link
+  file: state=link src=~{{ user_name }} dest=/home/{{ user_name }} owner={{ user_name }}
