@@ -102,6 +102,12 @@ either use an earlier version of Vagrant of manually install a workaround
     wget https://raw.github.com/cloudbau/vagrant-openstack-plugin/48eac2932fa16ccd5fab2e1d2e0d04047f3be7bd/lib/vagrant-openstack-plugin/action/sync_folders.rb
     mv sync_folders.rb ~/.vagrant.d/gems/gems/vagrant-openstack-plugin-0.3.0/lib/vagrant-openstack-plugin/action/
 
+The current version of the vagrant-vcloud plugin needs to be running with 
+Vagrant 1.5. If using version 1.4 one variable name will need to be modified.
+I forget exactly where the variable is but there will be an error thrown and
+based on the error you will need to remove the string 'URL' from the end of the
+variable.
+
 The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
 your distribution's package management system. Google "cpan perl install" for
