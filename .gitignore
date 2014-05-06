@@ -1,0 +1,5 @@
+*.swp
+*.swo
+.idea/**
+atlassian-ide-plugin.xml
+Bindle.iml

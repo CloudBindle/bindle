@@ -1,12 +1,39 @@
 #!/bin/bash -vx
 
+# workaround for Korea's cloud
+if [ -d "/maha" ]; then
+  umount  /maha
+  perl -p -i -e 's/uid=1000,gid=1000/defaults/' /etc/fstab
+  mount /maha
+  mount -o rw,bind `mount | grep maha\/tmp | awk '{print $1}'` /mnt
+fi
+
+# workaround for Tokyo's cloud
+if [ -d "/nshare4" ]; then 
+  dir=/nshare4/vmtmp/$RANDOM 
+  mkdir -p $dir 
+  mount -o rw,bind $dir /mnt 
+fi
+
+# workaround for Bionimbus' PDC cloud
+if [ -d "/glusterfs" ]; then
+  # this is causing problems with the server not being in the whitelist
+  rm /etc/apt/sources.list.d/R.list
+  # this is required to get the proxy settings in each subsequent, non-interactive shell
+  echo "source /etc/profile.d/proxy.sh" > ~/.bashrc.new
+  cat ~/.bashrc >> ~/.bashrc.new
+  mv ~/.bashrc.new ~/.bashrc
+fi
+
 # basic tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install curl unzip -y
 
 # add seqware user
-useradd -d /home/seqware -m seqware -s /bin/bash
+mkdir -p /mnt/home
+useradd -d /mnt/home/seqware -m seqware -s /bin/bash
+ln -s ~seqware /home/seqware
 
 # ensure locale is set to en-US (and remains so)
 sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config
@@ -28,9 +55,12 @@ echo 'LC_ALL="en_US.UTF-8"' | sudo tee -a /etc/environment
 echo 'LC_CTYPE="en_US.UTF-8"' | sudo tee -a /etc/environment
 
 # install the hadoop repo
-wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb &> /dev/null
-dpkg -i cdh4-repository_1.0_all.deb &> /dev/null
+#wget -q http://archive.cloudera.com/cdh4/one-click-install/precise/amd64/cdh4-repository_1.0_all.deb &> /dev/null
+#dpkg -i cdh4-repository_1.0_all.deb &> /dev/null
+echo "deb [arch=amd64] http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib" | sudo tee -a /etc/apt/sources.list.d/cloudera.list
+echo "deb-src http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh precise-cdh4.5.0 contrib" | sudo tee -a /etc/apt/sources.list.d/cloudera.list
 curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | sudo apt-key add -
+
 
 # setup cloudera manager repo (not used)
 #REPOCM=${REPOCM:-cm4}
@@ -52,9 +82,19 @@ curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | 
 # get packages
 apt-get update
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 cloudera-manager-server-db cloudera-manager-server cloudera-manager-daemons
-#apt-get -q -y --force-yes install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat6-common tomcat6 apache2 git maven sysv-rc-conf hbase-master xfsprogs
+#apt-get -q -y --force-yes install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2 git maven sysv-rc-conf hbase-master xfsprogs
 # get Java
-apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en &> /dev/null
-wget http://archive.cloudera.com/cm4/ubuntu/precise/amd64/cm/pool/contrib/o/oracle-j2sdk1.6/oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
-dpkg -i oracle-j2sdk1.6_1.6.0+update31_amd64.deb &> /dev/null
+apt-get -q -y --force-yes install libasound2 libxi6 libxtst6 libxt6 language-pack-en 
+wget http://archive.cloudera.com/cm5/ubuntu/lucid/amd64/cm/pool/contrib/o/oracle-j2sdk1.7/oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb 
+dpkg -i oracle-j2sdk1.7_1.7.0+update25-1_amd64.deb
 
+# cloudera 1.7 java package doesn't set up alternatives for some reason
+update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java 2000
+update-alternatives --set java /usr/lib/jvm/java-7-oracle-cloudera/jre/bin/java
+echo 'JAVA_HOME=/usr/lib/jvm/java-7-oracle-cloudera' | sudo tee -a /etc/environment
+
+# if we have a local maven mirror defined, set it up
+if [ -n "%{MAVEN_MIRROR}" ]; then 
+	mkdir ~seqware/.m2
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\"> <mirrors> <mirror> <id>artifactory</id><mirrorOf>*</mirrorOf> <url> %{MAVEN_MIRROR} </url>            <name>Artifactory</name>        </mirror>    </mirrors></settings>" > ~seqware/.m2/settings.xml
+fi
