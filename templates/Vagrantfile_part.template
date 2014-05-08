@@ -30,14 +30,14 @@
       aws.access_key_id = "%{AWS_KEY}"
       aws.secret_access_key = "%{AWS_SECRET_KEY}"
       aws.spot_instance = true
-      aws.spot_max_price = 0.748
+      aws.spot_max_price = 0.751
       aws.keypair_name = "%{AWS_SSH_KEY_NAME}"
       aws.user_data = File.read("user_data.txt")
       aws.region = "%{AWS_REGION}"
       aws.availability_zone = %{AWS_ZONE}
       aws.ami = "%{AWS_IMAGE}"
       aws.instance_type = "%{AWS_INSTANCE_TYPE}"
-      aws.instance_ready_timeout = 600
+      aws.instance_ready_timeout = 6000
       %{AWS_EBS_VOLS}
       override.ssh.username = "%{AWS_SSH_USERNAME}"
       override.ssh.private_key_path = "%{AWS_SSH_PEM_FILE}"
