@@ -37,6 +37,7 @@
       aws.availability_zone = %{AWS_ZONE}
       aws.ami = "%{AWS_IMAGE}"
       aws.instance_type = "%{AWS_INSTANCE_TYPE}"
+      aws.instance_ready_timeout = 600
       %{AWS_EBS_VOLS}
       override.ssh.username = "%{AWS_SSH_USERNAME}"
       override.ssh.private_key_path = "%{AWS_SSH_PEM_FILE}"
