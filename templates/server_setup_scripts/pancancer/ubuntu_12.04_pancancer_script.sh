@@ -5,7 +5,7 @@ apt-get update
 export DEBIAN_FRONTEND=noninteractive
 
 # general items needed for bwa workflow
-apt-get -q -y --force-yes install liblz-dev zlib1g-dev libxml-dom-perl samtools libossp-uuid-perl libjson-perl libxml-libxml-perl libtry-tiny-perl libgd2-noxpm
+apt-get -q -y --force-yes install liblz-dev zlib1g-dev libxml-dom-perl samtools libossp-uuid-perl libjson-perl libxml-libxml-perl libtry-tiny-perl libgd2-noxpm g++  dh-autoreconf libncurses-dev pkg-config libgd2-xpm-dev
 
 # download public key
 if [ ! -e "cghub_public.key" ]; then
