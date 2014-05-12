@@ -4,7 +4,7 @@
     %{custom_hostname}.vm.box = "%{BOX}"
 
     %{custom_hostname}.vm.provider "vmware_fusion" do |v|
-      v.box = "precise64"
+      v.box = "%{BOX}"
       v.vmx["memsize"]  = "4096"
     end
     # Provider-specific configuration so you can fine-tune various

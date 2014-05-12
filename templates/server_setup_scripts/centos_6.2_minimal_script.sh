@@ -6,9 +6,7 @@ echo 0 > /selinux/enforce
 # ensure updates repository is available, and heartbleed vulnerability is fixed
 sudo sed -i '1!N; s/\[updates\]\nenabled\s=\s0/[updates]\nenabled = 1/' /etc/yum.repos.d/CentOS-Base.repo
 yum install -y openssl openssh
-sudo service httpd restart
-sudo service nginx restart
-sudo service sshd restart
+service sshd restart
 
 # install Gluster dependencies
 sudo yum install -y http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
@@ -66,7 +64,7 @@ sudo rpm --import http://archive.cloudera.com/cdh4/redhat/6/x86_64/cdh/RPM-GPG-K
 
 # get Java 1.7
 cd /tmp
-wget http://download.oracle.com/otn-pub/java/jdk/7u55-b13/jdk-7u55-linux-x64.rpm
+wget --no-check-certificate --output-document=jdk-7u55-linux-x64.rpm https://kopila.garvan.unsw.edu.au/data/public/3e7384.php?dl=true
 rpm -Uvh /tmp/jdk-7u55-linux-x64.rpm
 alternatives --install /usr/bin/java java /usr/java/latest/jre/bin/java 200000
 alternatives --install /usr/bin/javaws javaws /usr/java/latest/jre/bin/javaws 200000
@@ -78,10 +76,11 @@ if [ -f /etc/profile.d/java-dev.sh ];
 then
 	echo '#!/bin/bash' > /etc/profile.d/java-dev.sh
 fi
-echo 'export JAVA_HOME=/usr/java/latest' >> /etc/profile.d/java-dev.sh
+echo 'export JAVA_HOME=/usr/java/latest/jre' >> /etc/profile.d/java-dev.sh
 echo 'PATH=$JAVA_HOME/bin:$PATH' >> /etc/profile.d/java-dev.sh
 chmod a+x /etc/profile.d/java-dev.sh
 source /etc/profile.d/java-dev.sh
+echo "JAVA_HOME is $JAVA_HOME"
 
 # get Java 1.6
 #cd /usr/local/src
@@ -101,12 +100,16 @@ fi
 
 # setup ephemeral and EBS volumes that are attached to this system
 # (ecryptfs-utils and xfsprogs are already installed above)
-perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt %{GLUSTER_DEVICE_BLACKLIST} %{GLUSTER_DEVICE_WHITELIST}
+if [ -f /vagrant/setup_volumes.pl ]; then
+    perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt %{GLUSTER_DEVICE_BLACKLIST} %{GLUSTER_DEVICE_WHITELIST}
+fi
 
 # now setup volumes for use with gluster
 # the default version of gluster (3.2?) appears to suffer from the problem described here: https://bugzilla.redhat.com/show_bug.cgi?id=807976
 # see Gluster's site for more info, this is the official way to install 3.4: http://download.gluster.org/pub/gluster/glusterfs/3.4/3.4.3/Ubuntu/Ubuntu.README
-wget -q -O /etc/yum.repos.d/glusterfs-epel.repo http://download.gluster.org/pub/gluster/glusterfs/3.5/3.5.0/EPEL.repo/glusterfs-epel.repo &> /dev/null
-rpm --import http://download.gluster.org/pub/gluster/glusterfs/3.5/3.5.0/EPEL.repo/pub.key
-yum install -y glusterfs-server-3.5.0-2.el6
-perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt
+if [ -f /vagrant/setup_gluster_volumes.pl ]; then
+    wget -q -O /etc/yum.repos.d/glusterfs-epel.repo http://download.gluster.org/pub/gluster/glusterfs/3.5/3.5.0/EPEL.repo/glusterfs-epel.repo &> /dev/null
+    rpm --import http://download.gluster.org/pub/gluster/glusterfs/3.5/3.5.0/EPEL.repo/pub.key
+    yum install -y glusterfs-server-3.5.0-2.el6
+    perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt
+fi

@@ -4,7 +4,6 @@
 #yum update
 
 # common installs for master and workers
-yum -y install git xfsprogs
 yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
 
 # install maven (for CentOS)
@@ -33,7 +32,43 @@ service zookeeper-server start
 yum -y install hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
 
 # the repos have been setup in the minimal script
-yum -y install tomcat7-common tomcat7 httpd
+yum -y install httpd
+
+# Install tomcat
+cd /tmp
+wget http://apache.petsads.us/tomcat/tomcat-7/v7.0.53/bin/apache-tomcat-7.0.53.tar.gz
+tar -xzvf apache-tomcat-7.0.53.tar.gz -C /opt/
+cd -
+cat > /etc/init.d/tomcat <<\STARTUP_SCRIPT
+#!/bin/bash
+# description: Tomcat Start Stop Restart
+# processname: tomcat
+# chkconfig: 234 20 80
+JAVA_HOME=/usr/java/latest/jre
+export JAVA_HOME
+PATH=$JAVA_HOME/bin:$PATH
+export PATH
+CATALINA_HOME=/opt/apache-tomcat-7.0.53
+
+case $1 in
+	start)
+		sh $CATALINA_HOME/bin/startup.sh
+		;;
+	stop)
+		sh $CATALINA_HOME/bin/shutdown.sh
+		;;
+	restart)
+		sh $CATALINA_HOME/bin/shutdown.sh
+		sh $CATALINA_HOME/bin/startup.sh
+		;;
+esac
+
+exit 0
+STARTUP_SCRIPT
+chmod 755 /etc/init.d/tomcat
+chkconfig --add tomcat
+chkconfig --level 234 tomcat on
+service tomcat start
 
 # install postgresql
 sudo sed -i 's/- Base$/- Base\nexclude=postgresql*/' /etc/yum.repos.d/CentOS-Base.repo
@@ -126,7 +161,7 @@ service oozie start
 
 # setup hbase
 # TODO: need hdfs-site.xml configured properly using alternatives, but for now just copy it
-cp /etc/hadoop/conf/hbase-site.xml /etc/hbase/conf/hbase-site.xml
+\cp /etc/hadoop/conf/hbase-site.xml /etc/hbase/conf/hbase-site.xml
 sudo -u hdfs hadoop fs -mkdir /hbase
 sudo -u hdfs hadoop fs -chown hbase /hbase
 service hbase-master start
@@ -134,11 +169,11 @@ service hbase-regionserver start
 
 service hue restart
 
-# setup daemons to start on boot
-for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql-9.3 tomcat7 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+# setup daemons to start on boot (tomcat is already setup)
+for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql-9.3 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
 
 # enforce Java 7 use for tomcat
-sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/java\/latest/;" /etc/default/tomcat7
+sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/lib\/jvm\/java-1.7.0-openjdk.x86_64/;" /etc/default/tomcat7
 
 # configure dirs for seqware
 # note these are placed on /mnt since that
