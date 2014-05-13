@@ -77,23 +77,23 @@ sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db.sql
 sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db_data.sql
 
 # stop tomcat7
-/etc/init.d/tomcat7 stop
+/etc/init.d/tomcat stop
 
 # remove landing page for tomcat
-rm -rf /var/lib/tomcat7/webapps/ROOT
+rm -rf  /opt/apache-tomcat-7.0.53/webapps/ROOT
 
 # seqware web service
-cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /var/lib/tomcat7/webapps/SeqWareWebService.war
-cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml /etc/tomcat7/Catalina/localhost/SeqWareWebService.xml
-perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat7/Catalina/localhost/SeqWareWebService.xml
+cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.53/SeqWareWebService.war
+cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWareWebService.xml
+perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWareWebService.xml
 
 # seqware portal
-cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war /var/lib/tomcat7/webapps/SeqWarePortal.war
-cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml /etc/tomcat7/Catalina/localhost/SeqWarePortal.xml
-perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /etc/tomcat7/Catalina/localhost/SeqWarePortal.xml
+cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.53/webapps/SeqWarePortal.war
+cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWarePortal.xml
+perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWarePortal.xml
 
 # restart tomcat7
-/etc/init.d/tomcat7 start
+/etc/init.d/tomcat start
 
 # seqware landing page
 cp -r ~seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
