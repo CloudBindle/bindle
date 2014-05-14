@@ -40,6 +40,7 @@ my $json_config_file = 'vagrant_cluster_launch.json';
 my $skip_launch = 0;
 my $vb_ram = 12000;
 my $vb_cores = 2;
+my @ebs_vols = ();
 
 my $help = 0;
 
@@ -56,13 +57,14 @@ GetOptions (
   "skip-launch" => \$skip_launch,
   "vb-ram=i" => \$vb_ram,
   "vb-cores=i" => \$vb_cores,
+  "aws-ebs=s{1,}" => \@ebs_vols,
   "help" => \$help,
 );
 
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--skip-launch] [--help]\n";
 }
 
 # make the target dir
@@ -423,6 +425,9 @@ sub launch_instances {
     print "  STARTING THREAD TO LAUNCH INSTANCE FOR NODE $node\n";
     my $thr = threads->create(\&launch_instance, $node);
     push (@all_threads, $thr);
+    # attempt to prevent RequestLimitExceeded on Amazon by sleeping between thread launch 
+    # http://docs.aws.amazon.com/AWSEC2/latest/APIReference/api-error-codes.html
+    sleep 30;
   }
   print "  ALL LAUNCH THREADS STARTED\n";
   # Now wait for the threads to finish; this will block if the thread isn't terminated
@@ -454,6 +459,10 @@ sub prepare_files {
     copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
     # script for setting up hadoop hdfs
     copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
+    copy("templates/setup_volumes.pl", "$work_dir/$node/setup_volumes.pl");
+    copy("templates/setup_gluster_peers.pl", "$work_dir/$node/setup_gluster_peers.pl");
+    copy("templates/setup_gluster_service.pl", "$work_dir/$node/setup_gluster_service.pl");
+    copy("templates/setup_gluster_volumes.pl", "$work_dir/$node/setup_gluster_volumes.pl");
     # these are used for when the box is rebooted, it setups the /etc/hosts file for example
     replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
     replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
@@ -484,6 +493,28 @@ sub setup_vagrantfile {
     $configs->{VB_CORES} = $cores;
     $configs->{VB_RAM} = $ram;
     $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
+    if (not exists $configs->{AWS_REGION}){
+	$configs->{AWS_REGION} = "us-east-1";
+    }
+    if (not exists $configs->{AWS_ZONE} or $configs->{AWS_ZONE} eq "nil" ){
+	$configs->{AWS_ZONE} = "nil";
+    }
+    else{
+	if ($configs->{AWS_ZONE} !~ /^"\S+"$/) { $configs->{AWS_ZONE} = "\"$configs->{AWS_ZONE}\""; }
+    }
+    $configs->{AWS_EBS_VOLS} = "";
+    if (scalar @ebs_vols > 0){
+	$configs->{AWS_EBS_VOLS} .= "aws.block_device_mapping = [";
+        # starts at "f=102"
+	my $count = 102;
+	foreach my $size (@ebs_vols){
+            my $current_name = chr($count);
+	    $configs->{AWS_EBS_VOLS} .= "{'DeviceName' => \"/dev/sd$current_name\", 'VirtualName' => \"block_storage\", 'Ebs.VolumeSize' => $size, 'Ebs.DeleteOnTermination' => true},";
+	    $count += 1;
+	}
+        chop($configs->{AWS_EBS_VOLS});
+	$configs->{AWS_EBS_VOLS} .= "]";
+    }
     my $node_output = "$work_dir/$node/Vagrantfile";
     autoreplace("$start", "$node_output");
     # FIXME: should change this var to something better

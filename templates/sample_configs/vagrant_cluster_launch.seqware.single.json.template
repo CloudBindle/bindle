@@ -20,6 +20,8 @@
     "OS_TENANT": "<FILLMEIN>",
     "OS_NETWORK": "<FILLMEIN>",
     # AMAZON
+    #"AWS_REGION": "us-east-1", 
+    #"AWS_ZONE": "us-east-1a",  
     "AWS_KEY": "<FILLMEIN>",
     "AWS_SECRET_KEY": "<FILLMEIN>",
     # Amazon Ubuntu 12.04.2 LTS
