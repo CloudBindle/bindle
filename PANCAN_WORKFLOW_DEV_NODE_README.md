@@ -19,7 +19,7 @@ guide we will focus on the second.
 
 ### Build a Workflow Development Environment
 
-SeqWare-Vagrant can be used to create a workflow development environment that
+Bindle can be used to create a workflow development environment that
 can be used to create SeqWare workflows or other tools. These can be used in
 Phase II activities (for SeqWare workflows) or Phase III (SeqWare workflows or
 other tools).  Like the production workflow running environment, the
@@ -34,10 +34,10 @@ SeqWare system recognizes and knows how to run.  In this way SeqWare workflows
 are portable between SeqWare environments, allowing us to move updated or new
 workflows between the various PanCancer cloud environments.  Groups that create
 SeqWare workflows can exchange the workflows and can be assured they will run
-across all the various SeqWare-Vagrant-created environments. SeqWare workflows
+across all the various Bindle-created environments. SeqWare workflows
 also integrate with metadata tracking tools and deciders, allowing for
 automated triggering.  This allows us to detect new samples in Phase II, launch
-clusters using SeqWare-Vagrant, and then automatically run workflows on those
+clusters using Bindle, and then automatically run workflows on those
 environments.
 
 You can find more information on how to build SeqWare workflows and use the
@@ -47,10 +47,10 @@ SeqWare tools at our project website http://seqware.io.
 
 * you will be working locally using VirtualBox, make sure you have a Linux or Mac available to work on with 16G of RAM
 * download and install:
-    * SeqWare-Vagrant
+    * Bindle
     * Vagrant
     * VirtualBox
-* copy and customize the SeqWare-Vagrant template of your choice (a single node only, do not use a cluster profile)
+* copy and customize the Bindle template of your choice (a single node only, do not use a cluster profile)
 * launch your development node using vagrant_cluster_launch.pl, select "--use-virtualbox" 
 * ssh into your node
 * Vagrant will automatically create a vagrant directory ("/vagrant" on the VM and within your "working_dir/master" dir) that is shared between your host and the VM 
@@ -66,7 +66,7 @@ The following is a detailed example showing you how to setup the workflow develo
 ### Step - Download and Install Components
 
 These steps will be different depending on whether or not you use a Mac or
-Linux host machine.  Much more information about SeqWare-Vagrant can be found
+Linux host machine.  Much more information about Bindle can be found
 at our GitHub site https://github.com/SeqWare/vagrant. In particular take a
 look at the README.md which goes into great detail about installing and
 configuring these tools.
@@ -81,19 +81,19 @@ Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
     $ wget http://download.virtualbox.org/virtualbox/4.3.8/virtualbox-4.3_4.3.8-92456~Ubuntu~precise_amd64.deb
     # sudo dpkg -i virtualbox-4.3_4.3.8-92456~Ubuntu~precise_amd64.deb
 
-    # download SeqWare Vagrant 1.1
-    $ wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/seqware-vagrant_1.1.tar.gz
-    $ tar zxf seqware-vagrant_1.1.tar.gz
-    $ cd seqware-vagrant_1.1
+    # download SeqWare Vagrant 1.2
+    $ wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/bindle_1.2.tar.gz
+    $ tar zxf bindle_1.2.tar.gz
+    $ cd bindle_1.2
 
-    # install seqware-vagrant dependencies, again see README for SeqWare-Vagrant
+    # install bindle dependencies, again see README for Bindle
     $ sudo apt-get update
     $ sudo apt-get install libjson-perl libtemplate-perl make gcc
 
-    # make sure you have all the dependencies needed for SeqWare-Vagrant, this should not produce an error
+    # make sure you have all the dependencies needed for Bindle, this should not produce an error
     $ perl -c vagrant_cluster_launch.pl
 
-    # now install the Vagrant tool which is used by SeqWare-Vagrant
+    # now install the Vagrant tool which is used by Bindle
     $ wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
     $ sudo dpkg -i vagrant_1.4.3_x86_64.deb
     $ vagrant plugin install vagrant-aws
@@ -104,11 +104,11 @@ VirtualBox. For now please move on to the next step.
 
 ### Step - Configuration
 
-Now that you have SeqWare-Vagrant and dependencies installed the next step is
+Now that you have Bindle and dependencies installed the next step is
 to launch your local VM that will run workflows via SeqWare, launch cluster
 jobs via GridEngine, or perform MapReduce jobs.
 
-The steps below assume you are working in the seqware-vagrant_1.1 directory:
+The steps below assume you are working in the bindle_1.2 directory:
 
     # copy the template used to setup a SeqWare single compute node for PanCancer
     # no modifications are required since you are launching using VirtualBox
@@ -172,15 +172,15 @@ functioning correctly.  Depending on the template you used this may or may not
 be already installed under the seqware user account. If not, you can download a
 copy of the workflow and install it yourself following our guides on
 http://seqware.io (see
-https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip).
+https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip).
 
     # assumes you have logged into your master node and switched to the vagrant user
     # download the sample HelloWorld workflow
-    $ wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip
+    $ wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
     # install the workflow
-    $ seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip
+    $ seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
     # now run the workflow with default test settings
-    $ seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11
+    $ seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13
 
 This command should finish without errors.  If there are problems please report
 the errors to the SeqWare user group, see http://seqware.io/community/ for
@@ -265,7 +265,7 @@ Guide.
 
 ## Next Steps
 
-Much more information can be found in the README for the SeqWare-Vagrant
+Much more information can be found in the README for the Bindle
 project, see https://github.com/SeqWare/vagrant
 
 For workflow development using SeqWare we encourage you look at our extensive

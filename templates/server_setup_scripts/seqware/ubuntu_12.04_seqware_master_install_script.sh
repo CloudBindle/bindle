@@ -81,6 +81,9 @@ cp ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${S
 cp ~seqware/gitroot/seqware/seqware-pipeline/target/seqware ~seqware/bin
 chmod +x ~seqware/bin/seqware
 echo 'export PATH=$PATH:~seqware/bin' >> ~seqware/.bash_profile
+# run it so the jar is downloaded before really calling it below
+su - seqware -c "seqware"
+
 
 # make everything owned by seqware
 chown -R seqware:seqware ~seqware
@@ -137,7 +140,7 @@ chmod a+x ~seqware/crons/status.cron
 su - seqware -c '(echo "* * * * * ~seqware/crons/status.cron >> ~seqware/logs/status.log") | crontab -'
 
 cd ~seqware
-wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip
-su - seqware -c "seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip"
-rm Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.11.zip
+wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
+su - seqware -c "seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip"
+rm Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
 
