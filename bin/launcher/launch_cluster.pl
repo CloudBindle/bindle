@@ -1,6 +1,9 @@
-use strict;
-use Getopt::Long;
+#!/usr/bin/env perl
+
+use common::sense;
 use Data::Dumper;
+
+use Getopt::Long;
 use JSON;
 #use Template;
 use Config;
@@ -121,10 +124,13 @@ if ($launch_vb) {
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
+
 prepare_files($cluster_configs, $configs, $work_dir);
+
 if (!$skip_launch) {
   # this launches and does first round setup
   launch_instances();
+  sleep 100;
   # this finds IP addresses and does second round of setup
   # FIXME: need a place to process settings files with info taken after launch (e.g. IPs)
   # and this should run via template toolkit since it's much easier to deal with for loops and other complex substitutions
@@ -148,7 +154,7 @@ sub find_node_info {
   foreach my $node (sort keys %{$cluster_configs}){
     $node_list .= `cd $work_dir/$node && vagrant status`."\n";
   }
-  print "$node_list\n";
+  print "Node List: $node_list\n";
 
   my @t = split /\n/, $node_list;
   foreach my $l (@t) {
@@ -198,7 +204,10 @@ sub find_node_info {
 # this finds all the host IP addresses and then runs the second provisioning on them
 sub provision_instances {
   # first, find all the hosts and get their info
+  say "cluster_configs";
+  print Dumper $cluster_configs;
   my $hosts = find_node_info($cluster_configs);
+  say 'hosts:';
   print Dumper($hosts);
 
   # FIXME: this should be better organized and it's own subroutine 
@@ -258,7 +267,9 @@ sub run_provision_files {
   foreach my $host_name (sort keys %{$hosts}) {
     my $scripts = $cluster_configs->{$host_name}{provision_files};
     my $host = $hosts->{$host_name};
-    print "  PROVISIONING FILES TO HOST $host_name\n";
+    print "  PROVISIONING FILES TO HOST $host_name\n"; 
+    run("rsync -e \"ssh -i $host->{key}\" -avz $work_dir/$host_name/ $host->{user}".'@'."$host->{ip}:/vagrant/");
+#    run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." -r $work_dir/$host_name/ ".$host->{user}."@".$host->{ip}.":/home/".$host->{user});
     my $thr = threads->create(\&provision_files_thread, $host_name, $scripts, $host);
     print "  LAUNCHED THREAD PROVISION FILES TO $host_name\n";
     push (@all_threads, $thr);
@@ -389,7 +400,7 @@ sub setup_os_config_scripts_list {
 
 # this basically cats files together after doing an autoreplace
 # that fills in variables from the config part of the JSON
-sub setup_os_config_scripts() {
+sub setup_os_config_scripts {
   my ($configs, $output_dir, $output_file) = @_;
   foreach my $host (sort keys %{$configs}) {
     run("mkdir $output_dir/$host");
@@ -498,10 +509,11 @@ sub setup_vagrantfile {
     $full_output =~ s/os.network = ""//;
     $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
     $full_output =~ s/os.floating_ip = ""//;
+
     open VOUT, ">$node_output" or die;
     print VOUT $full_output;
     close VOUT;
-  } 
+  }
 }
 
 # reads a JSON-based config

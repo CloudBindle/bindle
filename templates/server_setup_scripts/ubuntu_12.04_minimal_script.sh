@@ -25,6 +25,12 @@ if [ -d "/glusterfs" ]; then
   mv ~/.bashrc.new ~/.bashrc
 fi
 
+mkdir -p /user
+chmod 777 /user
+
+#mkdir -p /home/seqware/
+#chown seqware:seqware /home/seqware/
+
 # basic tools
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
@@ -34,6 +40,7 @@ apt-get install curl unzip -y
 mkdir -p /mnt/home
 useradd -d /mnt/home/seqware -m seqware -s /bin/bash
 ln -s ~seqware /home/seqware
+sudo chown -h seqware:seqware /home/seqware
 
 # ensure locale is set to en-US (and remains so)
 sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config
