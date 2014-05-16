@@ -102,7 +102,7 @@ either use an earlier version of Vagrant of manually install a workaround
     wget https://raw.github.com/cloudbau/vagrant-openstack-plugin/48eac2932fa16ccd5fab2e1d2e0d04047f3be7bd/lib/vagrant-openstack-plugin/action/sync_folders.rb
     mv sync_folders.rb ~/.vagrant.d/gems/gems/vagrant-openstack-plugin-0.3.0/lib/vagrant-openstack-plugin/action/
 
-The vagrant_cluster_launch.pl Perl script requires Perl (of course) and also a
+The bin/launcher/launch_cluster.pl Perl script requires Perl (of course) and also a
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
 your distribution's package management system. Google "cpan perl install" for
 more information if you're unfamiliar with installing Perl packages. I highly
@@ -116,7 +116,7 @@ do not use your native package manager as shown below for Ubuntu:
 
 To check to see if you have these you do:
 
-    perl -c vagrant_cluster_launcher.pl
+    perl -c bin/launcher/launch_cluster.pl
 
 It should exit without an error message.
 
@@ -221,23 +221,23 @@ choose not by the --vb-ram and --vb-cores options.
 ## Running the Cluster Launcher 
 
 The wrapper script that controls the system described above is called
-"vagrant_cluster_launch.pl".  Examples of launching in different environments
+"bin/launcher/launch_cluster.pl".  Examples of launching in different environments
 (assuming you have a "vagrant_cluster_launch.json" file in the current
 directory) include:
 
     # for AWS
-    perl vagrant_cluster_launch.pl --use-aws
+    perl bin/launcher/launch_cluster.pl --use-aws
     # for OpenStack
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
     # for VirtualBox
-    perl vagrant_cluster_launch.pl --use-virtualbox
+    perl bin/launcher/launch_cluster.pl --use-virtualbox
 
 This script also lets you point to the config file explicitly, change the
 working Vagrant directory (which defaults to target, it's the location where
 Vagrant puts all of its runtime files), and override RAM and CPU cores:
 
     # example, execute without options for a help message
-    perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws --config-file vagrant_cluster_launch.json
+    perl bin/launcher/launch_cluster.pl --use-aws --working-dir target-aws --config-file vagrant_cluster_launch.json
 
 
 ## SeqWare Examples
@@ -245,7 +245,7 @@ Vagrant puts all of its runtime files), and override RAM and CPU cores:
 These sections show specific examples taken from our templates. These cover
 single-node SeqWare, SeqWare clusters, and other OICR projects as well.  The
 config JSON templates and provisioning Bash shell scripts should provide ample
-examples of how to use vagrant_cluster_launch.pl with other tools. Using these
+examples of how to use launch_cluster.pl with other tools. Using these
 examples, you will need to modify the configuration template and copy them to
 vagrant_cluster_launch.json (or another file, using the --config-file option).
 
@@ -276,7 +276,7 @@ GridEngine cluster too:
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 #### Oozie SGE
 
@@ -287,7 +287,7 @@ SeqWare:
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 ### SeqWare - Cluster
 
@@ -305,7 +305,7 @@ GridEngine cluster too:
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 #### Oozie SGE
 
@@ -316,7 +316,7 @@ SeqWare:
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 
 ### SeqWare - Install Only
@@ -341,7 +341,7 @@ Amazon's cloud, VirtualBox snapshot, etc).
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you 
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 
 ## TCGA/ICGC PanCancer Examples
@@ -368,12 +368,12 @@ technology to use.
     # use this template for clusters of 4 nodes, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your environment
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
     # use this template for a single node, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your environment
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
 more information about this project. 
@@ -410,7 +410,7 @@ name embedded and will need to change if the index is updated.
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
 
@@ -425,11 +425,11 @@ and explore HA options.
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for you
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 ## Logging
 
-Every node launched by vagrant_cluster_launch.pl has it's own log file that you
+Every node launched by launch_cluster.pl has it's own log file that you
 can view (or watch during cluster building).  Take a look inside the directory
 specified in the --working-dir option.  There you should see a .log file for
 each server being launched (for a cluster) or just master.log if you launched a
@@ -438,7 +438,7 @@ VMs.
 
 ## Controlling the VM
 
-Once the vagrant_cluster_launch.pl script finishes running you will have one or
+Once the launch_cluster.pl script finishes running you will have one or
 more VM instances running on a given cloud or local VM environment.
 Unfortunately, Bindle does not provide the full range of VM lifecycle
 management e.g. suspend, shutdown, ssh connection automation, etc.  Vagrant
@@ -518,7 +518,7 @@ This is for development of features relating to CentOS support. It includes the 
 
 If you need to debug a problem set the VAGRANT_LOG variable e.g.:
 
-    VAGRANT_LOG=DEBUG perl vagrant_cluster_launch.pl --use-aws
+    VAGRANT_LOG=DEBUG perl bin/launcher/launch_cluster.pl --use-aws
 
 Also you can use the "--skip-launch" option to just create the various launch
 files not actually trigger a VM.
@@ -532,7 +532,7 @@ https://github.com/jeremyharris/vagrant-aws/commit/1473c3a45570fdebed2f2b2858524
 ## TODO
 
 The list of TODO items, some of which are out-of-date.  See the
-vagrant_cluster_launch.pl script for more TODO items too.
+launch_cluster.pl script for more TODO items too.
 
 * need to edit the landing page to remove mention of Pegasus
 * need to add code that will add all local drives to HDFS to maximize available storage (e.g. ephemerial drives)
