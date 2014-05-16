@@ -51,7 +51,7 @@ SeqWare tools at our project website http://seqware.io.
     * Vagrant
     * VirtualBox
 * copy and customize the Bindle template of your choice (a single node only, do not use a cluster profile)
-* launch your development node using vagrant_cluster_launch.pl, select "--use-virtualbox" 
+* launch your development node using bin/launcher/launch_cluster.pl, select "--use-virtualbox" 
 * ssh into your node
 * Vagrant will automatically create a vagrant directory ("/vagrant" on the VM and within your "working_dir/master" dir) that is shared between your host and the VM 
 * create new SeqWare workflows in this "working_dir/master" directory, please see the Developer Getting Started Guide at http://seqware.io
@@ -91,7 +91,7 @@ Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
     $ sudo apt-get install libjson-perl libtemplate-perl make gcc
 
     # make sure you have all the dependencies needed for Bindle, this should not produce an error
-    $ perl -c vagrant_cluster_launch.pl
+    $ perl -c bin/launcher/launch_cluster.pl
 
     # now install the Vagrant tool which is used by Bindle
     $ wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
@@ -130,7 +130,7 @@ availble on your machine. Do not attempt to use more RAM/CPU than you have
 available.
 
     # now launch the compute node, 12G RAM, 2 CPU cores
-    $ perl vagrant_cluster_launch.pl --use-virtualbox --working-dir target-vb-1 --vb-ram 12000 --vb-cores 2 --config-file vagrant_cluster_launch.json
+    $ perl bin/launcher/launch_cluster.pl --use-virtualbox --working-dir target-vb-1 --vb-ram 12000 --vb-cores 2 --config-file vagrant_cluster_launch.json
 
 You can follow the progress of this cluster launch in another terminal with.
 Use multiple terminals to watch logs for multiple-node clusters if you desire:
@@ -139,7 +139,7 @@ Use multiple terminals to watch logs for multiple-node clusters if you desire:
     $ tail -f target-vb-1/master.log
 
 Once this process complete you should see no error messages from
-"vagrant_cluster_launch.pl". If so, you are ready to use your workflow
+"bin/launcher/launch_cluster.pl". If so, you are ready to use your workflow
 development node.
 
 ### Step - Log In To Node/Cluster
