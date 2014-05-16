@@ -38,7 +38,7 @@ larger-scale computation.
     * Vagrant
     * Vagrant plugins and/or VirtualBox
 * copy and customize the Bindle template of your choice with your appropriate cloud settings
-* launch your cluster or node using vagrant_cluster_launch.pl
+* launch your cluster or node using bin/launcher/launch_cluster.pl
 * ssh into your cluster
 * launch SeqWare workflow(s) and monitor their results, this can be automated with a decider and is the process we use to automate "Phase II" of the project
 * _or_
@@ -129,7 +129,7 @@ Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
     $ sudo apt-get install libjson-perl libtemplate-perl make gcc
     
     # make sure you have all the dependencies needed for Bindle, this should not produce an error
-    $ perl -c vagrant_cluster_launch.pl
+    $ perl -c bin/launcher/launch_cluster.pl
     
     # now install the Vagrant tool which is used by Bindle
     $ wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
@@ -189,7 +189,7 @@ command line tool (the "master" directory for a single-node launch). The latter
 is important for controlling your node/cluster once launched. 
 
     # now launch the compute node
-    $ perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
+    $ perl bin/launcher/launch_cluster.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
 
 You can follow the progress of this cluster launch in another terminal with.
 Use multiple terminals to watch logs for multiple-node clusters if you desire:
@@ -292,7 +292,7 @@ newer/alternative/custom workflows.
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 ### Cluster With BWA Workflow
 
@@ -303,7 +303,7 @@ the storage site for the workflow (it is a large workflow).
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 ### Single Instance without Workflows
 
@@ -314,7 +314,7 @@ as 20 minutes and gives you flexibility to install newer/alternative workflows.
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 ### Single Instance with Workflows
 
@@ -323,7 +323,7 @@ In this environment we create a VM with the PanCancer BWA Workflow 2.0 installed
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # launch, use the correct command line args for your cloud environment, see docs above and the README for Bindle
-    perl vagrant_cluster_launch.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack
 
 ## Cloud-Specific Notes
 
@@ -347,7 +347,7 @@ When you launch the cluster you need to do the following differently from the ex
     # make sure you apply the rsync fix described in the README.md
 
     # example launching a host 
-    $ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+    $ perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
 There are several items you need to take care of post-provisioning to ensure you have a working cluster:
 
@@ -384,7 +384,7 @@ Here are some difference from the docs above:
     $ vagrant plugin install vagrant-openstack-plugin
 
     # example launching a host 
-    $ perl vagrant_cluster_launch.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
+    $ perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target-os-1 --config-file vagrant_cluster_launch.json
 
 Also note, here are the additional things I had to do to get this to work:
 
