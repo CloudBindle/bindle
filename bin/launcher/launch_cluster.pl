@@ -1,6 +1,7 @@
 use strict;
 use Getopt::Long;
 use Data::Dumper;
+use Config::Simple;
 use JSON;
 #use Template;
 use Config;
@@ -41,7 +42,6 @@ my $skip_launch = 0;
 my $vb_ram = 12000;
 my $vb_cores = 2;
 my @ebs_vols = ();
-
 my $help = 0;
 
 # check for help
@@ -77,6 +77,10 @@ my $cluster_configs = {};
 my $temp_cluster_configs = ();
 ($configs, $temp_cluster_configs) = read_json_config($json_config_file);
 
+#print Dumper($configs);
+#print Dumper($temp_cluster_configs);
+
+
 foreach my $node_config (@{$temp_cluster_configs}){
   my @names = @{$node_config->{'name'}};
   for (0 .. $#names){
@@ -88,7 +92,8 @@ foreach my $node_config (@{$temp_cluster_configs}){
   }
 }
 
-#print Dumper($cluster_configs);
+print Dumper($cluster_configs);
+die "TESTING";
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
@@ -546,7 +551,70 @@ sub read_json_config {
   }
   close IN;
   my $temp_configs = decode_json($json_txt);
-  return($temp_configs->{general}, $temp_configs->{node_config});
+  
+  my $general_config = extract_general_config($temp_configs->{general});
+  my $node_cnfg = extract_node_config($temp_configs->{node_config});
+  #print Dumper($node_cnfg);
+  return($general_config, $node_cnfg);
+}
+
+
+sub extract_node_config {
+  my ($node_config) = @_;
+  my @worker_nodes = ();
+  my @float_ips = ();
+  my @os_float_ips;
+  my $default_configs;
+  if ($launch_os){
+    $default_configs = new Config::Simple("config/os.cfg");
+    @os_float_ips = $default_configs->param('platform.FLOATING_IPS');
+    my @master_float_ip = $os_float_ips[0];
+    $node_config->[0]->{floatip} = \@master_float_ip;
+  }
+  else{
+    $default_configs = new Config::Simple("config/aws.cfg");
+  }
+  my $number_of_nodes = $default_configs->param('platform.NUMBER_OF_NODES');
+  if ($number_of_nodes != 1){    
+    for (my $i = 1; $i < $number_of_nodes; $i++){
+      push(@worker_nodes,'worker'.$i);
+      if ($launch_os){
+	push(@float_ips, $os_float_ips[$i]);
+      }
+      else{
+	push(@float_ips, '<FILLMEIN>');
+      }
+    }
+  $node_config->[1]->{name} = \@worker_nodes;
+  $node_config->[1]->{floatip} = \@float_ips;
+  }
+  
+  return $node_config;
+}
+
+
+
+#reads a .cfg file and extracts the required credentials
+sub extract_general_config {
+  my ($general_config) = @_;
+  my $default_configs;
+  my $selected_platform;
+  if ($launch_aws){
+    $selected_platform = "AWS_";
+    $default_configs = new Config::Simple("config/aws.cfg");
+  }
+  else{
+    $selected_platform = "OS_";
+    $default_configs = new Config::Simple("config/os.cfg");
+  }
+  
+  foreach my $key (sort keys %{$default_configs}->{_DATA}->{platform}) {
+    $general_config->{$selected_platform.$key} = $default_configs->param('platform.'.$key);
+  }
+  my $pem_file = $default_configs->param('platform.SSH_KEY_NAME');
+  $general_config->{$selected_platform.'SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
+
+  return $general_config;
 }
 
 sub autoreplace {
