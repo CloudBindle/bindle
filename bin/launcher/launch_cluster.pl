@@ -92,8 +92,8 @@ foreach my $node_config (@{$temp_cluster_configs}){
   }
 }
 
-print Dumper($cluster_configs);
-die "TESTING";
+#print Dumper($cluster_configs);
+#die "TESTING";
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
@@ -591,7 +591,6 @@ sub extract_node_config {
   
   return $node_config;
 }
-
 
 
 #reads a .cfg file and extracts the required credentials
