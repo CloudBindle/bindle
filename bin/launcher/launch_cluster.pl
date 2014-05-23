@@ -77,9 +77,6 @@ my $cluster_configs = {};
 my $temp_cluster_configs = ();
 ($configs, $temp_cluster_configs) = read_json_config($json_config_file);
 
-#print Dumper($configs);
-#print Dumper($temp_cluster_configs);
-
 
 foreach my $node_config (@{$temp_cluster_configs}){
   my @names = @{$node_config->{'name'}};
@@ -92,8 +89,6 @@ foreach my $node_config (@{$temp_cluster_configs}){
   }
 }
 
-#print Dumper($cluster_configs);
-#die "TESTING";
 
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
@@ -552,13 +547,17 @@ sub read_json_config {
   close IN;
   my $temp_configs = decode_json($json_txt);
   
-  my $general_config = extract_general_config($temp_configs->{general});
-  my $node_cnfg = extract_node_config($temp_configs->{node_config});
-  #print Dumper($node_cnfg);
-  return($general_config, $node_cnfg);
+  if ($launch_aws || $launch_os){
+    my $general_config = extract_general_config($temp_configs->{general});
+    my $node_cnfg = extract_node_config($temp_configs->{node_config});
+    return($general_config, $node_cnfg);
+  }
+  else{
+    return ($temp_configs->{general}, $temp_configs->{node_config});
+  }
 }
 
-
+#extracts the floating IP's from the .cfg file
 sub extract_node_config {
   my ($node_config) = @_;
   my @worker_nodes = ();

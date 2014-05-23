@@ -91,7 +91,7 @@ Virtualbox provider is available out of the box with Vagrant. You do this step
 as the user that will run Vagrant and the SeqWare Vagrant wrapper.
 
     vagrant plugin install vagrant-aws
-    vagrant plugin install vagrant-openstack-plugin
+    vagrant plugin install vagrant-openstack-plugin --plugin-version 0.4.1
     vagrant plugin install vagrant-vcloud
 
 Unfortunately, the current version of the vagrant-openstack-plugin has an issue
@@ -113,6 +113,7 @@ do not use your native package manager as shown below for Ubuntu:
 * Data::Dumper: should be installed by default with Perl
 * JSON: eg "sudo apt-get install libjson-perl" on Ubuntu 12.04
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
+* Config::Simple: eg "sudo apt-get install libconfig-simple-perl" on Ubuntu 12.04
 
 To check to see if you have these you do:
 
