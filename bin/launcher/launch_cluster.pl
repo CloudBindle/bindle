@@ -77,7 +77,6 @@ my $cluster_configs = {};
 my $temp_cluster_configs = ();
 ($configs, $temp_cluster_configs) = read_json_config($json_config_file);
 
-
 foreach my $node_config (@{$temp_cluster_configs}){
   my @names = @{$node_config->{'name'}};
   for (0 .. $#names){
@@ -566,14 +565,14 @@ sub extract_node_config {
   my $default_configs;
   if ($launch_os){
     $default_configs = new Config::Simple("config/os.cfg");
-    @os_float_ips = $default_configs->param('platform.FLOATING_IPS');
+    @os_float_ips = $default_configs->param('nodes.FLOATING_IPS');
     my @master_float_ip = $os_float_ips[0];
     $node_config->[0]->{floatip} = \@master_float_ip;
   }
   else{
     $default_configs = new Config::Simple("config/aws.cfg");
   }
-  my $number_of_nodes = $default_configs->param('platform.NUMBER_OF_NODES');
+  my $number_of_nodes = $default_configs->param('nodes.NUMBER_OF_NODES');
   if ($number_of_nodes != 1){    
     for (my $i = 1; $i < $number_of_nodes; $i++){
       push(@worker_nodes,'worker'.$i);
