@@ -2,18 +2,22 @@
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
-nodes configured with one or more Bash shell scripts. This lets you build Linux
-virtual machines from scratch, ensuring you development/testing/production VMs
-are clean and your configuration process is fully reproducible.  The big
-difference between building a cluster with this script vs. Vagrant directly is
-Vagrant provides a single pass at running provisioning script.  This tool,
-however, launches one or more instances, runs a base Bash configuration script
-on each, then queries Vagrant to identify the external and internal IP address
-of each of the launched instances. This script then runs one or more
-"secondary" provisioning scripts that can include variables substituted, for
-example, the IP addreses and domain names of the other hosts in the cluster.
-This functionality makes it possible to build clusters of nodes that know about
-each other without knowing the IP addreses ahead of time.
+nodes configured with one or more Bash shell scripts (in the future we are
+moving to [Ansible](http://www.ansible.com/) as a more robust provisioning
+mechanism). This lets you build Linux virtual machines from scratch, ensuring
+you development/testing/production VMs are clean and your configuration process
+is fully reproducible.  The big difference between building a cluster with this
+script vs. Vagrant directly is Vagrant provides a single pass at running
+provisioning script which actually makes it quite difficult to pass runtime
+information like the domain names/IP addresses of cluster nodes and to setup
+software where order matters like HDFS before HBase.  This tool, however,
+launches one or more instances, runs a base Bash configuration script on each,
+then queries Vagrant to identify the external and internal IP address of each
+of the launched instances. This script then runs one or more "secondary"
+provisioning scripts that can include variables substituted, for example, the
+IP addreses and domain names of the other hosts in the cluster.  This
+functionality makes it possible to build clusters of nodes that know about each
+other without knowing the IP addreses ahead of time.
 
 What we have found this useful for is building clusters (both Hadoop and
 GridEngine-based) on a variety of cloud environments without having to retool
@@ -43,13 +47,14 @@ In the latest version of the script you can specify multiple nodes with their
 own set of provisioning bash shell scripts making it easy to configure a single
 node or cluster with a simple to author config file. In the near future the
 mechanism of using shell scripts to configure nodes will be re-implemented (or
-supplemented) with Puppet/Ansible/Chef scripts which should make it easier to
-maintain different clusters and node types.  We will also improve the
-seperation between SeqWare and the generic functionality of this cluster
-builder.
+supplemented) with Ansible support which should make it easier to maintain
+different clusters and node types.  We will also improve the seperation between
+SeqWare and the generic functionality of this cluster builder.
 
 The profiles been tested to work by provisioning a cluster and running the
 HelloWorld workflow from SeqWare on the following configurations and platforms:
+
+TODO: we need to update this for the 1.2 release
 
 | *Configuration name*                                              | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) |
 |-------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|:-----------:|
