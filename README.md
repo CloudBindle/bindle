@@ -65,7 +65,7 @@ TODO: we need to update this for the 1.2 release
 |*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713; | &#x2713; | &#x2713; | NA | &#x2717; (NFS blocked) |
 |*vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template*      | &#x2713; | &#x2713; | &#x2713; | &#x2713; | &#x2713; |
 
-## Build & Source Control   
+## Build & Source Control
 
 Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
 working branch is "develop".  If you need to make changes work on a feature
@@ -73,7 +73,7 @@ branch and make a pull request to another developer when ready to merge with
 develop.  See the HubFlow docs above for a detailed description of this
 process.
 
-## Installing 
+## Installing
 
 Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let
 you launch a local node or cluster of virtual machine nodes on your desktop or
@@ -111,7 +111,7 @@ The bin/launcher/launch_cluster.pl Perl script requires Perl (of course) and als
 few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
 your distribution's package management system. Google "cpan perl install" for
 more information if you're unfamiliar with installing Perl packages. I highly
-recommend using PerlBrew to simplify working with Perl dependencies if you 
+recommend using PerlBrew to simplify working with Perl dependencies if you
 do not use your native package manager as shown below for Ubuntu:
 
 * Getopt::Long: should be installed by default with Perl
@@ -164,7 +164,7 @@ For example, to download the base Ubuntu 12.04 box you do the following:
 
 Keep in mind this is primarily aimed at developers making a new profile config.
 For the existing ones we provide they already link to the box that will be
-pulled in on first lauch.  This may take a while on a slow connection.
+pulled in on first launch.  This may take a while on a slow connection.
 
 For Amazon or an OpenStack cloud a "dummy" box will be used and is already
 configured in the code.
@@ -185,7 +185,7 @@ to vagrant_cluster_launch.json:
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
 
 By using this destination filename and location the .gitignore file will
-prevent you from accidently checking in this file (it will contain sensitive
+prevent you from accidentally checking in this file (it will contain sensitive
 information like your Amazon key).
 
 Next, fill in your various settings depending on what cloud provider you use
@@ -223,7 +223,7 @@ override the memory/core requirements in VirtualBox ONLY.  Keep in mind for AWS
 and other clouds the RAM and Cores are determinted by the instance type you
 choose not by the --vb-ram and --vb-cores options.
 
-## Running the Cluster Launcher 
+## Running the Cluster Launcher
 
 The wrapper script that controls the system described above is called
 "bin/launcher/launch_cluster.pl".  Examples of launching in different environments
@@ -280,7 +280,7 @@ GridEngine cluster too:
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you 
+    # launch, use the correct command line args for you
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 #### Oozie SGE
@@ -291,7 +291,7 @@ SeqWare:
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you 
+    # launch, use the correct command line args for you
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 ### SeqWare - Cluster
@@ -309,7 +309,7 @@ GridEngine cluster too:
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you 
+    # launch, use the correct command line args for you
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 #### Oozie SGE
@@ -320,7 +320,7 @@ SeqWare:
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you 
+    # launch, use the correct command line args for you
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 
@@ -333,7 +333,7 @@ or cluster from pre-compiled SeqWare release files and avoid the lengthy build
 and integration test time. These profiles are, therefore, useful when
 installing SeqWare rather than testing it.
 
-### SeqWare - CentOS 
+### SeqWare - CentOS
 
 A user-contributed profile for setting us SeqWare on a CentOS VM.
 
@@ -345,7 +345,7 @@ Amazon's cloud, VirtualBox snapshot, etc).
 
     # use this template, customize it
     cp templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you 
+    # launch, use the correct command line args for you
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 
@@ -381,7 +381,7 @@ technology to use.
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
-more information about this project. 
+more information about this project.
 
 ## OICR Examples
 
@@ -459,7 +459,7 @@ Here's a quick overview:
     # once in these directories you can issue Vagrant commands
     # check the status of the VM
     vagrant status
-    # suspend 
+    # suspend
     vagrant suspend
     # resume
     vagrant resume
@@ -505,7 +505,7 @@ This is for development of features relating to CentOS support. It includes the 
 
 4. Install the appropriate version of Ruby:
     `rvm install ruby-1.9.2-p320`
- 
+
 5. Navigate to the veewee directory. This should automatically invoke RVM.
 
     `cd veewee`
@@ -514,7 +514,7 @@ This is for development of features relating to CentOS support. It includes the 
 
 6. Copy or symlink the Seqware-veewee folder from SeqWare/vagrant into the veewee directory:
     `ln -s *[PATH TO BINDLE]*/SeqWare-veewee ./definitions/SeqWare-veewee`
- 
+
 7. Edit veewee's "definition.rb" file, and comment out the following three scripts:
     chef.sh, puppet.sh, ruby.sh
 
@@ -547,4 +547,3 @@ launch_cluster.pl script for more TODO items too.
 * better integration with our Maven build process, perhaps automatically calling this to setup integration test environment -- done
 * message of the day on login over ssh
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
-
