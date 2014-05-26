@@ -32,7 +32,8 @@ service zookeeper-server start
 
 # install Hadoop deps, the master node runs the NameNode, SecondaryNameNode and JobTracker
 # NOTE: shouldn't really use secondary name node on same box for production
-yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
+yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-0.20-mapreduce-tasktracker hadoop-hdfs-namenode hadoop-hdfs-secondarynamenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
+
 
 # the repos have been setup in the minimal script
 yum -y install httpd
@@ -172,8 +173,8 @@ service hbase-regionserver start
 
 service hue restart
 
-# setup daemons to start on boot
-for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
+# setup daemons to start on boot (tomcat is already set up)
+for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
 
 # configure dirs for seqware
 # note these are placed on /mnt since that
