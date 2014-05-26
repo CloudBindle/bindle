@@ -41,6 +41,7 @@ echo "export MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" >> ~seqware/.bash_prof
 
 # make everything owned by seqware
 chown -R seqware:seqware ~seqware
+chmod -R a+rx ~seqware
 
 # correct permissions
 su - seqware -c 'chmod 640 ~seqware/.seqware/settings'
