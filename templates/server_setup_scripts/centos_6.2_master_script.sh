@@ -39,8 +39,8 @@ yum -y install httpd
 
 # Install tomcat
 cd /tmp
-wget http://apache.petsads.us/tomcat/tomcat-7/v7.0.53/bin/apache-tomcat-7.0.53.tar.gz
-tar -xzvf apache-tomcat-7.0.53.tar.gz -C /opt/
+wget http://www.eu.apache.org/dist/tomcat/tomcat-7/v7.0.54/bin/apache-tomcat-7.0.54.tar.gz
+tar -xzvf apache-tomcat-7.0.54.tar.gz -C /opt/
 cd -
 cat > /etc/init.d/tomcat <<\STARTUP_SCRIPT
 #!/bin/bash
@@ -51,7 +51,7 @@ JAVA_HOME=/usr/java/latest/jre
 export JAVA_HOME
 PATH=$JAVA_HOME/bin:$PATH
 export PATH
-CATALINA_HOME=/opt/apache-tomcat-7.0.53
+CATALINA_HOME=/opt/apache-tomcat-7.0.54
 
 case $1 in
 	start)
