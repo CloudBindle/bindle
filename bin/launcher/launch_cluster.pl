@@ -88,11 +88,9 @@ my $cluster_configs = {};
 # Use this temporary object to reconfigure the worker arrays to the format the original script expects
 ($configs, $cluster_configs) = read_json_config($json_config_file);
 
-
 # dealing with defaults from the config including various SeqWare-specific items
 if (!defined($configs->{'SEQWARE_BUILD_CMD'})) { $configs->{'SEQWARE_BUILD_CMD'} = $default_seqware_build_cmd; }
 if (!defined($configs->{'MAVEN_MIRROR'})) { $configs->{'MAVEN_MIRROR'} = ""; }
-
 
 # define the "boxes" used for each provider
 # TODO: these are hardcoded and may change
@@ -537,7 +535,6 @@ sub setup_vagrantfile {
 # reads a JSON-based config
 sub read_json_config {
   my ($config_file) = @_;
-  my $cluster_configs = {};
   open IN, "<$config_file" or die;
   my $json_txt = "";
   while(<IN>) { 
@@ -547,15 +544,14 @@ sub read_json_config {
   close IN;
   my $temp_configs = decode_json($json_txt);
   my $general_config = extract_general_config($temp_configs->{general});
-  my $temp_cluster_configs = ();
+  my ($temp_cluster_configs, $cluster_configs) = {};
   if ($launch_aws || $launch_os){
     $temp_cluster_configs = extract_node_config($temp_configs->{node_config});
   }
   else{ $temp_cluster_configs = $temp_configs->{node_config}; }
-  
+
   foreach my $node_config (@{$temp_cluster_configs}){
-  print Dumper($node_config);
-  my @names = @{$node_config->{'name'}};
+    my @names = @{$node_config->{'name'}};
     for (0 .. $#names){
       my $node_config_copy = dclone $node_config;
       delete $node_config_copy->{'floatip'};
@@ -569,9 +565,7 @@ sub read_json_config {
 #extracts the floating IP's from the .cfg file
 sub extract_node_config {
   my ($temp_cluster_configs) = @_;
-  my @worker_nodes = ();
-  my @float_ips = ();
-  my @os_float_ips;
+  my (@worker_nodes, @float_ips, @os_float_ips) = ();
   my $number_of_nodes = $default_configs->param('nodes.number_of_nodes');
   if ($launch_os){
     @os_float_ips = $default_configs->param('nodes.floating_ips');
