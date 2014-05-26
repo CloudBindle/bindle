@@ -213,7 +213,7 @@ chkconfig --level 235 rpcbind on
 
 # Add hadoop-init startup script
 # TODO: I had to comment this out previously... might need to do so again. --LC
-\cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
-chown root:root /etc/init.d/hadoop-init
-chmod 755 /etc/init.d/hadoop-init
-chkconfig --level 235 hadoop-init on
+#\cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
+#chown root:root /etc/init.d/hadoop-init
+#chmod 755 /etc/init.d/hadoop-init
+#chkconfig --level 235 hadoop-init on
