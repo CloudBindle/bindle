@@ -23,7 +23,7 @@ sudo -u hdfs hadoop fs -mkdir -p /user/vagrant
 sudo -u hdfs hadoop fs -chown -R vagrant /user/vagrant
 
 # configure seqware settings
-cp /vagrant/settings ~vagrant/.seqware/
+\cp /vagrant/settings ~vagrant/.seqware/
 perl -p -i -e 's/\/home\/seqware\//\/home\/vagrant\//g' ~vagrant/.seqware/settings
 perl -p -i -e 's/\/user\/seqware\//\/user\/vagrant\//g' ~vagrant/.seqware/settings
 
@@ -56,10 +56,10 @@ mkdir -p ~vagrant/.m2/
 curl -L https://github.com/SeqWare/seqware/releases/download/${SEQWARE_VERSION}/archetype-catalog.xml > ~vagrant/.m2/archetype-catalog.xml
 
 # setup jar
-cp ~vagrant/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~vagrant/jars/
+\cp ~vagrant/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~vagrant/jars/
 
 # setup seqware cli
-cp ~vagrant/gitroot/seqware/seqware-pipeline/target/seqware ~vagrant/bin/
+\cp ~vagrant/gitroot/seqware/seqware-pipeline/target/seqware ~vagrant/bin/
 chmod +x ~vagrant/bin/seqware
 echo 'export PATH=$PATH:~vagrant/bin' >> ~vagrant/.bash_profile
 

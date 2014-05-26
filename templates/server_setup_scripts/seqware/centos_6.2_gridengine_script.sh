@@ -109,7 +109,7 @@ perl -pi -e 's/SW_DEFAULT_WORKFLOW_ENGINE=oozie/SW_DEFAULT_WORKFLOW_ENGINE=oozie
 #perl -pi -e 's/OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial \${threads}/OOZIE_SGE_THREADS_PARAM_FORMAT=/' /vagrant/settings
 
 # Add sge-init-master startup script
-cp /vagrant/sge-init-master /etc/init.d/sge-init
+\cp /vagrant/sge-init-master /etc/init.d/sge-init
 chown root:root /etc/init.d/sge-init
 chmod 755 /etc/init.d/sge-init
 chkconfig --levels 235 sge-init on

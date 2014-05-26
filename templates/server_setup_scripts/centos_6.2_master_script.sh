@@ -1,7 +1,7 @@
 #!/bin/bash -vx
 
 # first, fix the /etc/hosts file since SGE wants reverse lookup to work
-cp /etc/hosts /tmp/hosts
+\cp /etc/hosts /tmp/hosts
 echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
 cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
 
@@ -88,7 +88,7 @@ yum -y install postgresql93.x86_64
 #yum -y install hadoop-lzo-cdh4
 
 # configuration for hadoop
-cp /vagrant/conf.master.tar.gz /etc/hadoop/
+\cp /vagrant/conf.master.tar.gz /etc/hadoop/
 cd /etc/hadoop/
 tar zxf conf.master.tar.gz
 cd -
@@ -134,7 +134,7 @@ for x in `cd /etc/init.d ; ls hadoop-0.20-mapreduce-*` ; do sudo service $x star
 
 # setup hue
 cd /usr/share/hue
-cp desktop/libs/hadoop/java-lib/hue-plugins-*.jar /usr/lib/hadoop-0.20-mapreduce/lib
+\cp desktop/libs/hadoop/java-lib/hue-plugins-*.jar /usr/lib/hadoop-0.20-mapreduce/lib
 cd -
 # for some reason needs to be restarted to register plugins properly
 service hue stop
@@ -163,7 +163,7 @@ service oozie start
 
 # setup hbase
 # TODO: need hdfs-site.xml configured properly using alternatives, but for now just copy it
-cp /etc/hadoop/conf/hbase-site.xml /etc/hbase/conf/hbase-site.xml
+\cp /etc/hadoop/conf/hbase-site.xml /etc/hbase/conf/hbase-site.xml
 sudo -u hdfs hadoop fs -mkdir /hbase
 sudo -u hdfs hadoop fs -chown hbase /hbase
 service hbase-master start
@@ -210,7 +210,7 @@ chkconfig --levels 235 nfs on
 
 # Add hadoop-init startup script
 # TODO: I had to comment this out previously... might need to do so again. --LC
-cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
+\cp /vagrant/hadoop-init-master /etc/init.d/hadoop-init
 chown root:root /etc/init.d/hadoop-init
 chmod 755 /etc/init.d/hadoop-init
 sysv-rc-conf hadoop-init on

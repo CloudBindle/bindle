@@ -17,7 +17,7 @@ sudo -u hdfs hadoop fs -mkdir -p /user/seqware
 sudo -u hdfs hadoop fs -chown -R seqware /user/seqware
 
 # configure seqware settings
-cp /vagrant/settings ~seqware/.seqware
+\cp /vagrant/settings ~seqware/.seqware
 
 # install hubflow
 cd ~seqware/gitroot
@@ -48,10 +48,10 @@ su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BUILD_CMD} 2>&1 | tee bu
 export SEQWARE_VERSION=`ls ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
 
 # setup jar
-cp ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~seqware/jars/
+\cp ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~seqware/jars/
 
 # setup seqware cli
-cp ~seqware/gitroot/seqware/seqware-pipeline/target/seqware ~seqware/bin
+\cp ~seqware/gitroot/seqware/seqware-pipeline/target/seqware ~seqware/bin
 chmod +x ~seqware/bin/seqware
 echo 'export PATH=$PATH:~seqware/bin' >> ~seqware/.bash_profile
 
@@ -63,8 +63,8 @@ service postgresql-9.3 start
 sudo -u postgres psql -c "CREATE USER seqware WITH PASSWORD 'seqware' CREATEDB;"
 sudo -u postgres psql --command "ALTER USER seqware WITH superuser;"
 # expose sql scripts
-cp ~seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db.sql /tmp/seqware_meta_db.sql
-cp ~seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db_data.sql /tmp/seqware_meta_db_data.sql
+\cp ~seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db.sql /tmp/seqware_meta_db.sql
+\cp ~seqware/gitroot/seqware/seqware-meta-db/seqware_meta_db_data.sql /tmp/seqware_meta_db_data.sql
 chmod a+rx /tmp/seqware_meta_db.sql
 chmod a+rx /tmp/seqware_meta_db_data.sql
 # this is the DB actually used by people
@@ -83,20 +83,20 @@ sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db_data.sql
 rm -rf  /opt/apache-tomcat-7.0.53/webapps/ROOT
 
 # seqware web service
-cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.53/SeqWareWebService.war
-cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWareWebService.xml
+\cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.53/SeqWareWebService.war
+\cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWareWebService.xml
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWareWebService.xml
 
 # seqware portal
-cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.53/webapps/SeqWarePortal.war
-cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWarePortal.xml
+\cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.53/webapps/SeqWarePortal.war
+\cp ~seqware/gitroot/seqware/seqware-portal/target/seqware-portal-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWarePortal.xml
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /opt/apache-tomcat-7.0.53/conf/Catalina/localhost/SeqWarePortal.xml
 
 # restart tomcat7
 /etc/init.d/tomcat start
 
 # seqware landing page
-cp -r ~seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
+\cp -r ~seqware/gitroot/seqware/seqware-distribution/docs/vm_landing/* /var/www/
 
 # for glassfish database location during tests
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" ~seqware/gitroot/seqware/pom.xml
@@ -104,7 +104,7 @@ perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" ~seqware/gitroot/seqware/
 su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_IT_CMD} 2>&1 | tee it.log'
 
 # setup cronjobs after testing to avoid WorkflowStatusChecker or Launcher clashes
-cp /vagrant/status.cron ~seqware/crons/
+\cp /vagrant/status.cron ~seqware/crons/
 chown -R seqware:seqware ~seqware/crons
 chmod a+x ~seqware/crons/status.cron
 su - seqware -c '(echo "* * * * * ~seqware/crons/status.cron >> ~seqware/logs/status.log") | crontab -'
