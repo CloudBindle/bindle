@@ -79,7 +79,7 @@ sudo sed -i 's/- Updates$/- Updates\nexclude=postgresql*/' /etc/yum.repos.d/Cent
 cd /tmp
 curl -O http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
 rpm -ivh pgdg-centos93-9.3-1.noarch.rpm
-yum -y install postgresql93.x86_64
+yum install -y postgresql93
 
 # setup LZO
 #wget -q http://archive.cloudera.com/gplextras/ubuntu/lucid/amd64/gplextras/cloudera.list
@@ -173,9 +173,6 @@ service hue restart
 
 # setup daemons to start on boot
 for i in httpd crond hadoop-hdfs-namenode hadoop-hdfs-datanode hadoop-hdfs-secondarynamenode hadoop-0.20-mapreduce-tasktracker hadoop-0.20-mapreduce-jobtracker hue oozie postgresql tomcat7 hbase-master hbase-regionserver; do echo $i; chkconfig $i on; done
-
-# enforce Java 7 use for tomcat
-sudo perl -pi -e  "s/#JAVA_HOME=\/usr\/lib\/jvm\/openjdk-6-jdk/JAVA_HOME=\/usr\/java\/latest\/jre/;" /etc/default/tomcat7
 
 # configure dirs for seqware
 # note these are placed on /mnt since that
