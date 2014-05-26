@@ -43,6 +43,7 @@ my $vb_ram = 12000;
 my $vb_cores = 2;
 my @ebs_vols = ();
 my $help = 0;
+my $default_configs;
 
 # check for help
 if (scalar(@ARGV) == 0) { $help = 1; }
@@ -70,23 +71,22 @@ if($help) {
 # make the target dir
 run("mkdir -p $work_dir");
 
+if ($launch_aws){
+  $default_configs = new Config::Simple('config/aws.cfg');
+}
+elsif ($launch_os){ 
+  $default_configs = new Config::Simple('config/os.cfg');
+}
+else{
+  $default_configs = new Config::Simple('config/vcloud.cfg');
+}
+
+
 # config object used for find and replace
 my $configs = {};
 my $cluster_configs = {};
 # Use this temporary object to reconfigure the worker arrays to the format the original script expects
-my $temp_cluster_configs = ();
-($configs, $temp_cluster_configs) = read_json_config($json_config_file);
-
-foreach my $node_config (@{$temp_cluster_configs}){
-  my @names = @{$node_config->{'name'}};
-  for (0 .. $#names){
-    my $node_config_copy = dclone $node_config;
-    print @{$node_config_copy->{'floatip'}}[$_]."\n";
-    delete $node_config_copy->{'floatip'};
-    $node_config_copy->{'floatip'} = @{$node_config->{'floatip'}}[$_];
-    $cluster_configs->{$names[$_]} = $node_config_copy;
-  }
-}
+($configs, $cluster_configs) = read_json_config($json_config_file);
 
 
 # dealing with defaults from the config including various SeqWare-specific items
@@ -537,6 +537,7 @@ sub setup_vagrantfile {
 # reads a JSON-based config
 sub read_json_config {
   my ($config_file) = @_;
+  my $cluster_configs = {};
   open IN, "<$config_file" or die;
   my $json_txt = "";
   while(<IN>) { 
@@ -545,34 +546,38 @@ sub read_json_config {
   }
   close IN;
   my $temp_configs = decode_json($json_txt);
-  
+  my $general_config = extract_general_config($temp_configs->{general});
+  my $temp_cluster_configs = ();
   if ($launch_aws || $launch_os){
-    my $general_config = extract_general_config($temp_configs->{general});
-    my $node_cnfg = extract_node_config($temp_configs->{node_config});
-    return($general_config, $node_cnfg);
+    $temp_cluster_configs = extract_node_config($temp_configs->{node_config});
   }
-  else{
-    return ($temp_configs->{general}, $temp_configs->{node_config});
+  else{ $temp_cluster_configs = $temp_configs->{node_config}; }
+  
+  foreach my $node_config (@{$temp_cluster_configs}){
+  print Dumper($node_config);
+  my @names = @{$node_config->{'name'}};
+    for (0 .. $#names){
+      my $node_config_copy = dclone $node_config;
+      delete $node_config_copy->{'floatip'};
+      $node_config_copy->{'floatip'} = @{$node_config->{'floatip'}}[$_];
+      $cluster_configs->{$names[$_]} = $node_config_copy;
+    }
   }
+  return($general_config, $cluster_configs);
 }
 
 #extracts the floating IP's from the .cfg file
 sub extract_node_config {
-  my ($node_config) = @_;
+  my ($temp_cluster_configs) = @_;
   my @worker_nodes = ();
   my @float_ips = ();
   my @os_float_ips;
-  my $default_configs;
+  my $number_of_nodes = $default_configs->param('nodes.number_of_nodes');
   if ($launch_os){
-    $default_configs = new Config::Simple("config/os.cfg");
-    @os_float_ips = $default_configs->param('nodes.FLOATING_IPS');
+    @os_float_ips = $default_configs->param('nodes.floating_ips');
     my @master_float_ip = $os_float_ips[0];
-    $node_config->[0]->{floatip} = \@master_float_ip;
+    $temp_cluster_configs->[0]->{floatip} = \@master_float_ip;
   }
-  else{
-    $default_configs = new Config::Simple("config/aws.cfg");
-  }
-  my $number_of_nodes = $default_configs->param('nodes.NUMBER_OF_NODES');
   if ($number_of_nodes != 1){    
     for (my $i = 1; $i < $number_of_nodes; $i++){
       push(@worker_nodes,'worker'.$i);
@@ -583,33 +588,28 @@ sub extract_node_config {
 	push(@float_ips, '<FILLMEIN>');
       }
     }
-  $node_config->[1]->{name} = \@worker_nodes;
-  $node_config->[1]->{floatip} = \@float_ips;
+    $temp_cluster_configs->[1]->{name} = \@worker_nodes;
+    $temp_cluster_configs->[1]->{floatip} = \@float_ips;
   }
-  
-  return $node_config;
+  return $temp_cluster_configs;
 }
 
 
 #reads a .cfg file and extracts the required credentials
 sub extract_general_config {
   my ($general_config) = @_;
-  my $default_configs;
   my $selected_platform;
   if ($launch_aws){
     $selected_platform = "AWS_";
-    $default_configs = new Config::Simple("config/aws.cfg");
   }
-  else{
+  elsif ($launch_os){
     $selected_platform = "OS_";
-    $default_configs = new Config::Simple("config/os.cfg");
   }
-  
   foreach my $key (sort keys %{$default_configs}->{_DATA}->{platform}) {
-    $general_config->{$selected_platform.$key} = $default_configs->param('platform.'.$key);
+    $general_config->{$selected_platform.(uc $key)} = $default_configs->param('platform.'.$key);
   }
-  my $pem_file = $default_configs->param('platform.SSH_KEY_NAME');
-  $general_config->{$selected_platform.'SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
+  my $pem_file = $default_configs->param('platform.ssh_key_name');
+  $general_config->{$selected_platform.'ssh_pem_file'} = "~/.ssh/".$pem_file.".pem";
 
   return $general_config;
 }
