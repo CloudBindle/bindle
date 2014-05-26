@@ -199,11 +199,17 @@ chown seqware:seqware /mnt/datastore
 ## Setup NFS before seqware
 # see http://www.howtoforge.com/setting-up-an-nfs-server-and-client-on-centos-6.3
 yum -y install rpcbind nfs-utils nfs-utils-lib
+chkconfig --level 35 nfs on
+chkconfig --level 35 nfslock on
+chkconfig --level 35 rpcbind on
+service rpcbind start
+service nfslock start
+service nfs start
 echo '%{EXPORTS}' >> /etc/exports
 exportfs -ra
 # TODO: get rid of portmap localhost setting maybe... don't see the file they refer to
-service portmap restart
-/etc/init.d/nfs restart
+service rpcbind restart
+service nfs restart
 chkconfig --levels 235 nfs on 
 
 # Add hadoop-init startup script
