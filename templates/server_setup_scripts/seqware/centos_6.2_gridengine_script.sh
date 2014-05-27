@@ -27,7 +27,7 @@ TMPSC=/tmp/sc.tmp
 qconf -sc | grep -v 'h_vmem' > $TMPSC
 echo "h_vmem              h_vmem     MEMORY      <=    YES         YES        0        0" >> $TMPSC
 qconf -Mc $TMPSC
-rm $TMPSC
+\rm $TMPSC
 
 # this is interactive... how do I load from a file?
 for hostName in %{SGE_HOSTS}; do
@@ -91,7 +91,7 @@ urgency_slots     min
 accounting_summary FALSE" > $TMPPROFILE
 qconf -Ap $TMPPROFILE
 qconf -aattr queue pe_list serial main.q
-rm $TMPPROFILE
+\rm $TMPPROFILE
 
 # restart
 /etc/init.d/gridengine-exec stop
