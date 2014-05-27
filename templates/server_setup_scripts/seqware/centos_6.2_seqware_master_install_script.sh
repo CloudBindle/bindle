@@ -112,7 +112,7 @@ sudo -u postgres psql test_seqware_meta_db < /tmp/seqware_meta_db_data.sql
 rm -rf  /opt/apache-tomcat-7.0.54/webapps/ROOT
 
 # seqware web service
-\cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.54/SeqWareWebService.war
+\cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.war /opt/apache-tomcat-7.0.54/webapps/SeqWareWebService.war
 \cp ~seqware/gitroot/seqware/seqware-webservice/target/seqware-webservice-${SEQWARE_VERSION}.xml /opt/apache-tomcat-7.0.54/conf/Catalina/localhost/SeqWareWebService.xml
 perl -pi -e "s/test_seqware_meta_db/seqware_meta_db/;" /opt/apache-tomcat-7.0.54/conf/Catalina/localhost/SeqWareWebService.xml
 
@@ -141,7 +141,7 @@ su - seqware -c '(echo "* * * * * ~seqware/crons/status.cron >> ~seqware/logs/st
 cd ~seqware
 wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
 su - seqware -c "seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip"
-rm Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
+rm -f Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
 
 # enable SELinux
-echo 1 > /selinux/enforce
+####echo 1 > /selinux/enforce

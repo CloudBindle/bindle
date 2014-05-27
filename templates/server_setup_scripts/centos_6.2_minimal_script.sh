@@ -1,38 +1,8 @@
 #!/bin/bash -vx
 
-# workaround for Korea's cloud
-if [ -d "/maha" ]; then
-  umount  /maha
-  perl -p -i -e 's/uid=1000,gid=1000/defaults/' /etc/fstab
-  mount /maha
-  mount -o rw,bind `mount | grep maha\/tmp | awk '{print $1}'` /mnt
-fi
-
-# workaround for Tokyo's cloud
-if [ -d "/nshare4" ]; then
-  dir=/nshare4/vmtmp/$RANDOM
-  mkdir -p $dir
-  mount -o rw,bind $dir /mnt
-fi
-
-# workaround for Bionimbus' PDC cloud
-if [ -d "/glusterfs" ]; then
-  # this is causing problems with the server not being in the whitelist
-  rm /etc/apt/sources.list.d/R.list
-  # this is required to get the proxy settings in each subsequent, non-interactive shell
-  echo "source /etc/profile.d/proxy.sh" > ~/.bashrc.new
-  cat ~/.bashrc >> ~/.bashrc.new
-  mv ~/.bashrc.new ~/.bashrc
-  # now filesystem
-  mkdir -p /glusterfs/users/BOCONNOR/seqware-oozie
-  chmod a+rwx /glusterfs/users/BOCONNOR/seqware-oozie
-  mkdir -p /mnt/seqware-oozie
-  mount -o bind /glusterfs/users/BOCONNOR/seqware-oozie /mnt/seqware-oozie
-fi
-
 # basic tools
-#yum update
-yum install curl unzip attr -y
+yum update -y
+yum install -y curl unzip attr wget
 
 # ensure updates repository is available, and heartbleed vulnerability is fixed
 sudo sed -i '1!N; s/\[updates\]\nenabled\s=\s0/[updates]\nenabled = 1/' /etc/yum.repos.d/CentOS-Base.repo
@@ -74,29 +44,26 @@ wget -q -O /etc/yum.repos.d/cloudera-cdh4.repo http://archive.cloudera.com/cdh4/
 sudo rpm --import http://archive.cloudera.com/cdh4/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
 
 # get Java 1.7
+yum install -y alsa-lib libXi libXtst libXt
+# QUESTION: Liviu, why are you installing two versions of Java 1.7? --Brian
 cd /tmp
-wget --no-check-certificate --output-document=jdk-7u55-linux-x64.rpm https://kopila.garvan.unsw.edu.au/data/public/3e7384.php?dl=true
-rpm -Uvh /tmp/jdk-7u55-linux-x64.rpm
-alternatives --install /usr/bin/java java /usr/java/latest/jre/bin/java 200000
-alternatives --install /usr/bin/javaws javaws /usr/java/latest/jre/bin/javaws 200000
-alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
-alternatives --install /usr/bin/jar jar /usr/java/latest/bin/jar 200000
+#wget --no-check-certificate --output-document=jdk-7u55-linux-x64.rpm https://kopila.garvan.unsw.edu.au/data/public/3e7384.php?dl=true
+#rpm -Uvh /tmp/jdk-7u55-linux-x64.rpm
+wget http://archive-primary.cloudera.com/cm5/redhat/6/x86_64/cm/5.0.1/RPMS/x86_64/oracle-j2sdk1.7-1.7.0+update45-1.x86_64.rpm
+rpm -Uhv oracle-j2sdk1.7-1.7.0+update45-1.x86_64.rpm
+alternatives --install /usr/bin/java java /usr/java/jdk1.7.0_45-cloudera/bin/java 300000
+alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.7.0_45-cloudera/bin/javaws 300000
+alternatives --install /usr/bin/javac javac /usr/java/jdk1.7.0_45-cloudera/bin/javac 300000
+alternatives --install /usr/bin/jar jar /usr/java/jdk1.7.0_45-cloudera/bin/jar 300000
 if [ -f /etc/profile.d/java-dev.sh ];
 then
 	echo '#!/bin/bash' > /etc/profile.d/java-dev.sh
 fi
-echo 'export JAVA_HOME=/usr/java/latest/jre' >> /etc/profile.d/java-dev.sh
+echo 'export JAVA_HOME=/usr/java/jdk1.7.0_45-cloudera' >> /etc/profile.d/java-dev.sh
 echo 'PATH=$JAVA_HOME/bin:$PATH' >> /etc/profile.d/java-dev.sh
 chmod a+x /etc/profile.d/java-dev.sh
 source /etc/profile.d/java-dev.sh
 echo "JAVA_HOME is $JAVA_HOME"
-
-# get packages
-yum install -y alsa-lib libXi libXtst libXt
-cd /tmp
-wget http://archive-primary.cloudera.com/cm5/redhat/6/x86_64/cm/5.0.1/RPMS/x86_64/oracle-j2sdk1.7-1.7.0+update45-1.x86_64.rpm
-rpm -Uhv oracle-j2sdk1.7-1.7.0+update45-1.x86_64.rpm
-cd -
 
 # if we have a local maven mirror defined, set it up
 if [ -n "%{MAVEN_MIRROR}" ]; then

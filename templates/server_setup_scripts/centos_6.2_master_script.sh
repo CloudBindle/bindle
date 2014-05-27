@@ -1,10 +1,5 @@
 #!/bin/bash -vx
 
-# first, fix the /etc/hosts file since SGE wants reverse lookup to work
-\cp /etc/hosts /tmp/hosts
-echo `/sbin/ifconfig  | grep -A 3 eth0 | grep 'inet addr' | perl -e 'while(<>){ chomp; /inet addr:(\d+\.\d+\.\d+\.\d+)/; print $1; }'` `hostname` > /etc/hosts
-cat /tmp/hosts | grep -v '127.0.1.1' >> /etc/hosts
-
 # common installs for master and workers
 yum -y install git xfsprogs
 yum -y install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-datanode hadoop-client hbase-regionserver
@@ -48,7 +43,7 @@ cat > /etc/init.d/tomcat <<\STARTUP_SCRIPT
 # description: Tomcat Start Stop Restart
 # processname: tomcat
 # chkconfig: 234 20 80
-JAVA_HOME=/usr/java/latest/jre
+JAVA_HOME=/usr/java/jdk1.7.0_45-cloudera
 export JAVA_HOME
 PATH=$JAVA_HOME/bin:$PATH
 export PATH
