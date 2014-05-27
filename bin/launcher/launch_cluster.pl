@@ -35,16 +35,11 @@ use Storable 'dclone';
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
 my $aws_key = '';
 my $aws_secret_key = '';
-my $launch_aws = 0;
-my $launch_vb = 0;
-my $launch_os = 0;
-my $launch_vcloud = 0;
+my ($launch_aws, $launch_vb, $launch_os, $launch_vcloud, $skip_launch) = (0,0,0,0,0);
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my $json_config_file = 'vagrant_cluster_launch.json';
-my $skip_launch = 0;
-my $vb_ram = 12000;
-my $vb_cores = 2;
+my ($vb_ram, $vb_cores) = (12000, 2);
 my @ebs_vols = ();
 my $default_configs;
 
@@ -93,6 +88,10 @@ my $cluster_configs = {};
 # Use this temporary object to reconfigure the worker arrays to the format the original script expects
 ($configs, $cluster_configs) = read_json_config($json_config_file);
 
+
+#print Dumper($configs);
+#print Dumper($cluster_configs);
+#die "Testing";
 
 # dealing with defaults from the config including various SeqWare-specific items
 $configs->{'SEQWARE_BUILD_CMD'} //= $default_seqware_build_cmd; 
@@ -635,13 +634,12 @@ sub extract_node_config {
   return $temp_cluster_configs;
 }
 
-
 #reads a .cfg file and extracts the required platform configurations
 sub extract_general_config {
   my ($general_config) = @_;
   my $selected_platform = uc $default_configs->param('platform.type');
   
-  foreach my $key (sort keys %{$default_configs}->{_DATA}->{platform}) {
+  foreach my $key (sort keys $default_configs->param(-block=>'platform')) {
     $general_config->{$selected_platform.'_'.(uc $key)} = $default_configs->param('platform.'.$key);
   }
   
@@ -650,7 +648,7 @@ sub extract_general_config {
     $general_config->{'VCLOUD_USER_NAME'} = $default_configs->param('platform.ssh_username');
   }
   else{
-    $general_config->{$selected_platform.'_ssh_pem_file'} = "~/.ssh/".$pem_file.".pem";
+    $general_config->{$selected_platform.'_SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
   }
   
   $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file.".pem";
