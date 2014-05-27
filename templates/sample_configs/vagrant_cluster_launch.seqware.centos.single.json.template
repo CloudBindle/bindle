@@ -63,8 +63,6 @@
       "second_pass_scripts": [
         [ "templates/server_setup_scripts/centos_6.2_hosts_script.sh",
           "templates/server_setup_scripts/centos_6.2_master_script.sh",
-          "templates/server_setup_scripts/seqware/centos_6.2_gridengine_script.sh",
-          "templates/server_setup_scripts/seqware/oozie-sge-plugin.sh",
           "templates/server_setup_scripts/seqware/centos_6.2_seqware_master_script.sh",
           "templates/server_setup_scripts/seqware/centos_6.2_seqware_master_vagrant_user_script.sh"
         ]
