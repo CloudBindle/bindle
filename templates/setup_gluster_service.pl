@@ -18,13 +18,13 @@ GetOptions (
 
 #my $cmd = "gluster peer status; gluster volume info; gluster volume status; gluster volume create gv0 replica 2 transport tcp";
 # turn off replicate for now
-my $cmd = "gluster peer status; gluster volume info; gluster volume status; sleep 10; gluster volume create gv0 transport tcp";
+my $cmd = "gluster peer status; gluster volume info; gluster volume status; sleep 30; gluster volume create gv0 transport tcp";
 
-open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
+open DIRS, "<", $dir_map or die "Cannot open file $dir_map: $!\n";
 while(<DIRS>) {
   chomp;
   my $dir = $_;
-  open IN, "<$host" or die "Cannot open file $host\n";
+  open IN, "<", $host or die "Cannot open file $host: $!\n";
   while(<IN>) {
     chomp;
     my @a = split /\s+/;
@@ -40,11 +40,9 @@ close DIRS;
 # disable built-in NFS server so it doesn't interfer with other NFS exports
 $cmd .= "; gluster volume set gv0 nfs.disable on";
 # turn on the volume
-$cmd .= "; sleep 10; gluster volume start gv0; sleep 10; gluster peer status; gluster volume info; gluster volume status;";
+$cmd .= "; sleep 10; gluster volume start gv0; sleep 30; gluster peer status; gluster volume info; gluster volume status;";
 
-print "GLUSTER SETUP WITH COMMAND: $cmd\n";
+print "SETTING UP GLUSTER WITH COMMAND: $cmd\n";
 
-if (system($cmd)) {
-  print "Problems creating volume with command '$cmd'\n";
-}
-
+system($cmd) == 0
+    or die "Problems creating volume with command $cmd: $!\n";

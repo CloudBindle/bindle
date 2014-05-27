@@ -133,3 +133,4 @@ apt-get update
 apt-get -q -y --force-yes install glusterfs-server
 perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt 
 
+echo "FINISHED MINIMAL SCRIPT"
