@@ -535,7 +535,7 @@ sub setup_vagrantfile {
 # reads a JSON-based config
 sub read_json_config {
   my ($config_file) = @_;
-  open IN, "<$config_file" or die;
+  open IN, "<$config_file" or die "No template JSON file detected in this directory!";
   my $json_txt = "";
   while(<IN>) { 
     next if (/^\s*#/);
@@ -545,7 +545,7 @@ sub read_json_config {
   my $temp_configs = decode_json($json_txt);
   my $general_config = extract_general_config($temp_configs->{general});
   my ($temp_cluster_configs, $cluster_configs) = {};
-  if ($launch_aws || $launch_os){
+  if ($launch_aws || $launch_os || $launch_vcloud){
     $temp_cluster_configs = extract_node_config($temp_configs->{node_config});
   }
   else{ $temp_cluster_configs = $temp_configs->{node_config}; }
@@ -564,47 +564,52 @@ sub read_json_config {
 
 #extracts the floating IP's from the .cfg file
 sub extract_node_config {
+
   my ($temp_cluster_configs) = @_;
   my (@worker_nodes, @float_ips, @os_float_ips) = ();
   my $number_of_nodes = $default_configs->param('nodes.number_of_nodes');
+  
   if ($launch_os){
     @os_float_ips = $default_configs->param('nodes.floating_ips');
     my @master_float_ip = $os_float_ips[0];
     $temp_cluster_configs->[0]->{floatip} = \@master_float_ip;
   }
-  if ($number_of_nodes != 1){    
-    for (my $i = 1; $i < $number_of_nodes; $i++){
-      push(@worker_nodes,'worker'.$i);
-      if ($launch_os){
-	push(@float_ips, $os_float_ips[$i]);
-      }
-      else{
-	push(@float_ips, '<FILLMEIN>');
-      }
+  
+  for (my $i = 1; $i < $number_of_nodes; $i++){
+    push(@worker_nodes,'worker'.$i);
+    if ($launch_os){
+      push(@float_ips, $os_float_ips[$i]);
     }
-    $temp_cluster_configs->[1]->{name} = \@worker_nodes;
-    $temp_cluster_configs->[1]->{floatip} = \@float_ips;
+    else{
+      push(@float_ips, '<FILLMEIN>');
+    }
   }
+  
+  $temp_cluster_configs->[1]->{name} = \@worker_nodes;
+  $temp_cluster_configs->[1]->{floatip} = \@float_ips;
   return $temp_cluster_configs;
 }
 
 
-#reads a .cfg file and extracts the required credentials
+#reads a .cfg file and extracts the required platform configurations
 sub extract_general_config {
   my ($general_config) = @_;
-  my $selected_platform;
-  if ($launch_aws){
-    $selected_platform = "AWS_";
-  }
-  elsif ($launch_os){
-    $selected_platform = "OS_";
-  }
+  my $selected_platform = uc $default_configs->param('platform.type');
+  
   foreach my $key (sort keys %{$default_configs}->{_DATA}->{platform}) {
-    $general_config->{$selected_platform.(uc $key)} = $default_configs->param('platform.'.$key);
+    $general_config->{$selected_platform.'_'.(uc $key)} = $default_configs->param('platform.'.$key);
   }
+  
   my $pem_file = $default_configs->param('platform.ssh_key_name');
-  $general_config->{$selected_platform.'ssh_pem_file'} = "~/.ssh/".$pem_file.".pem";
-
+  if ($launch_vcloud){
+    $general_config->{'VCLOUD_USER_NAME'} = $default_configs->param('platform.ssh_username');
+  }
+  else{
+    $general_config->{$selected_platform.'_ssh_pem_file'} = "~/.ssh/".$pem_file.".pem";
+  }
+  
+  $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file.".pem";
+  
   return $general_config;
 }
 
