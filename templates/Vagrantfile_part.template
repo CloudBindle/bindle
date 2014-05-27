@@ -70,13 +70,15 @@
       vcloud.vdc_name = "%{VCLOUD_VDC_NAME}"
 
       vcloud.catalog_name = "%{VCLOUD_CATALOG_NAME}"
-      vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
+      #vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
       vcloud.vdc_network_name = "%{VCLOUD_VDC_NETWORK_NAME}"
 
 #      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
 #      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
+       vcloud.network_bridge=true
     end
 
+    config.ssh.private_key_path = "%{SSH_PRIVATE_KEY_PATH}"
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
     %{custom_hostname}.vm.network :forwarded_port, host: 8080, guest: 8080
     %{custom_hostname}.vm.network :forwarded_port, host: 8888, guest: 8888
@@ -87,5 +89,5 @@
     %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
     #%{custom_hostname}.vm.hostname = "%{custom_hostname}"
-    %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
+   # %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
   end

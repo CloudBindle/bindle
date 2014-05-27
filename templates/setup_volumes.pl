@@ -13,12 +13,15 @@ use Getopt::Long;
 # * you have ecryptfs and mkfs.xfs installed
 # TODO
 
-my $final_list;
-my $out_file = "mount_report.txt";
-my $list = `ls -1 /dev/sd* /dev/xv*`;
-my @list = split /\n/, $list;
-my $blacklist;
-my $whitelist;
+my $final_list ='';
+my $out_file = 'mount_report.txt';
+
+my @list = split /\n/, `ls -1 /dev/sd*`; #/dev/xv*
+print @list."\n";
+
+
+my $blacklist ='';
+my $whitelist ='';
 my $blist = {};
 my $wlist = {};
 
@@ -35,8 +38,10 @@ $blist = read_list($blacklist);
 $wlist = read_list($whitelist);
 
 foreach my $dev (@list) {
+  print "CURRENT DEV $dev\n";
   # skip if doesn't exist
   next if (!-e $dev || -l $dev);
+  
   # skip if the root partition
   next if (blacklist($dev, $blist));
   # true if empty or it's on the whitelist
@@ -45,16 +50,10 @@ foreach my $dev (@list) {
   print "DEV: $dev\n";
   # if already mounted just add directory
   if(!mounted($dev)) {
-    print "  NOT MOUNTED!\n";
-    my $format = system("bash -c 'mkfs.xfs -i size=512 $dev &> /dev/null'");
-    if ($format) { print "  UNABLE TO FORMAT!\n"; }
-    else {  print "  FORMATTED OK!\n"; }
-    $dev =~ /\/dev\/(\S+)/;
-    my $dev_name = $1;
-    print "  MOUNTING BECAUSE NOT MOUNTED\n";
-    my $mount = system("bash -c 'mkdir -p /$dev_name && mount $dev /$dev_name' && chmod a+rwx /$dev_name");
-    if ($mount) { print "  UNABLE TO MOUNT $dev on /$dev_name\n"; }
-  } else {
+    print "  MOUNTING FILE SYSTEM!\n";
+    mount($dev);
+  } 
+  else {
     print "  NOT MOUTING SINCE ALREADY MOUNTED!\n";
   }
   my $mount_path = find_mount_path($dev);
@@ -68,12 +67,27 @@ foreach my $dev (@list) {
 
 # OUTPUT REPORT
 
-open OUT, ">$out_file" or die "Can't open output file $out_file\n";
+open OUT, ">", $out_file or die "Can't open output file $out_file: $!\n";
 print OUT $final_list;
 close OUT;
 
 
 # SUBROUTINES
+
+sub mount {
+    my ($dev) = @_;
+    
+    system("bash -c 'mkfs.xfs -i size=512 $dev &> /dev/null'") == 0 
+        or die "  UNABLE TO FORMAT!\n"; 
+
+    $dev =~ /\/dev\/(\S+)/;
+    my $dev_name = $1;
+    print "  MOUNTING BECAUSE NOT MOUNTED: $dev_name\n";
+    system("bash -c 'mkdir -p /$dev_name && mount $dev /$dev_name' && chmod a+rwx /$dev_name") == 0
+        or  "  UNABLE TO MOUNT $dev on /$dev_name\n"; 
+}
+
+
 
 # TODO
 sub read_list {
@@ -87,31 +101,28 @@ sub whitelist {
 }
 
 sub blacklist {
-  my $dev = shift;
-  my $hash = shift;
+  my ($dev, $hash) = @_;
+
   # TODO: right now blacklist all but sdf or above which we add as EBS volumes
-  if ($dev =~ /sda/ || $dev =~ /hda/ || $dev =~ /xvda/ ||
-   $dev =~ /sdb/ || $dev =~ /hdb/ || $dev =~ /xvdb/ ||
-   $dev =~ /sdc/ || $dev =~ /hdc/ || $dev =~ /xvdc/ ||
-   $dev =~ /sdd/ || $dev =~ /hdd/ || $dev =~ /xvdd/ ||
-   $dev =~ /sde/ || $dev =~ /hde/ || $dev =~ /xvde/
-  ) {
-    print "  BLACKLIST DEV $dev\n";
-    return(1);
+  if ($dev =~ /sda|hda|xvda|sdb$|hdb|xvdb|sdc|hdc|xvdc|sdd|hdd|xvdd|sde|hde|xvde/) {
+      print "  BLACKLIST DEV $dev\n";
+      return 1 ;
   }
-  return(0);
+  return 0;
 }
 
 sub mounted {
   my $dev = shift;
   # blacklist any drives that are likely to be root partition
-  if ($dev =~ /sda/ || $dev =~ /hda/ || $dev =~ /xvda/) {
+  if ($dev =~ /sda|hda|xvda/) {
     print "  DEV BLACKLISTED: $dev\n";
-    return(1);
+    return 1;
   }
+
   my $count = `df -h | grep $dev | wc -l`;
   chomp $count;
-  return($count);
+
+  return $count;
 }
 
 sub add_to_config {
@@ -146,24 +157,29 @@ sub setup_ecryptfs {
       my @chars = ( "A" .. "Z", "a" .. "z", 0 .. 9 );
       my $password = join("", @chars[ map { rand @chars } ( 1 .. 11 ) ]);
       my $ecrypt_cmd = "mkdir -p $dir/encrypted && mount.ecryptfs $dir/encrypted $dir/encrypted -o ecryptfs_cipher=aes,ecryptfs_key_bytes=16,ecryptfs_passthrough=n,ecryptfs_enable_filename_crypto=n,no_sig_cache,key=passphrase:passwd=$password && chmod a+rwx $dir/encrypted";
-      $ecrypt_result = system($ecrypt_cmd);
-      if ($ecrypt_result) {
+      if(system($ecrypt_cmd)) {
          print "   ERROR: there was a problem running the ecrypt command $ecrypt_cmd\n";
-         return(0);
+         return 0;
       }
-    } else {
+    } 
+    else {
       print "   ALREADY ENCRYPTED: this was already encrypted $dir so skipping.\n";
     }
-  } else {
+  } 
+  else {
     print "   ERROR: can't find mount.ecryptfs so skipping encryption of the HDFS volume\n";
-    return(0);
+    return 0;
   }
-  return(1);
+  return 1;
 }
 
 sub find_mount_path {
   my $dev = shift;
+
   my $path = `df -h | grep $dev | awk '{ print \$6}'`;
+  print "Cannot find mount path\n" unless ($path);
   chomp $path;
+  print "CHOMPED: $path\n";
+
   return($path);
 }
