@@ -288,7 +288,7 @@ sub run_provision_files {
         my $scripts = $cluster_configs->{$host_name}{provision_files};
         my $host = $hosts->{$host_name};
         say "  PROVISIONING FILES TO HOST $host_name"; 
-        run("rsync -e \"ssh -i $host->{key}\" -avz $work_dir/$host_name/ $host->{user}".'@'."$host->{ip}:/vagrant/");
+        #run("rsync -e \"ssh -i $host->{key}\" -avz $work_dir/$host_name/ $host->{user}".'@'."$host->{ip}:/vagrant/");
         push @threads, threads->create(\&provision_files_thread,
                                          $host_name, $scripts, $host);
         say "  LAUNCHED THREAD PROVISION FILES TO $host_name";
