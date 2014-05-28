@@ -38,11 +38,11 @@ my $aws_secret_key = '';
 my ($launch_aws, $launch_vb, $launch_os, $launch_vcloud, $skip_launch) = (0,0,0,0,0);
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
-my $json_config_file = 'vagrant_cluster_launch.json';
 my ($vb_ram, $vb_cores) = (12000, 2);
 my @ebs_vols = ();
 my $default_configs;
-
+my $launch_command = 'vagrant up';
+my $cluster_name = 'cluster1';
 # check for help
 my $help = (scalar @ARGV == 0)? 1 : 0;
 
@@ -51,8 +51,7 @@ GetOptions (
     "use-virtualbox" => \$launch_vb,
     "use-openstack"  => \$launch_os,
     "use-vcloud"     => \$launch_vcloud,
-    "working-dir=s"  => \$work_dir,
-    "config-file=s"  => \$json_config_file,
+    "use-cluster=s"  => \$cluster_name,
     "skip-launch"    => \$skip_launch,
     "vb-ram=i"       => \$vb_ram,
     "vb-cores=i"     => \$vb_cores,
@@ -65,68 +64,41 @@ if($help) {
   die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'>] [--config-file <config json file, default is 'vagrant_cluster_launch.json'>] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--skip-launch] [--help]\n";
 }
 
-make_target_directory($work_dir);
-
-sub make_target_directory {
-   run("mkdir -p $_[0]");
-}
-
 if ($launch_aws){
   $default_configs = new Config::Simple('config/aws.cfg');
+  $launch_command .= ' --provider=aws';
 }
 elsif ($launch_os){ 
   $default_configs = new Config::Simple('config/os.cfg');
+  $launch_command .= ' --provider=openstack';
 }
-else{
+elsif ($launch_vcloud){
   $default_configs = new Config::Simple('config/vcloud.cfg');
+  $launch_command .= ' --provider=vcloud';
+}
+elsif ($launch_vb) {
+  $default_configs = new Config::Simple('config/vb.cfg');
 }
 
+make_target_directory($cluster_name,$default_configs, $work_dir);
+
+sub make_target_directory {
+   my ($cluster_name,$default_configs, $work_dir) = @_;
+   $work_dir = $default_configs->param("$cluster_name.target_directory");
+   run("mkdir -p $work_dir");
+}
 
 # config object used for find and replace
 my $configs = {};
 my $cluster_configs = {};
-# Use this temporary object to reconfigure the worker arrays to the format the original script expects
-($configs, $cluster_configs) = read_json_config($json_config_file);
-
-
-#print Dumper($configs);
-#print Dumper($cluster_configs);
-#die "Testing";
+#reconfigures the worker arrays to the format the original script expects
+#also reads in all the default configurations for the appropriate platfrom 
+#from the .cfg file in the config folder
+($configs, $cluster_configs) = read_default_configs($default_configs);
 
 # dealing with defaults from the config including various SeqWare-specific items
 $configs->{'SEQWARE_BUILD_CMD'} //= $default_seqware_build_cmd; 
 $configs->{'MAVEN_MIRROR'} //= ""; 
-
-# define the "boxes" used for each provider
-# TODO: these are hardcoded and may change
-# you can override for VirtualBox only via the json config
-# you can find boxes listed at http://www.vagrantbox.es/
-
-my $launch_command = 'vagrant up';
-
-if ($launch_vb) {
-   # Allow a custom box to be specified
-   $configs->{'BOX'} //= "Ubuntu_12.04"; 
-   $configs->{'BOX_URL'} //= "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"; 
-}
-elsif ($launch_os) {
-   $launch_command .= ' --provider=openstack';
-   $configs->{BOX} = 'dummy';
-   $configs->{BOX_URL} = 'https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box';
-} 
-elsif ($launch_aws) {
-   $launch_command .= ' --provider=aws';
-   $configs->{BOX} = 'dummy';
-   $configs->{BOX_URL} = 'https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box';
-} 
-elsif ($launch_vcloud) {
-  $launch_command .= ' --provider=vcloud';
-  $configs->{BOX} = 'pancancer_1';
-  $configs->{BOX_URL} = 'https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box';
-}
-else {
-  die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param";
-}
 
 # process server scripts into single bash script
 setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
@@ -577,22 +549,33 @@ sub setup_vagrantfile {
 }
 
 # reads a JSON-based config
-sub read_json_config {
-  my ($config_file) = @_;
+sub read_default_configs {
+  my ($default_configs) = @_;
+  my $config_file = $default_configs->param("$cluster_name.json_template_file_path");
   open IN, "<$config_file" or die "No template JSON file detected in this directory!";
   my $json_txt = "";
+  
   while(<IN>) { 
     next if (/^\s*#/);
     $json_txt .= $_;
   }
   close IN;
+  
   my $temp_configs = decode_json($json_txt);
   my $general_config = extract_general_config($temp_configs->{general});
   my ($temp_cluster_configs, $cluster_configs) = {};
+  
   if ($launch_aws || $launch_os || $launch_vcloud){
     $temp_cluster_configs = extract_node_config($temp_configs->{node_config});
   }
-  else{ $temp_cluster_configs = $temp_configs->{node_config}; }
+  elsif ($launch_vb){ 
+    $temp_cluster_configs = $temp_configs->{node_config}; 
+    $general_config->{'BOX'} //= "Ubuntu_12.04"; 
+    $general_config->{'BOX_URL'} //= "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box";
+  }
+  else{ 
+    die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param"; 
+  }
 
   foreach my $node_config (@{$temp_cluster_configs}){
     my @names = @{$node_config->{'name'}};
@@ -603,6 +586,7 @@ sub read_json_config {
       $cluster_configs->{$names[$_]} = $node_config_copy;
     }
   }
+  
   return($general_config, $cluster_configs);
 }
 
@@ -611,10 +595,10 @@ sub extract_node_config {
 
   my ($temp_cluster_configs) = @_;
   my (@worker_nodes, @float_ips, @os_float_ips) = ();
-  my $number_of_nodes = $default_configs->param('nodes.number_of_nodes');
+  my $number_of_nodes = $default_configs->param("$cluster_name.number_of_nodes");
   
   if ($launch_os){
-    @os_float_ips = $default_configs->param('nodes.floating_ips');
+    @os_float_ips = $default_configs->param("$cluster_name.floating_ips");
     my @master_float_ip = $os_float_ips[0];
     $temp_cluster_configs->[0]->{floatip} = \@master_float_ip;
   }
@@ -640,7 +624,16 @@ sub extract_general_config {
   my $selected_platform = uc $default_configs->param('platform.type');
   
   foreach my $key (sort keys $default_configs->param(-block=>'platform')) {
-    $general_config->{$selected_platform.'_'.(uc $key)} = $default_configs->param('platform.'.$key);
+    # define the "boxes" used for each provider
+    # These may be changed in the config file
+    # you can override for VirtualBox only via the json config
+    # you can find boxes listed at http://www.vagrantbox.es/
+    if($key =~ /box/){
+      $general_config->{uc $key} = $default_configs->param('platform.'.$key);
+    }
+    else{
+      $general_config->{$selected_platform.'_'.(uc $key)} = $default_configs->param('platform.'.$key);
+    }
   }
   
   my $pem_file = $default_configs->param('platform.ssh_key_name');
@@ -684,7 +677,7 @@ sub replace {
 
     open my $in, '<', $src;
     open my $out, '>', $dest;
-    while(<IN>) {
+    while(<$in>) {
         $_ =~ s/$from/$to/g;
         print $out $_;
     }
