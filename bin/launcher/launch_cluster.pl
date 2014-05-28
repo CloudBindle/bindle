@@ -194,11 +194,7 @@ sub get_pip_id {
     my ($work_dir, $host_id, $host) = @_;
  
     my $pip = `cd $work_dir/$host_id && ssh -p $host->{port} -o StrictHostKeyChecking=no -i $host->{key} $host->{user}\@$host->{ip} \"/sbin/ifconfig | grep -A 1 eth0 | grep inet\"`;
-<<<<<<< HEAD
- 
-=======
 
->>>>>>> feature/aw-vcloud
     return ($pip =~ /addr:(\S+)/)? $1: 0;
 }
 
