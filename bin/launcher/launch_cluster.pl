@@ -80,12 +80,15 @@ elsif ($launch_vb) {
   $default_configs = new Config::Simple('config/vb.cfg');
 }
 
-make_target_directory($cluster_name,$default_configs, $work_dir);
+$work_dir = make_target_directory($cluster_name,$default_configs, $work_dir);
 
 sub make_target_directory {
    my ($cluster_name,$default_configs, $work_dir) = @_;
+   
    $work_dir = $default_configs->param("$cluster_name.target_directory");
    run("mkdir -p $work_dir");
+   
+   return $work_dir;
 }
 
 # config object used for find and replace
@@ -188,7 +191,7 @@ sub host_information {
 sub get_pip_id {
     my ($work_dir, $host_id, $host) = @_;
  
-    my $pip = `cd $work_dir/$host_id && ssh -p $host->{port} -o StrictHostKeyChecking=no -i $host_id->{key} $host->{user}\@$host->{ip} \"/sbin/ifconfig | grep -A 1 eth0 | grep inet\"`;
+    my $pip = `cd $work_dir/$host_id && ssh -p $host->{port} -o StrictHostKeyChecking=no -i $host->{key} $host->{user}\@$host->{ip} \"/sbin/ifconfig | grep -A 1 eth0 | grep inet\"`;
  
     return ($pip =~ /addr:(\S+)/)? $1: 0;
 }
