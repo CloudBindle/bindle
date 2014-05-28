@@ -199,7 +199,6 @@ sub host_information {
             $host{user} = $1;
         }
         elsif ($hl =~ /IdentityFile\s+(\S+)/) { 
-                       IdentityFile
            $host{key} = $1;
         }
         elsif ($hl =~ /Port\s+(\S+)/) {
