@@ -131,7 +131,6 @@ sub find_cluster_info {
         $vagrant_status = `cd $work_dir/$node && vagrant status`.'\n';
         chomp $vagrant_status;
         find_node_info(\%cluster_info, $vagrant_status);
-    #    push @node_status, $vagrant_status;
     }
 
     return \%cluster_info;
@@ -182,6 +181,9 @@ sub host_information {
         }
     }
 
+
+
+
     my $pip = get_pip_id($work_dir, $host_id, \%host);
     $host{pip} = $pip if ($pip); 
 
@@ -192,7 +194,11 @@ sub get_pip_id {
     my ($work_dir, $host_id, $host) = @_;
  
     my $pip = `cd $work_dir/$host_id && ssh -p $host->{port} -o StrictHostKeyChecking=no -i $host->{key} $host->{user}\@$host->{ip} \"/sbin/ifconfig | grep -A 1 eth0 | grep inet\"`;
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> feature/aw-vcloud
     return ($pip =~ /addr:(\S+)/)? $1: 0;
 }
 
@@ -376,7 +382,7 @@ sub figure_out_sge_host_str {
 
     my $hosts_str = "";
     foreach my $host (sort keys %{$hosts}) {
-        $hosts_str .= " $host";
+        $hosts_str .= " $hosts->{$host}{ip}";
     }
 
     return $hosts_str;
