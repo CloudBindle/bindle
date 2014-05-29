@@ -18,6 +18,7 @@ use threads;
 use Storable 'dclone';
 use Carp::Always;
 use cluster::config;
+use cluster::provision
 # VARS
 
 # Notes:
@@ -37,7 +38,6 @@ use cluster::config;
 # * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
-my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
 my $aws_key = '';
 my $aws_secret_key = '';
 my ($launch_aws, $launch_vb, $launch_os, $launch_vcloud, $skip_launch) = (0,0,0,0,0);
@@ -85,6 +85,7 @@ print Dumper($cluster_configs);
 die "Testing";
 
 # dealing with defaults from the config including various SeqWare-specific items
+my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
 $configs->{'SEQWARE_BUILD_CMD'} //= $default_seqware_build_cmd; 
 $configs->{'MAVEN_MIRROR'} //= ""; 
 
@@ -97,7 +98,7 @@ prepare_files($cluster_configs, $configs, $work_dir);
 
 launch_instances($cluster_configs) unless ($skip_launch);
 sleep 100;
-provision_instances($cluster_configs) unless ($skip_launch);
+cluster::provison->provision_instances($configs, $cluster_configs, $work_dir) unless ($skip_launch);
 say "FINISHED";
 
 #sub launch_and_provision_vms {
@@ -168,9 +169,6 @@ sub host_information {
         }
     }
 
-
-
-
     my $pip = get_pip_id($work_dir, $host_id, \%host);
     $host{pip} = $pip if ($pip); 
 
@@ -189,7 +187,7 @@ sub get_pip_id {
 # FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them
 sub provision_instances {
-    my ($cluster_configs) = @_;
+    my ($configs, $cluster_configs) = @_;
     # first, find all the hosts and get their info
     my $hosts = find_cluster_info($cluster_configs);
 
