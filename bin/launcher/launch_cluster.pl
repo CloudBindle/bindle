@@ -87,9 +87,9 @@ $configs->{'SEQWARE_BUILD_CMD'} //= $default_seqware_build_cmd;
 $configs->{'MAVEN_MIRROR'} //= ""; 
 
 # process server scripts into single bash script
-cluster::setup->setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
+setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
 
-cluster::setup->prepare_files($cluster_configs, $configs, $work_dir, $vb_ram, $vb_cores, @ebs_vols);
+prepare_files($cluster_configs, $configs, $work_dir);
 
 launch_instances($cluster_configs) unless ($skip_launch);
 sleep 100;
