@@ -8,6 +8,9 @@ use JSON;
 use Config;
 use Storable 'dclone';
 
+#reads in all the data written to the appropriate config file located at config/
+#and constructs an object in the form of configs and default_configs to match
+#the format the original script expects it to be in
 sub read_default_configs {
   my ($class, $cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb) = @_;
   my $default_configs;
@@ -56,6 +59,7 @@ sub read_default_configs {
   return($general_config, $cluster_configs, $work_dir);
 }
 
+#reads in the json file and gets rid of all the commented lines
 sub read_json_config {
   my ($config_file) = @_;
   open IN, "<$config_file" or die "No template JSON file detected in this directory!";
@@ -71,6 +75,8 @@ sub read_json_config {
   return $temp_configs;
 }
 
+#this extracts all the information needed to set up the particular cluster
+#that is, it extracts floating_ips and the number of nodes it will have
 sub extract_node_config {
   my ($temp_cluster_configs, $default_configs,$launch_os, $cluster_name) = @_;
 
@@ -98,8 +104,7 @@ sub extract_node_config {
   return $temp_cluster_configs;
 }
 
-
-
+#extracts all the platform related information from the config file
 sub extract_general_config {
   my ($general_config, $default_configs,$launch_vcloud) = @_;
   my $selected_platform = uc $default_configs->param('platform.type');
@@ -130,6 +135,7 @@ sub extract_general_config {
   return $general_config;
 }
 
+#reads in the target_directory specified in the config file and makes a folder
 sub make_target_directory {
    my ($cluster_name,$default_configs) = @_;
    
@@ -163,6 +169,7 @@ sub run {
     }
 }
 
+#adds on to the launch_command for vagrant according to the specified platform
 sub set_launch_command {
   my ($class, $launch_aws, $launch_os, $launch_vcloud) = @_;
   my $launch_command;
