@@ -90,12 +90,12 @@ $configs->{'MAVEN_MIRROR'} //= "";
 cluster::setup->setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
-# FIXME: should remove the non-generic files processed below if possible, notice how there are project-specific file copies below!
+# FIXME: should remove the non-generic files processed (bin/cluster/setup.pm) if possible, notice how there are project-specific file copies!
 cluster::setup->prepare_files($cluster_configs, $configs, $work_dir, $vb_ram, $vb_cores, @ebs_vols);
 
 launch_instances($cluster_configs) unless ($skip_launch);
 sleep 100;
-# FIXME: method needs to be broken into individual steps
+
 # FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them
 cluster::provision->provision_instances($configs, $cluster_configs, $work_dir) unless ($skip_launch);
