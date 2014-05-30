@@ -18,7 +18,7 @@ sub setup_os_config_scripts {
     foreach my $host (sort keys %{$configs}) {
         run("mkdir $output_dir/$host");
         foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
-            autoreplace($script, "$output_file.temp");
+            autoreplace($script, "$output_file.temp", $configs);
             run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
             run("rm $output_file.temp");
         }
@@ -32,17 +32,17 @@ sub setup_os_config_scripts {
 sub prepare_files {
     my ($class, $cluster_configs, $configs, $work_dir, $vb_ram, $vb_cores, @ebs_vols) = @_;
     # Vagrantfile, the core file used by Vagrant that defines each of our nodes
-    setup_vagrantfile("templates/Vagrantfile_start.template", 
+    $configs = setup_vagrantfile("templates/Vagrantfile_start.template", 
                       "templates/Vagrantfile_part.template", 
                       "templates/Vagrantfile_end.template", 
                       $cluster_configs, $configs, "$work_dir", $vb_ram, $vb_cores, @ebs_vols);
 
     foreach my $node (sort keys %{$cluster_configs}) {
         # cron for SeqWare
-        autoreplace("templates/status.cron", "$work_dir/$node/status.cron");
+        autoreplace("templates/status.cron", "$work_dir/$node/status.cron", $configs);
         # various files used for SeqWare when installed and not built from source
-        autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/seqware-webservice.xml");
-        autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/seqware-portal.xml");
+        autoreplace("templates/seqware/seqware-webservice.xml", "$work_dir/$node/seqware-webservice.xml", $configs);
+        autoreplace("templates/seqware/seqware-portal.xml", "$work_dir/$node/seqware-portal.xml", $configs);
         # settings, user data
         copy("templates/settings", "$work_dir/$node/settings");
         copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
@@ -65,11 +65,12 @@ sub prepare_files {
         copy("templates/conf.master.tar.gz", "$work_dir/$node/conf.master.tar.gz");
         # DCC
         # FIXME: break out into config driven provisioner
-        autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml");
+        autoreplace("templates/DCC/settings.yml", "$work_dir/$node/settings.yml",$configs);
         # DCC validator
         copy("templates/dcc_validator/application.conf", "$work_dir/$node/application.conf");
         copy("templates/dcc_validator/init.sh", "$work_dir/$node/init.sh");
     }
+    return $configs;
 }
 
 # this assumes the first pass script was created per host by setup_os_config_scripts
@@ -104,9 +105,10 @@ sub setup_vagrantfile {
     	    $configs->{AWS_EBS_VOLS} .= "]";
         }
         my $node_output = "$work_dir/$node/Vagrantfile";
-        autoreplace("$start", "$node_output");
+	print "$node_output\n";
+        autoreplace("$start", "$node_output", $configs);
         # FIXME: should change this var to something better
-        autoreplace("$part", "$node_output.temp");
+        autoreplace("$part", "$node_output.temp", $configs);
         run("cat $node_output.temp >> $node_output");
         run("rm $node_output.temp");
         run("cat $end >> $node_output");
@@ -117,11 +119,12 @@ sub setup_vagrantfile {
         $full_output =~ s/os.network = ""//;
         $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
         $full_output =~ s/os.floating_ip = ""//;
-    
         open my $vout, '>', $node_output;
         print $vout $full_output;
         close $vout;
     }
+    
+    return $configs;
 }
 
 sub autoreplace {
