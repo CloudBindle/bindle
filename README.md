@@ -1,12 +1,34 @@
 ## Table of Contents
 
-* [About Bindle](# About Bindle)
-* [Build and Source Control](# Build and Source Control)
-* [Installatung Bindle](# Installing)
-* [Note about Versions](## Note about Versions)
-* [Getting "Boxes"](# Getting \"Boxes")
-
-
+* [About Bindle](#about-bindle)
+* [Build and Source Control](#build-source-control)
+* [Installing Bindle](#installing)
+    * [Note about Versions](#note-about-versions)
+    * [Getting "Boxes"](#getting-boxes)
+    * [Configuration Profiles](#configuration-profiles)
+    * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
+* [Running the Cluster Launcher](#running-the-cluster-launcher)
+* [SeqWare Examples](#seqware-examples)
+    * [SeqWare - Single Node](#seqware---single-node)
+        * [Oozie Hadoop](#oozie-hadoop)
+        * [Oozie SGE](#oozie-sge)
+    * [SeqWare - Cluster](#seqware---cluster)
+        * [Oozie Hadoop](#oozie-hadoop-1)
+        * [Oozie SGE](#oozie-sge-1)
+    * [SeqWare - Install Only](#seqware---install-only)
+    * [SeqWare - CentOS](#seqware---centos)
+    * [SeqWare Query Engine - Single node](#seqware-query-engine---single-node)
+* [TCGA/ICGC PanCancer Examples](#tcgaicgc-pancancer-examples)
+* [OICR Examples](#oicr-examples)
+    * [General OICR Settings](#general-oicr-settings)
+    * [ICGC DCC Portal - Small Cluster](#icgc-dcc-portal---small-cluster)
+    * [ICGC DCC Portal - Large Cluster](#icgc-dcc-portal---large-cluster)
+* [Logging](#logging)
+* [Controlling the VM](#controlling-the-vm)
+    * [CentOS Information](#centos-information)
+        * [Veewee Installation and Usage Instructions (Mac)](#veewee-installation-and-usage-instructions-mac)
+* [Debugging](#debugging)
+* [TODO](#todo)
 
 
 ## About Bindle
