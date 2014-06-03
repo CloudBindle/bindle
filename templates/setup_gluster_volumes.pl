@@ -21,8 +21,8 @@ GetOptions (
 
 my $out_txt;
 
-open IN, "<", $dir_map or die "Cannot open file $dir_map: $!\n";
-open OUT, ">", $output or die "Cannot open file $output: $!\n";
+open IN, "<$dir_map" or die "Cannot open file $dir_map\n";
+open OUT, ">$output" or die "Cannot open file $output\n";
 while(<IN>) {
   chomp;
   my $location = $_;
