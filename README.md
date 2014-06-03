@@ -1,3 +1,14 @@
+## Table of Contents
+
+* [About Bindle](# About Bindle)
+* [Build and Source Control](# Build and Source Control)
+* [Installatung Bindle](# Installing)
+* [Note about Versions](## Note about Versions)
+* [Getting "Boxes"](# Getting \"Boxes")
+
+
+
+
 ## About Bindle
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
