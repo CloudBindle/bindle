@@ -223,7 +223,7 @@ configuration templates in:
 
 Copy the file path of desired template(for example
 templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
-to the root dir of this project (bindle) and place it in the appropriate config file
+ and place it in the appropriate config file
 
 Next, fill in your various platform settings depending on what cloud provider you use
 (Vcloud(vcloud.cfg), Amazon(aws.cfg), or OpenStack(os.cfg)):
