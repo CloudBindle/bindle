@@ -43,20 +43,26 @@ my ($launch_aws, $launch_vb, $launch_os, $launch_vcloud, $skip_launch) = (0,0,0,
 my $launch_cmd = "vagrant up";
 my $work_dir = "target";
 my ($vb_ram, $vb_cores) = (12000, 2);
+my $json_config_file = 'vagrant_cluster_launch.json';
 my @ebs_vols = ();
 my $default_configs;
 my $launch_command = 'vagrant up';
 my $cluster_name = 'cluster1';
 # check for help
 my $help = (scalar @ARGV == 0)? 1 : 0;
+my $def_config = 0;
+
 
 GetOptions (
     "use-aws"        => \$launch_aws,
     "use-virtualbox" => \$launch_vb,
     "use-openstack"  => \$launch_os,
     "use-vcloud"     => \$launch_vcloud,
+    "working-dir=s" => \$work_dir,
+    "config-file=s" => \$json_config_file,
     "launch-cluster=s"  => \$cluster_name,
     "skip-launch"    => \$skip_launch,
+    "use-default-config" => \$def_config,
     "vb-ram=i"       => \$vb_ram,
     "vb-cores=i"     => \$vb_cores,
     "aws-ebs=s{1,}"  => \@ebs_vols,
@@ -74,10 +80,54 @@ $launch_command .= cluster::config->set_launch_command($launch_aws, $launch_os, 
 my $configs = {};
 my $cluster_configs = {};
 
-#reconfigures the worker arrays to the format the original script expects
-#also reads in all the default configurations for the appropriate platfrom 
-#from the .cfg file in the config folder
-($configs, $cluster_configs, $work_dir) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
+#used for reading in from the .cfg files
+if ($def_config){
+  #reconfigures the worker arrays to the format the original script expects
+  #also reads in all the default configurations for the appropriate platfrom 
+  #from the .cfg file in the config folder
+  ($configs, $cluster_configs, $work_dir) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
+}
+else{
+  my $temp_cluster_configs = ();
+  ($configs, $temp_cluster_configs) = read_json_config($json_config_file);
+
+  foreach my $node_config (@{$temp_cluster_configs}){
+    my @names = @{$node_config->{'name'}};
+    for (0 .. $#names){
+      my $node_config_copy = dclone $node_config;
+      print @{$node_config_copy->{'floatip'}}[$_]."\n";
+      delete $node_config_copy->{'floatip'};
+      $node_config_copy->{'floatip'} = @{$node_config->{'floatip'}}[$_];
+      $cluster_configs->{$names[$_]} = $node_config_copy;
+    }
+  }
+  # define the "boxes" used for each provider
+  # TODO: these are hardcoded and may change
+  # you can override for VirtualBox only via the json config
+  # you can find boxes listed at http://www.vagrantbox.es/
+  if ($launch_vb) {
+    $launch_cmd = "vagrant up";
+
+    # Allow a custom box to be specified
+    if (!defined($configs->{'BOX'})) { $configs->{'BOX'} = "Ubuntu_12.04"; }
+    if (!defined($configs->{'BOX_URL'})) { $configs->{'BOX_URL'} = "http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box"; }
+  } elsif ($launch_os) {
+    $launch_cmd = "vagrant up --provider=openstack";
+    $configs->{'BOX'} = "dummy";
+    $configs->{'BOX_URL'} = "https://github.com/cloudbau/vagrant-openstack-plugin/raw/master/dummy.box";
+  } elsif ($launch_aws) {
+    $launch_cmd = "vagrant up --provider=aws";
+    $configs->{'BOX'} = "dummy";
+    $configs->{'BOX_URL'} = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box";
+  } elsif ($launch_vcloud) {
+    $launch_cmd = "vagrant up --provider=vcloud";
+    $configs->{'BOX'} = "pancancer_1";
+    $configs->{'BOX_URL'} = "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
+  } else {
+    die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
+  }
+}
+
 
 # dealing with defaults from the config including various SeqWare-specific items
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
