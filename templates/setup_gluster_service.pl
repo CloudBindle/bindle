@@ -43,6 +43,6 @@ $cmd .= "; gluster volume set gv0 nfs.disable on";
 $cmd .= "; sleep 10; gluster volume start gv0; sleep 30; gluster peer status; gluster volume info; gluster volume status;";
 
 print "SETTING UP GLUSTER WITH COMMAND: $cmd\n";
-
-system($cmd) == 0
-    or die "Problems creating volume with command $cmd: $!\n";
+if (system($cmd)) {
+  print "Problems creating colume with command '$cmd'\n";
+}

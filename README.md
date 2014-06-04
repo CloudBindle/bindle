@@ -1,3 +1,36 @@
+## Table of Contents
+
+* [About Bindle](#about-bindle)
+* [Build and Source Control](#build-source-control)
+* [Installing Bindle](#installing)
+    * [Note about Versions](#note-about-versions)
+    * [Getting "Boxes"](#getting-boxes)
+    * [Configuration Profiles](#configuration-profiles)
+    * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
+* [Running the Cluster Launcher](#running-the-cluster-launcher)
+* [SeqWare Examples](#seqware-examples)
+    * [SeqWare - Single Node](#seqware---single-node)
+        * [Oozie Hadoop](#oozie-hadoop)
+        * [Oozie SGE](#oozie-sge)
+    * [SeqWare - Cluster](#seqware---cluster)
+        * [Oozie Hadoop](#oozie-hadoop-1)
+        * [Oozie SGE](#oozie-sge-1)
+    * [SeqWare - Install Only](#seqware---install-only)
+    * [SeqWare - CentOS](#seqware---centos)
+    * [SeqWare Query Engine - Single node](#seqware-query-engine---single-node)
+* [TCGA/ICGC PanCancer Examples](#tcgaicgc-pancancer-examples)
+* [OICR Examples](#oicr-examples)
+    * [General OICR Settings](#general-oicr-settings)
+    * [ICGC DCC Portal - Small Cluster](#icgc-dcc-portal---small-cluster)
+    * [ICGC DCC Portal - Large Cluster](#icgc-dcc-portal---large-cluster)
+* [Logging](#logging)
+* [Controlling the VM](#controlling-the-vm)
+    * [CentOS Information](#centos-information)
+        * [Veewee Installation and Usage Instructions (Mac)](#veewee-installation-and-usage-instructions-mac)
+* [Debugging](#debugging)
+* [TODO](#todo)
+
+
 ## About Bindle
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
@@ -78,6 +111,12 @@ or an OpenStack cloud you can skip this step.
 Install dependencies:
 
     sudo apt-get install gcc make
+
+Install bindle dependencies:
+
+      sudo apt-get update
+      sudo apt-get install libjson-perl libtemplate-perl make gcc
+
 
 Install Vagrant using the package from their
 [site](http://downloads.vagrantup.com/) that is correct for your platform.  For
@@ -182,27 +221,19 @@ configuration templates in:
 
     templates/sample_configs/
 
-Copy one of the files (for example
+Copy the file path of desired template(for example
 templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
-to the root dir of this project (bindle) and rename it
-to vagrant_cluster_launch.json:
+to the root dir of this project (bindle) and place it in the appropriate config file
 
-    cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+Next, fill in your various platform settings depending on what cloud provider you use
+(Vcloud(vcloud.cfg), Amazon(aws.cfg), or OpenStack(os.cfg)):
 
-By using this destination filename and location the .gitignore file will
-prevent you from accidently checking in this file (it will contain sensitive
-information like your Amazon key).
+     vim config/os.cfg
 
-Next, fill in your various settings depending on what cloud provider you use
-(VirtualBox, Amazon, or OpenStack).  You can keep distinct settings for each of
-the backend types which allows you to launch both AWS and OpenStack-based
-machines with the same config file.
-
-At this point you will also want to examine the sections describing each of the
-nodes. Please use "master" as the name of the master node (we have assumptions
-in our code/config templates). Feel free to add or remove worker nodes (min 0,
-max recommended 10) and alter the list of "secondary" Bash shell config scripts
-that are run after the node is launched.
+At this point you will also want to create a new cluster by copy-pasting cluster1
+block and modifying the configs or you can simply modify cluster1 configs and use that.
+Feel free to change the number of nodes (min 1, max recommended 11). Please note that 
+if the number of nodes is 1, it means that there will be 1 master and 0 worker nodes.
 
 If you use the template recommended above you will have a 1 node Hadoop cluster
 (with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
@@ -232,22 +263,16 @@ choose not by the --vb-ram and --vb-cores options.
 
 The wrapper script that controls the system described above is called
 "bin/launcher/launch_cluster.pl".  Examples of launching in different environments
-(assuming you have a "vagrant_cluster_launch.json" file in the current
-directory) include:
+ include:
 
     # for AWS
-    perl bin/launcher/launch_cluster.pl --use-aws
+    perl bin/launcher/launch_cluster.pl --use-aws --launch-cluster <cluster-name> 
     # for OpenStack
-    perl bin/launcher/launch_cluster.pl --use-openstack
+    perl bin/launcher/launch_cluster.pl --use-openstack --launch-cluster <cluster-name>
     # for VirtualBox
-    perl bin/launcher/launch_cluster.pl --use-virtualbox
+    perl bin/launcher/launch_cluster.pl --use-virtualbox --launch-cluster <cluster-name>
 
-This script also lets you point to the config file explicitly, change the
-working Vagrant directory (which defaults to target, it's the location where
-Vagrant puts all of its runtime files), and override RAM and CPU cores:
-
-    # example, execute without options for a help message
-    perl bin/launcher/launch_cluster.pl --use-aws --working-dir target-aws --config-file vagrant_cluster_launch.json
+"<clustername>" represents the cluster you want to run from the config file (Ex: cluster1).
 
 
 ## SeqWare Examples
@@ -282,9 +307,10 @@ This is the default engine which is a pure Hadoop solution. You may choose
 Oozie-SGE below if you want better debugging information and you want to have a
 GridEngine cluster too:
 
-
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    ls templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
@@ -295,9 +321,12 @@ configruation will let you spin up an SGE cluster configured to work with
 SeqWare:
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template vagrant_cluster_launch.json
+    ls templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template 
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
+    
 
 ### SeqWare - Cluster
 
@@ -313,7 +342,9 @@ Oozie-SGE below if you want better debugging information and you want to have a
 GridEngine cluster too:
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template vagrant_cluster_launch.json
+    ls templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template 
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
@@ -324,10 +355,11 @@ configruation will let you spin up an SGE cluster configured to work with
 SeqWare:
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template vagrant_cluster_launch.json
+    ls templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
-
 
 ### SeqWare - Install Only
 
@@ -349,7 +381,9 @@ suitable for snapshoting for redistribution as a machine image (e.g. AMI on
 Amazon's cloud, VirtualBox snapshot, etc).
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template vagrant_cluster_launch.json
+    ls templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
@@ -370,19 +404,25 @@ We provide two profiles for this project:
 * templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template: A cluster of 4-12 machines used for OpenStack or vCloud
 
 Here are some examples, you will want to customize the
-vagrant_cluster_launch.json to include the settings for the particular cloud
+templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template 
+to include the settings for the particular cloud
 environment you are working in (EBI, BioNimbus, DKFZ, Korea, etc).  Each cloud
 will provide you the specifics such as account name, API keys, and which cloud
 technology to use.
 
     # use this template for clusters of 4 nodes, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your environment
+    ls templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template 
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
+    # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
+
     # use this template for a single node, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for your environment
+    ls templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template 
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
+    # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
@@ -418,8 +458,10 @@ update.  Also, take a look at templates/DCC/settings.yml which has the index
 name embedded and will need to change if the index is updated.
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you
+    ls templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
+    # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
@@ -433,8 +475,10 @@ number, optimize the configuration to better take advantage of the node number,
 and explore HA options.
 
     # use this template, customize it
-    cp templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template vagrant_cluster_launch.json
-    # launch, use the correct command line args for you
+    ls templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template 
+    # Don't forget to place the path of the template file in your connfig file!
+    vim config/os.cfg
+    # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack
 
 ## Logging

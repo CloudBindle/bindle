@@ -89,5 +89,5 @@
     %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
     #%{custom_hostname}.vm.hostname = "%{custom_hostname}"
-   # %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
+    %{custom_hostname}.vm.provision :shell, :path => "%{custom_hostname}_os_server_setup.sh"
   end
