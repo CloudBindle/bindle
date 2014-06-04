@@ -20,11 +20,11 @@ GetOptions (
 # turn off replicate for now
 my $cmd = "gluster peer status; gluster volume info; gluster volume status; sleep 30; gluster volume create gv0 transport tcp";
 
-open DIRS, "<$dir_map" or die "Cannot open file $dir_map\n";
+open DIRS, "<", $dir_map or die "Cannot open file $dir_map: $!\n";
 while(<DIRS>) {
   chomp;
   my $dir = $_;
-  open IN, "<$host" or die "Cannot open file $host\n";
+  open IN, "<", $host or die "Cannot open file $host: $!\n";
   while(<IN>) {
     chomp;
     my @a = split /\s+/;
