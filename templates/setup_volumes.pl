@@ -19,30 +19,31 @@ my $list = `ls -1 /dev/sd* /dev/xv*`;
 my @list = split /\n/, $list;
 my $blacklist;
 my $whitelist;
-my $blist = {};
-my $wlist = {};
-my $glusterdirectory = "gluster";
+my @blist = {};
+my @wlist = {};
+my $gluster_directory_list = {};
 
 GetOptions (
   "output=s" => \$out_file,
   "whitelist=s" => \$whitelist,
   "blacklist=s" => \$blacklist,
-  "oicrdirectory=s" => \$glusterdirectory,
+  "directorylist=s" => \$glusterdirectory,
 );
 
 
 # MAIN LOOP
 
-$blist = read_list($blacklist);
-$wlist = read_list($whitelist);
+@blist = read_list($blacklist);
+@wlist = read_list($whitelist);
+@dir_list = read_list($glusterdirectory);
 
 foreach my $dev (@list) {
   # skip if doesn't exist
   next if (!-e $dev || -l $dev);
   # skip if the root partition
-  next if (blacklist($dev, $blist));
+  next if (blacklist($dev, @blist));
   # true if empty or it's on the whitelist
-  next if (!whitelist($dev, $wlist));
+  next if (!whitelist($dev, @wlist));
   # then extra device so can continue
   print "DEV: $dev\n";
   # if already mounted just add directory
@@ -68,6 +69,18 @@ foreach my $dev (@list) {
   $final_list .= "$mount_path\n";
 }
 
+# now handle the list of dirs
+# for each dir in list
+# do setup_ecrypt
+# add to final_list
+foreach my $dir (@dir_list) {
+  my $mount_path = $dir;
+  if (setup_ecryptfs($mount_path)) {
+    $mount_path = $mount_path."/encrypted";
+  }
+  $final_list .= "$mount_path\n";
+}
+
 # OUTPUT REPORT
 
 open OUT, ">$out_file" or die "Can't open output file $out_file\n";
@@ -79,23 +92,37 @@ close OUT;
 
 # TODO
 sub read_list {
-  return({});
+  my ($data) = @_;
+  my @list = split /,/, $data;
+  return @list;
 }
 
 # TODO
 sub whitelist {
-  my ($dev, $hash) = @_;
-  return(1);
+  my ($dev, @whlist) = @_;
+  foreach(@whlist) {
+    if ($dev =~ /sd$_|hd$_|xvd$_/){
+      print " WHITELIST DEV $dev\n";
+      return 1;
+    }
+  }
+  return(0);
 }
 
 sub blacklist {
-  my $dev = shift;
-  my $hash = shift;
+  my ($dev,@blklist) = @_;
   # TODO: right now blacklist all but sdf or above which we add as EBS volumes
-  if ($dev =~ /sda|hda|xvda|sdb|hdb|xvdb|sdc|hdc|xvdc|sdd|hdd|xvdd|sde|hde|xvde/ ) {
-    print " BLACKLIST DEV $dev\n";
-    return(1);
+  foreach(@blklist){
+    #my ($option1,$option2,$option3) = ("sd$_","hd$_","xvd$_");
+    if ($dev =~ /sd$_|hd$_|xvd$_/){
+      print " BLACKLIST DEV $dev\n";
+      return 1;
+    }
   }
+  #if ($dev =~ /sda|hda|xvda|sdb|hdb|xvdb|sdc|hdc|xvdc|sdd|hdd|xvdd|sde|hde|xvde/ ) {
+  #  print " BLACKLIST DEV $dev\n";
+  #  return(1);
+  # }
   return(0);
 }
 
