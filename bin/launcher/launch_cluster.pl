@@ -51,7 +51,7 @@ my $cluster_name = 'cluster1';
 # check for help
 my $help = (scalar @ARGV == 0)? 1 : 0;
 my $def_config = 0;
-
+my $json_template_file = "";
 
 GetOptions (
     "use-aws"        => \$launch_aws,
@@ -85,7 +85,10 @@ if ($def_config){
   #reconfigures the worker arrays to the format the original script expects
   #also reads in all the default configurations for the appropriate platfrom 
   #from the .cfg file in the config folder
-  ($configs, $cluster_configs, $work_dir) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
+  ($configs, $cluster_configs, $work_dir, $json_template_file) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
+  
+  system("cp $json_template_file $json_config_file");
+
 }
 else{
   my $temp_cluster_configs = ();
