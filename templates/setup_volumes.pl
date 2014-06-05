@@ -27,7 +27,7 @@ GetOptions (
   "output=s" => \$out_file,
   "whitelist=s" => \$whitelist,
   "blacklist=s" => \$blacklist,
-  "oicrdirectory" => \$glusterdirectory,
+  "oicrdirectory=s" => \$glusterdirectory,
 );
 
 
@@ -163,4 +163,4 @@ sub find_mount_path {
   my $path = `df -h | grep $dev | awk '{ print \$6}'`;
   chomp $path;
   return($path);
-}se strict;
+}
