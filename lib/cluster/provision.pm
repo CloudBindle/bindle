@@ -77,7 +77,7 @@ sub figure_out_sge_host_str {
 
     my $hosts_str = "";
     foreach my $host (sort keys %{$hosts}) {
-        $hosts_str .= " $hosts->{$host}{ip}";
+        $hosts_str .= " $host";
     }
 
     return $hosts_str;
