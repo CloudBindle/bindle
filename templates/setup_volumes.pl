@@ -21,13 +21,13 @@ my $blacklist;
 my $whitelist;
 my @blist = {};
 my @wlist = {};
-my $gluster_directory_list = {};
-
+my $gluster_directory_list;
+my @dir_list = {};
 GetOptions (
   "output=s" => \$out_file,
   "whitelist=s" => \$whitelist,
   "blacklist=s" => \$blacklist,
-  "directorylist=s" => \$glusterdirectory,
+  "directorylist=s" => \$gluster_directory_list,
 );
 
 
@@ -35,7 +35,7 @@ GetOptions (
 
 @blist = read_list($blacklist);
 @wlist = read_list($whitelist);
-@dir_list = read_list($glusterdirectory);
+@dir_list = read_list($gluster_directory_list);
 
 foreach my $dev (@list) {
   # skip if doesn't exist

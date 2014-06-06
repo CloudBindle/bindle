@@ -116,7 +116,12 @@ fi
 # setup ephemeral and EBS volumes that are attached to this system
 apt-get update
 apt-get -q -y --force-yes install ecryptfs-utils xfsprogs
-perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt %{GLUSTER_DEVICE_BLACKLIST} %{GLUSTER_DEVICE_WHITELIST} %{GLUSTER_DIRECTORY}
+volume_dirs= %{GLUSTER_DIRECTORYLIST_PATHS}
+for vol_dir in ${volume_dirs//,/}; do
+  mkdir -p $vol_dir
+  echo "$vol_dir"
+done
+perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt %{GLUSTER_DEVICE_BLACKLIST} %{GLUSTER_DEVICE_WHITELIST} --directorylist %{GLUSTER_DIRECTORYLIST_PATHS}
 
 # now setup volumes for use with gluster
 # the default version of gluster (3.2?) appears to suffer from the problem described here: https://bugzilla.redhat.com/show_bug.cgi?id=807976
