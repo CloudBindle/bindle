@@ -57,6 +57,7 @@
       override.ssh.username = "%{OS_SSH_USERNAME}"
       override.ssh.private_key_path = "%{OS_SSH_PEM_FILE}"
       os.network = "%{OS_NETWORK}"
+      os.networks = [ "%{OS_NETWORK}" ]   
       os.floating_ip = "%{OS_FLOATING_IP}"
       os.server_name = "%{custom_hostname}"
       os.user_data = "#cloud-config\nmanage_etc_hosts: True"
