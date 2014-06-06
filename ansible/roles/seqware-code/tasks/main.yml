@@ -50,6 +50,7 @@
 - name: SeqWare - Code - Git | Cloning seqware
   sudo: yes
   sudo_user: "{{ user_name }}"
+  when: "'master' in group_names"
   git: update=no repo=https://github.com/SeqWare/seqware.git dest=~{{ user_name }}/gitroot/seqware version={{ seqware_repo_version }}
 
 # setup bash profile for seqware
@@ -89,6 +90,7 @@
     insertafter: EOF
   with_items: 
       - '{{ user_name }} ALL=(ALL) NOPASSWD: ALL'
+  when: "'master' in group_names"
   notify: restart oozie
   
 - name:  Set user groups
