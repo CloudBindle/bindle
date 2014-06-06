@@ -106,7 +106,8 @@ sub whitelist {
       return 1;
     }
   }
-  return(0);
+
+  return 0;
 }
 
 sub blacklist {
@@ -119,11 +120,8 @@ sub blacklist {
       return 1;
     }
   }
-  #if ($dev =~ /sda|hda|xvda|sdb|hdb|xvdb|sdc|hdc|xvdc|sdd|hdd|xvdd|sde|hde|xvde/ ) {
-  #  print " BLACKLIST DEV $dev\n";
-  #  return(1);
-  # }
-  return(0);
+
+  return 0;
 }
 
 sub mounted {
