@@ -56,7 +56,7 @@ HelloWorld workflow from SeqWare on the following configurations and platforms:
 
 TODO: we need to update this for the 1.2 release
 
-| *Configuration name*                                                          | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) | OpenStack (OICRi - IceHouse) |
+| *Configuration name*                                                          | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) | OpenStack (OICR - IceHouse) |
 |-------------------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|:-------------------------:|:----------------------------:|
 |*vagrant_cluster_launch.seqware.install.sge_cluster.json.template*             | &#x2713;         | &#x2713; |                      |            |                           |                             |
 |*vagrant_cluster_launch.seqware.install.sge_node.json.template*                | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |                           |                             |
