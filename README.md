@@ -166,7 +166,7 @@ do not use your native package manager as shown below for Ubuntu:
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
 * Config::Simple: eg "sudo apt-get install libconfig-simple-perl" on Ubuntu 12.04
 * Carp::Always: eg "sudo apt-get install libcarp-always-perl"
-* IPC::System::Simple: eh "sudo-apt-get install licipc-system-simple-perl"
+* IPC::System::Simple: eg "sudo-apt-get install libipc-system-simple-perl"
 
 To check to see if you have these you do:
 
