@@ -272,11 +272,11 @@ The wrapper script that controls the system described above is called
  include:
 
     # for AWS
-    perl bin/launcher/launch_cluster.pl --use-aws --use-default-configs --launch-cluster <cluster-name> 
+    perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
     # for OpenStack
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
     # for VirtualBox
-    perl bin/launcher/launch_cluster.pl --use-virtualbox --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-virtualbox --use-default-config --launch-cluster <cluster-name>
 
 <clustername> represents the cluster block you want to run from the config file (Ex: cluster1).
 Please note that you can still use the old way to set up configurations. That is, copying the template file over 
@@ -326,7 +326,7 @@ GridEngine cluster too:
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 #### Oozie SGE
 
@@ -340,7 +340,7 @@ SeqWare:
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
     
 
 ### SeqWare - Cluster
@@ -362,7 +362,7 @@ GridEngine cluster too:
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 #### Oozie SGE
 
@@ -376,7 +376,7 @@ SeqWare:
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 ### SeqWare - Install Only
 
@@ -403,7 +403,7 @@ Amazon's cloud, VirtualBox snapshot, etc).
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 
 ## TCGA/ICGC PanCancer Examples
@@ -434,7 +434,7 @@ technology to use.
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 
     # use this template for a single node, customize it (Only need to add the Gluster blacklist, whitelist,
@@ -443,7 +443,7 @@ technology to use.
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
 more information about this project.
@@ -483,7 +483,7 @@ name embedded and will need to change if the index is updated.
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
 
@@ -501,7 +501,7 @@ and explore HA options.
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-configs --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 ## Logging
 
