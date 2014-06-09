@@ -151,7 +151,7 @@ sleep 100;
 
 # FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them
-cluster::provision->provision_instances($configs, $cluster_configs, $work_dir) unless ($skip_launch);
+cluster::provision->provision_instances($configs, $cluster_configs, $work_dir, $launch_vcloud) unless ($skip_launch);
 say "FINISHED";
 
 # SUBROUTINES
