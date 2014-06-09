@@ -51,7 +51,7 @@ my $cluster_name = 'cluster1';
 # check for help
 my $help = (scalar @ARGV == 0)? 1 : 0;
 my $def_config = 0;
-
+my $json_template_file = "";
 
 GetOptions (
     "use-aws"        => \$launch_aws,
@@ -85,7 +85,10 @@ if ($def_config){
   #reconfigures the worker arrays to the format the original script expects
   #also reads in all the default configurations for the appropriate platfrom 
   #from the .cfg file in the config folder
-  ($configs, $cluster_configs, $work_dir) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
+  ($configs, $cluster_configs, $work_dir, $json_template_file) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
+  
+  system("cp $json_template_file $json_config_file");
+
 }
 else{
   my $temp_cluster_configs = ();
@@ -137,7 +140,7 @@ $configs->{'MAVEN_MIRROR'} //= "";
 # process server scripts into single bash script
 # this basically cats files together after doing an autoreplace
 # that fills in variables from the config part of the JSON
-cluster::setup->setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
+setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
 # FIXME: should remove the non-generic files processed (bin/cluster/setup.pm) if possible, notice how there are project-specific file copies!
@@ -150,6 +153,22 @@ sleep 100;
 # this finds all the host IP addresses and then runs the second provisioning on them
 cluster::provision->provision_instances($configs, $cluster_configs, $work_dir) unless ($skip_launch);
 say "FINISHED";
+
+# SUBROUTINES
+
+# this basically cats files together after doing an autoreplace
+# that fills in variables from the config part of the JSON
+sub setup_os_config_scripts {
+  my ($configs, $output_dir, $output_file) = @_;
+  foreach my $host (sort keys %{$configs}) {
+    run("mkdir $output_dir/$host");
+    foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
+      autoreplace($script, "$output_file.temp");
+      run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
+      run("rm $output_file.temp");
+    }
+  }
+}
 
 sub launch_instances {
     my @threads;
@@ -197,4 +216,23 @@ sub run {
     else {
         system($final_cmd);
     }
+}
+
+sub autoreplace {
+  my ($src, $dest, $localconfigs) = @_;
+  unless (defined $localconfigs) {
+    $localconfigs = $configs;
+  }
+  print "AUTOREPLACE: $src $dest\n";
+  open IN, "<$src" or die "Can't open input file $src\n";
+  open OUT, ">$dest" or die "Can't open output file $dest\n";
+  while(<IN>) {
+    foreach my $key (sort keys %{$localconfigs}) {
+      my $value = $localconfigs->{$key};
+      $_ =~ s/%{$key}/$value/g;
+    }
+    print OUT $_;
+  }
+  close IN;
+  close OUT;
 }

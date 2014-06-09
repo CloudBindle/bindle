@@ -56,7 +56,7 @@ sub read_default_configs {
     }
   }
   
-  return($general_config, $cluster_configs, $work_dir);
+  return($general_config, $cluster_configs, $work_dir,$config_file);
 }
 
 #reads in the json file and gets rid of all the commented lines

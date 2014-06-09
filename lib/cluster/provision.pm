@@ -77,7 +77,7 @@ sub figure_out_sge_host_str {
 
     my $hosts_str = "";
     foreach my $host (sort keys %{$hosts}) {
-        $hosts_str .= " $hosts->{$host}{ip}";
+        $hosts_str .= " $host";
     }
 
     return $hosts_str;
@@ -85,18 +85,18 @@ sub figure_out_sge_host_str {
 
 # this creates a string to add to /etc/exports
 sub make_exports_str {
-    my ($hosts) = @_;
-
-    my $result = "";
-    foreach my $host (sort keys %{$hosts}) {
-        my $pip = $hosts->{$host}{pip};
-        $result .= "/home $pip(rw,sync,no_root_squash,no_subtree_check)
-           /mnt/home $pip(rw,sync,no_root_squash,no_subtree_check)
-           /mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
-           /mnt/seqware-oozie $pip(rw,sync,no_root_squash,no_subtree_check)";
-    }
-
-    return $result;
+  my ($hosts) = @_;
+  my $result = "";
+  foreach my $host (sort keys %{$hosts}) {
+    my $pip = $hosts->{$host}{pip};
+    $result .= "
+/home $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/home $pip(rw,sync,no_root_squash,no_subtree_check)
+/mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
+";
+  }
+  print "EXPORT: $result\n";
+  return($result);
 }
 
 sub make_dcc_portal_host_string {
