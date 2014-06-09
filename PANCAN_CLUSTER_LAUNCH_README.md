@@ -131,7 +131,7 @@ Note the "$" is the Bash shell prompt in these examples and "#" is a comment:
     # install the required perl modules
     $ sudo apt-get install libconfig-simple-perl 
     $ sudo apt-get install libcarp-always-perl
-    $ sudo-apt-get install licipc-system-simple-perl
+    $ sudo apt-get install libipc-system-simple-perl
     # make sure you have all the dependencies needed for Bindle, this should not produce an error
     $ perl -c bin/launcher/launch_cluster.pl
     
