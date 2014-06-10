@@ -166,7 +166,7 @@ do not use your native package manager as shown below for Ubuntu:
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
 * Config::Simple: eg "sudo apt-get install libconfig-simple-perl" on Ubuntu 12.04
 * Carp::Always: eg "sudo apt-get install libcarp-always-perl"
-* IPC::System::Simple: eh "sudo-apt-get install licipc-system-simple-perl"
+* IPC::System::Simple: eg "sudo-apt-get install libipc-system-simple-perl"
 
 To check to see if you have these you do:
 
@@ -180,10 +180,10 @@ There have been some reports of problems with the latest version of Vagrant
 and Vagrant plugins for OpenStack and/or AWS.  Here is what we currently use on
 Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
-* Vagrant: 1.2.2
+* Vagrant: 1.4.3
 * Vagrant plugins:
-    * vagrant-aws (0.2.2)
-    * vagrant-openstack-plugin (0.2.2)
+    * vagrant-aws (0.4.1)
+    * vagrant-openstack-plugin (0.4.1)
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 

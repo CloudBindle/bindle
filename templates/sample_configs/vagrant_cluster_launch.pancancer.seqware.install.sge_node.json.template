@@ -42,8 +42,7 @@
     # and make sure you have no spaces! (Ex: "--whitelist a1,a2,f,g1")
     "GLUSTER_DEVICE_WHITELIST": "--whitelist a1",
     # path to directories you want to use to set up volumes incase you don't have any devices
-    "GLUSTER_DIRECTORYLIST_PATHS": "",
-
+    "GLUSTER_DIRECTORYLIST_PATHS": "/mnt/volumes/gluster1,/mnt/volumes/gluster2",
     # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
     "SEQWARE_VERSION": "1.0.13"
   },
