@@ -17,31 +17,26 @@ my $final_list;
 my $out_file = "mount_report.txt";
 my $list = `ls -1 /dev/sd* /dev/xv*`;
 my @list = split /\n/, $list;
-my $blacklist;
 my $whitelist;
-my @blist = {};
 my @wlist = {};
 my $gluster_directory_list;
 my @dir_list = {};
 GetOptions (
   "output=s" => \$out_file,
   "whitelist=s" => \$whitelist,
-  "blacklist=s" => \$blacklist,
   "directorylist=s" => \$gluster_directory_list,
 );
 
 
 # MAIN LOOP
 
-@blist = read_list($blacklist);
 @wlist = read_list($whitelist);
 @dir_list = read_list($gluster_directory_list);
 
 foreach my $dev (@list) {
   # skip if doesn't exist
   next if (!-e $dev || -l $dev);
-  # skip if the root partition
-  next if (blacklist($dev, @blist));
+  print "All Devices: $dev\n";
   # true if empty or it's on the whitelist
   next if (!whitelist($dev, @wlist));
   # then extra device so can continue
@@ -90,37 +85,31 @@ close OUT;
 
 # SUBROUTINES
 
-# TODO
+# separates the string into an array 
 sub read_list {
   my ($data) = @_;
   my @list = split /,/, $data;
   return @list;
 }
 
-# TODO
+# determines if the device is permitted to be used as a volume
 sub whitelist {
   my ($dev, @whlist) = @_;
-  foreach(@whlist) {
-    if ($dev =~ /sd$_|hd$_|xvd$_/){
-      print " WHITELIST DEV $dev\n";
-      return 1;
+  if (scalar(@whlist) == 0){
+    print "WARNING: USING ALL THE DEVICES TO SET UP VOLUMES!!!! YOU DIDN'T SPECIFY ANY WHITELIST DEVICES!!!!\n";
+    return 1;
+  }
+  else{ 
+    foreach(@whlist) {
+      print "DEV $dev\n";
+      my ($option1,$option2,$option3) = ("/dev/sd$_", "/dev/hd$_","/dev/xvd$_");
+      print "option1 $option1\n";
+      if ($dev =~ m/^($option1|$option2|$option3)$/i){
+        print " WHITELIST DEV $dev\n";
+        return 1;
+      }
     }
   }
-
-  return 0;
-}
-
-sub blacklist {
-  my ($dev,@blklist) = @_;
-  # TODO: right now blacklist all but sdf or above which we add as EBS volumes
-  foreach(@blklist){
-    #my ($option1,$option2,$option3) = ("sd$_","hd$_","xvd$_");
-    if ($dev =~ /sd$_|hd$_|xvd$_/){
-      print " BLACKLIST DEV $dev\n";
-      return 1;
-    }
-  }
-
   return 0;
 }
 
