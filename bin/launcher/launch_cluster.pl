@@ -220,6 +220,21 @@ sub run {
     }
 }
 
+#reads a JSON-based config
+sub read_json_config {
+  my ($config_file) = @_;
+  open IN, "<$config_file" or die;
+  my $json_txt = "";
+  while(<IN>) {
+    next if (/^\s*#/);
+    $json_txt .= $_;
+  }
+  close IN;
+  my $temp_configs = decode_json($json_txt);
+  return($temp_configs->{general}, $temp_configs->{node_config});
+}
+
+
 sub autoreplace {
   my ($src, $dest, $localconfigs) = @_;
   unless (defined $localconfigs) {
