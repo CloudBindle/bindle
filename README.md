@@ -166,13 +166,15 @@ do not use your native package manager as shown below for Ubuntu:
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
 * Config::Simple: eg "sudo apt-get install libconfig-simple-perl" on Ubuntu 12.04
 * Carp::Always: eg "sudo apt-get install libcarp-always-perl"
-* IPC::System::Simple: eg "sudo-apt-get install libipc-system-simple-perl"
+* IPC::System::Simple: eg "sudo apt-get install libipc-system-simple-perl"
 
 To check to see if you have these you do:
 
     perl -c bin/launcher/launch_cluster.pl
 
-It should exit without an error message.
+It should exit without an error message. 
+For detailed explanation on setting up a launcher and launching clusters from that, please refer to
+the [Pancancer Cluster Launch ReadMe](https://github.com/SeqWare/vagrant/blob/develop/PANCAN_CLUSTER_LAUNCH_README.md)
 
 ### Note About Versions
 
@@ -320,10 +322,7 @@ This is the default engine which is a pure Hadoop solution. You may choose
 Oozie-SGE below if you want better debugging information and you want to have a
 GridEngine cluster too:
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
-    # Don't forget to place the path of the template file in your connfig file!
+    # use this json template path: templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
     vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
@@ -334,10 +333,7 @@ We support a workflow engine that talks to SGE via an Oozie plugin and this
 configruation will let you spin up an SGE cluster configured to work with
 SeqWare:
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template 
-    # Don't forget to place the path of the template file in your connfig file!
+    # use this json template path: templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template 
     vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
@@ -356,9 +352,7 @@ This is the default engine which is a pure Hadoop solution. You may choose
 Oozie-SGE below if you want better debugging information and you want to have a
 GridEngine cluster too:
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template 
+    # use this template: vim templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template 
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
@@ -370,9 +364,7 @@ We support a workflow engine that talks to SGE via an Oozie plugin and this
 configruation will let you spin up an SGE cluster configured to work with
 SeqWare:
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template
+    # use this template: vim templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
@@ -397,9 +389,7 @@ This will launch a single node that's a self-contained SeqWare Query Engine box.
 suitable for snapshoting for redistribution as a machine image (e.g. AMI on
 Amazon's cloud, VirtualBox snapshot, etc).
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template
+    # use this template: vim templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
@@ -428,18 +418,15 @@ environment you are working in (EBI, BioNimbus, DKFZ, Korea, etc).  Each cloud
 will provide you the specifics such as account name, API keys, and which cloud
 technology to use.
 
-    # use this template for clusters of 4 nodes, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template 
+    # use this template path for clusters of 4 node:             
+    # templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template 
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
     perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
 
 
-    # use this template for a single node, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template 
+    # use this template for a single node: templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template 
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
@@ -477,9 +464,7 @@ referenced inside the JSON so you will want to change these if there's an
 update.  Also, take a look at templates/DCC/settings.yml which has the index
 name embedded and will need to change if the index is updated.
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template
+    # use this template: templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
@@ -495,9 +480,7 @@ Elasticsearch DCC Portal index dumps. In the future we will increase this
 number, optimize the configuration to better take advantage of the node number,
 and explore HA options.
 
-    # use this template, customize it (Only need to add the Gluster blacklist, whitelist,
-    # and directories information in the template file)
-    vim templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template 
+    # use this template: templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template 
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
