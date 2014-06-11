@@ -93,6 +93,8 @@ if ($def_config){
 
 }
 else{
+  # make the target dir
+  run("mkdir -p $work_dir");
   my $temp_cluster_configs = ();
   ($configs, $temp_cluster_configs) = read_json_config($json_config_file);
 
