@@ -14,7 +14,7 @@ my ($configs, $cluster_configs, $work_dir);
 
 
 sub provision_instances {
-    my ($class, $cfgs, $cluster_cfgs,$target_dir, $launch_vcloud) = @_;
+    my ($class, $cfgs, $cluster_cfgs,$target_dir, $launch_vcloud,$use_rsync) = @_;
     ($configs, $cluster_configs, $work_dir)=($cfgs, $cluster_cfgs,$target_dir);
     # first, find all the hosts and get their info
     my $hosts = find_cluster_info($cluster_configs,$work_dir);
@@ -38,7 +38,7 @@ sub provision_instances {
     $configs->{DCC_ES_HOSTS_STR} = make_dcc_es_host_string($hosts); 
   
     # now process templates to remote destinations
-    run_provision_files($cluster_configs, $hosts, $launch_vcloud);
+    run_provision_files($cluster_configs, $hosts, $launch_vcloud,$use_rsync);
   
     # this runs over all hosts and calls the provision scripts in the correct order
     run_provision_script_list($cluster_configs, $hosts);
@@ -150,14 +150,14 @@ sub run_provision_script_list {
 
 # processes and copies files to the specific hosts
 sub run_provision_files {
-    my ($cluster_configs, $hosts, $launch_vcloud) = @_;
+    my ($cluster_configs, $hosts, $launch_vcloud, $use_rsync) = @_;
 
     my @threads;
     foreach my $host_name (sort keys %{$hosts}) {
         my $scripts = $cluster_configs->{$host_name}{provision_files};
         my $host = $hosts->{$host_name};
         say "  PROVISIONING FILES TO HOST $host_name"; 
-        if ($launch_vcloud){
+        if ($launch_vcloud || $use_rsync){
             run("rsync -e \"ssh -i $host->{key}\" -avz $work_dir/$host_name/ $host->{user}".'@'."$host->{ip}:/vagrant/");
         }
         push @threads, threads->create(\&provision_files_thread,

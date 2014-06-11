@@ -114,7 +114,7 @@ sub extract_general_config {
     # These may be changed in the config file
     # you can override for VirtualBox only via the json config
     # you can find boxes listed at http://www.vagrantbox.es/
-    if($key =~ /box/){
+    if($key =~ /box|gluster/){
       $general_config->{uc $key} = $default_configs->param('platform.'.$key);
     }
     else{
