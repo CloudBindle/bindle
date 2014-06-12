@@ -43,7 +43,8 @@ sub provision_instances {
     # this runs over all hosts and calls the provision scripts in the correct order
     run_provision_script_list($cluster_configs, $hosts);
 
-    return;  
+    # now call ansible if configured
+    return run_ansible_playbook($cluster_configs, $hosts);
 }
 
 sub find_cluster_info {
@@ -302,6 +303,52 @@ sub autoreplace {
     }
 
     close $in, $out;
+}
+
+# this generates an ansible inventory and runs ansible
+sub run_ansible_playbook {
+  my ($cluster_configs, $hosts) = @_;
+
+  # this could use a specific set module
+  my %type_set = ();
+  foreach my $host_name (sort keys %{$hosts}) {
+    $type_set{$cluster_configs->{$host_name}{type}} = 1;
+  }
+
+  open (INVENTORY, '>', "$work_dir/inventory") or die "Could not open inventory file for writing";
+
+  foreach my $type (keys %type_set){
+    print INVENTORY "[$type]\n";
+    foreach my $host_name (sort keys %{$hosts}) {
+      my $cluster_config = $cluster_configs->{$host_name};
+      my $host = $hosts->{$host_name};
+      if ($type ne $cluster_config->{type}){
+        next; 
+      }
+      print INVENTORY "$host_name\tansible_ssh_host=$host->{ip}\tansible_ssh_user=$host->{user}\tansible_ssh_private_key_file=$host->{key}\n";
+    } 
+  }
+  print INVENTORY "[all_groups:children]\n";
+  foreach my $type (keys %type_set) {
+    print INVENTORY "$type\n";
+  }
+  close (INVENTORY); 
+
+
+  if (not exists $configs->{ANSIBLE_PLAYBOOK}){
+	  return 0;
+  }
+  # run playbook command
+  # I'm sure this "cluster" parameter is not how one should do it in Perl, but this seems to work with the call from the launcher which inserts the package
+  # as the first parameter
+  return run_ansible_command("cluster", $work_dir, $configs);
+}
+
+sub run_ansible_command{
+  my ($package, $work_dir, $configs) = @_;
+  my $command = "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}";
+  print "Ansible command: $command";
+  return system($command);
 }
 
 sub run {

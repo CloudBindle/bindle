@@ -111,7 +111,7 @@ else{
     }
   }
 if ($run_ansible){
-    exit run_ansible_command();
+    exit cluster::provision->run_ansible_command($work_dir,$configs);
 }
 
   # define the "boxes" used for each provider
@@ -163,57 +163,6 @@ sleep 100;
 # this finds all the host IP addresses and then runs the second provisioning on them
 cluster::provision->provision_instances($configs, $cluster_configs, $work_dir, $launch_vcloud, $use_rsync) unless ($skip_launch);
 say "FINISHED";
-  # now call ansible if configured
-  return run_ansible_playbook($cluster_configs, $hosts);
-# this generates an ansible inventory and runs ansible
-sub run_ansible_playbook {
-  my ($cluster_configs, $hosts) = @_;
-
-  # this could use a specific set module
-  my %type_set = ();
-  foreach my $host_name (sort keys %{$hosts}) {
-    $type_set{$cluster_configs->{$host_name}{type}} = 1;
-  }
-
-  open (INVENTORY, '>', "$work_dir/inventory") or die "Could not open inventory file for writing";
-
-  foreach my $type (keys %type_set){
-    print INVENTORY "[$type]\n";
-    foreach my $host_name (sort keys %{$hosts}) {
-      my $cluster_config = $cluster_configs->{$host_name};
-      my $host = $hosts->{$host_name};
-      if ($type ne $cluster_config->{type}){
-        next; 
-      }
-      print INVENTORY "$host_name\tansible_ssh_host=$host->{ip}\tansible_ssh_user=$host->{user}\tansible_ssh_private_key_file=$host->{key}\n";
-    } 
-  }
-  print INVENTORY "[all_groups:children]\n";
-  foreach my $type (keys %type_set) {
-    print INVENTORY "$type\n";
-  }
-  close (INVENTORY); 
-
-
-  if (not exists $configs->{ANSIBLE_PLAYBOOK}){
-	  return 0;
-  }
-  # run playbook command
-  return run_ansible_command();
-}
-
-sub run_ansible_command{
-  my $command = "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}";
-  print "Ansible command: $command";
-  return system($command);
-}
-
-
-      # check whether there actually are second pass scripts
-      if (not exists $cluster_configs->{$host_name}{second_pass_scripts}){
-	$cont = 0;
-        next; 
-      }
 
 # SUBROUTINES
 
