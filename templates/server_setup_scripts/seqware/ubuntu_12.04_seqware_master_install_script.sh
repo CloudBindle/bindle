@@ -19,6 +19,8 @@ mkdir -p ~seqware/provisioned-bundles
 mkdir -p ~seqware/workflow-dev
 mkdir -p ~seqware/.seqware
 mkdir -p ~seqware/gitroot/seqware
+
+sudo usermod -aG sudo hdfs
 sudo -u hdfs hadoop fs -mkdir -p /user/seqware
 sudo -u hdfs hadoop fs -chown -R seqware /user/seqware
 
