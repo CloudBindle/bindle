@@ -8,6 +8,7 @@
     * [Configuration Profiles](#configuration-profiles)
     * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
 * [Running the Cluster Launcher](#running-the-cluster-launcher)
+* [Destroying the Clusters](#destroying-the-clusters)
 * [SeqWare Examples](#seqware-examples)
     * [SeqWare - Single Node](#seqware---single-node)
         * [Oozie Hadoop](#oozie-hadoop)
@@ -295,6 +296,18 @@ like this(please note that you must use this way if you are launching a cluster 
     vim vagrant_cluster_launch.json
     # now to launch the node
     perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
+    
+## Destroying the Clusters
+
+The script that takes care of the process required to terminate a cluster is located at 
+"bin/launcher/destroy_cluster.pl". To destroy a cluster, simply run the following command:
+
+     # assumes ur in the Bindle directory
+     perl bin/launcher/destroy_cluster.pl --cluster-name <target-dir>
+     
+The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). This will remove
+the cluster from the appropriate environment but it is advised to check the web interface to make sure
+that the nodes are deleted.
 
 ## SeqWare Examples
 
