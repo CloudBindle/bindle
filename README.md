@@ -286,7 +286,7 @@ The wrapper script that controls the system described above is called
     # for VirtualBox
     perl bin/launcher/launch_cluster.pl --use-virtualbox --use-default-config --launch-cluster <cluster-name>
 
-<clustername> represents the cluster block you want to run from the config file (Ex: cluster1).
+"clustername" represents the cluster block you want to run from the config file (Ex: cluster1).
 Please note that you can still use the old way to set up configurations. That is, copying the template file over 
 like this(please note that you must use this way if you are launching a cluster using virtualbox):
 
