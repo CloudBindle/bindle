@@ -237,11 +237,17 @@ Next, fill in your various platform settings depending on what cloud provider yo
     
     vim config/os.cfg
     
-
+   
 At this point you will also want to create a new cluster by copy-pasting cluster1
-block and modifying the configs or you can simply modify cluster1 configs and use that.
+block and modifying the configs for it or you can simply modify cluster1 configs and use that.
 Feel free to change the number of nodes (min 1, max recommended 11). Please note that 
 if the number of nodes is 1, it means that there will be 1 master and 0 worker nodes.
+
+Please note for VirtualBox, you will need to use the old configuration technique:
+    
+    cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    
+Next, you can fill in the required information and move on to the next step.
 
 If you use the template recommended above you will have a 1 node Hadoop cluster
 (with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
@@ -282,13 +288,13 @@ The wrapper script that controls the system described above is called
 
 <clustername> represents the cluster block you want to run from the config file (Ex: cluster1).
 Please note that you can still use the old way to set up configurations. That is, copying the template file over 
-like this:
+like this(please note that you must use this way if you are launching a cluster using virtualbox):
 
-   cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-   # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
-   vim vagrant_cluster_launch.json
-   # now to launch the node
-   perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
+    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
+    # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
+    vim vagrant_cluster_launch.json
+    # now to launch the node
+    perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
 
 ## SeqWare Examples
 
