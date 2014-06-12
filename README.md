@@ -155,7 +155,7 @@ based on the error you will need to remove the string 'URL' from the end of the
 variable.
 
 The bin/launcher/launch_cluster.pl Perl script requires Perl (of course) and also a
-few modules.  They should already be installed if you went through install bindle dependcies 
+few modules.  They should already be installed if you went through install bindle dependencies 
 but if not, you can install these using [CPAN](http://www.cpan.org/) or via
 your distribution's package management system. Google "cpan perl install" for
 more information if you're unfamiliar with installing Perl packages. I highly
