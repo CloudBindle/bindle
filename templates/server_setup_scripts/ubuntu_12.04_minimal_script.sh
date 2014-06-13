@@ -1,13 +1,5 @@
 #!/bin/bash -vx
 
-# workaround for Korea's cloud
-if [ -d "/maha" ]; then
-umount /maha
-  perl -p -i -e 's/uid=1000,gid=1000/defaults/' /etc/fstab
-  mount /maha
-  mount -o rw,bind `mount | grep maha\/tmp | awk '{print $1}'` /mnt
-fi
-
 # workaround for Tokyo's cloud
 if [ -d "/nshare4" ]; then
 dir=/nshare4/vmtmp/$RANDOM

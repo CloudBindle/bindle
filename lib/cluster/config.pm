@@ -62,7 +62,7 @@ sub read_default_configs {
 #reads in the json file and gets rid of all the commented lines
 sub read_json_config {
   my ($config_file) = @_;
-  open IN, "<$config_file" or die "No template JSON file detected in this directory!";
+  open IN, '<', $config_file or die "No template JSON file detected in this directory!";
   my $json_txt = "";
 
   while(<IN>) {
@@ -124,13 +124,15 @@ sub extract_general_config {
   
   my $pem_file = $default_configs->param('platform.ssh_key_name');
   if ($launch_vcloud){
-    $general_config->{'VCLOUD_USER_NAME'} = $default_configs->param('platform.ssh_username');
+      $general_config->{'VCLOUD_USER_NAME'} = $default_configs->param('platform.ssh_username');
+      $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file;
   }
   else{
-    $general_config->{$selected_platform.'_SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
+      $general_config->{$selected_platform.'_SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
+      $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file.".pem";
   }
   
-  $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file.".pem";
+
   
   return $general_config;
 }

@@ -53,7 +53,7 @@ foreach my $dev (@list) {
     my $mount = system("bash -c 'mkdir -p /$dev_name && mount $dev /$dev_name' && chmod a+rwx /$dev_name");
     if ($mount) { print " UNABLE TO MOUNT $dev on /$dev_name\n"; }
   } else {
-    print " NOT MOUTING SINCE ALREADY MOUNTED!\n";
+    print " NOT MOUNTING SINCE ALREADY MOUNTED!\n";
   }
   my $mount_path = find_mount_path($dev);
   # if ecryptfs was success, the mount path gets encrypted added to it

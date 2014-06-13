@@ -121,7 +121,7 @@ Install dependencies:
 Install bindle dependencies:
 
       sudo apt-get update
-      sudo apt-get install libjson-perl libtemplate-perl make gcc
+      sudo apt-get install libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
 
 
 Install Vagrant using the package from their
@@ -147,7 +147,8 @@ based on the error you will need to remove the string 'URL' from the end of the
 variable.
 
 The bin/launcher/launch_cluster.pl Perl script requires Perl (of course) and also a
-few modules.  You can install these using [CPAN](http://www.cpan.org/) or via
+few modules.  They should already be installed if you went through install bindle dependencies 
+but if not, you can install these using [CPAN](http://www.cpan.org/) or via
 your distribution's package management system. Google "cpan perl install" for
 more information if you're unfamiliar with installing Perl packages. I highly
 recommend using PerlBrew to simplify working with Perl dependencies if you
@@ -294,7 +295,7 @@ like this(please note that you must use this way if you are launching a cluster 
 The script that takes care of the process required to terminate a cluster is located at 
 "bin/launcher/destroy_cluster.pl". To destroy a cluster, simply run the following command:
 
-     # assumes ur in the Bindle directory
+     # assumes you are in the Bindle directory
      perl bin/launcher/destroy_cluster.pl --cluster-name <target-dir>
      
 The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). This will remove
