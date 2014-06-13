@@ -90,14 +90,14 @@ HelloWorld workflow from SeqWare on the following configurations and platforms:
 
 TODO: we need to update this for the 1.2 release
 
-| *Configuration name*                                              | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) |
-|-------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|:-----------:|
-|*vagrant_cluster_launch.seqware.install.sge_cluster.json.template* | &#x2713;         | &#x2713; |                      |            | |
-|*vagrant_cluster_launch.seqware.install.sge_node.json.template*    | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | |
-|*vagrant_cluster_launch.seqware.sge_cluster.json.template*         | &#x2713;         | &#x2713; |                      |            | |
-|*vagrant_cluster_launch.seqware.sge_node.json.template*            | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | |
-|*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713; | &#x2713; | &#x2713; | NA | &#x2717; (NFS blocked) |
-|*vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template*      | &#x2713; | &#x2713; | &#x2713; | &#x2713; | &#x2713; |
+| *Configuration name*                                                          | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) | OpenStack (OICR - IceHouse) |
+|-------------------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|:-------------------------:|:----------------------------:|
+|*vagrant_cluster_launch.seqware.install.sge_cluster.json.template*             | &#x2713;         | &#x2713; |                      |            |                           |                             |
+|*vagrant_cluster_launch.seqware.install.sge_node.json.template*                | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |                           |                             |
+|*vagrant_cluster_launch.seqware.sge_cluster.json.template*                     | &#x2713;         | &#x2713; |                      |            |                           |                             |
+|*vagrant_cluster_launch.seqware.sge_node.json.template*                        | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |                           |                             |
+|*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713;         | &#x2713; | &#x2713;             | NA         | &#x2717; (NFS blocked)    |                             |
+|*vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template*      | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | &#x2713;                  |                             |
 
 ## Build & Source Control
 
@@ -128,8 +128,8 @@ Install Vagrant using the package from their
 [site](http://downloads.vagrantup.com/) that is correct for your platform.  For
 example, I used the following Ubuntu 12.04 64-bit:
 
-    wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.4.3_x86_64.deb
-    sudo dpkg -i vagrant_1.4.3_x86_64.deb
+    wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.deb 
+    sudo dpkg -i vagrant_1.6.3_x86_64.deb
 
 You then need to install plugins to handle AWS, vCloud, and/or OpenStack. The
 Virtualbox provider is available out of the box with Vagrant. You do this step
@@ -138,14 +138,6 @@ as the user that will run Vagrant and the SeqWare Vagrant wrapper.
     vagrant plugin install vagrant-aws
     vagrant plugin install vagrant-openstack-plugin --plugin-version 0.4.1
     vagrant plugin install vagrant-vcloud
-
-Unfortunately, the current version of the vagrant-openstack-plugin has an issue
-with the new multiple SSH key implementation in Vagrant 1.4.0. You will need to
-either use an earlier version of Vagrant of manually install a workaround
-(courtesy of https://github.com/cloudbau/vagrant-openstack-plugin/issues/38 ):
-
-    wget https://raw.github.com/cloudbau/vagrant-openstack-plugin/48eac2932fa16ccd5fab2e1d2e0d04047f3be7bd/lib/vagrant-openstack-plugin/action/sync_folders.rb
-    mv sync_folders.rb ~/.vagrant.d/gems/gems/vagrant-openstack-plugin-0.3.0/lib/vagrant-openstack-plugin/action/
 
 
 The current version of the vagrant-vcloud plugin needs to be running with 
@@ -184,10 +176,10 @@ There have been some reports of problems with the latest version of Vagrant
 and Vagrant plugins for OpenStack and/or AWS.  Here is what we currently use on
 Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
-* Vagrant: 1.4.3
+* Vagrant: 1.6.3
 * Vagrant plugins:
     * vagrant-aws (0.4.1)
-    * vagrant-openstack-plugin (0.4.1)
+    * vagrant-openstack-plugin (0.7.0)
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
