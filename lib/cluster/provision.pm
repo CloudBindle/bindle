@@ -87,12 +87,13 @@ sub figure_out_sge_host_str {
 sub make_exports_str {
   my ($hosts) = @_;
   my $result = "";
+  my $count = 1;
   foreach my $host (sort keys %{$hosts}) {
     my $pip = $hosts->{$host}{pip};
     $result .= "
-/home $pip(rw,sync,no_root_squash,no_subtree_check)
-/mnt/home $pip(rw,sync,no_root_squash,no_subtree_check)
-/mnt/datastore $pip(rw,sync,no_root_squash,no_subtree_check)
+/home $pip(rw,fsid=".$count++.",sync,no_root_squash,no_subtree_check)
+/mnt/home $pip(rw,fsid=".$count++.",sync,no_root_squash,no_subtree_check)
+/mnt/datastore $pip(rw,fsid=".$count++.",sync,no_root_squash,no_subtree_check)
 ";
   }
   print "EXPORT: $result\n";
@@ -157,7 +158,7 @@ sub run_provision_files {
         my $scripts = $cluster_configs->{$host_name}{provision_files};
         my $host = $hosts->{$host_name};
         say "  PROVISIONING FILES TO HOST $host_name"; 
-        if ($launch_vcloud || $use_rsync){
+        if ($use_rsync){
             run("rsync -e \"ssh -i $host->{key}\" -avz $work_dir/$host_name/ $host->{user}".'@'."$host->{ip}:/vagrant/");
         }
         push @threads, threads->create(\&provision_files_thread,

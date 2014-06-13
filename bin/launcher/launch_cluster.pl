@@ -243,8 +243,8 @@ sub autoreplace {
     $localconfigs = $configs;
   }
   print "AUTOREPLACE: $src $dest\n";
-  open IN, "<$src" or die "Can't open input file $src\n";
-  open OUT, ">$dest" or die "Can't open output file $dest\n";
+  open IN, '<', $src or die "Can't open input file $src\n";
+  open OUT, '>', $dest or die "Can't open output file $dest\n";
   while(<IN>) {
     foreach my $key (sort keys %{$localconfigs}) {
       my $value = $localconfigs->{$key};
