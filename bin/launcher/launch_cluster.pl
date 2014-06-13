@@ -129,7 +129,7 @@ else{
   } elsif ($launch_vcloud) {
     $launch_cmd = "vagrant up --provider=vcloud";
     $configs->{'BOX'} = "pancancer_1";
-    $configs->{'BOX_URL'} = "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
+    $configs->{'BOX_URL'} = "https://raw.github.com/CloudBindle/Bindle/develop/vagrant-box/vcloud/ubuntu_12_04.box"
   } else {
     die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
   }
