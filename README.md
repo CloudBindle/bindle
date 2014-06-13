@@ -270,8 +270,14 @@ choose not by the --vb-ram and --vb-cores options.
 ## Running the Cluster Launcher
 
 The wrapper script that controls the system described above is called
-"bin/launcher/launch_cluster.pl".  Examples of launching in different environments
- include:
+"bin/launcher/launch_cluster.pl". 
+
+Please note that a detailed explanation of the cluster launching process
+for virtual box is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/PANCAN_WORKFLOW_DEV_NODE_README.md).
+A detailed explanation of the cluster launching process for other environments 
+is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/PANCAN_CLUSTER_LAUNCH_README.md).
+
+Examples of launching in different environments include:
 
     # for AWS
     perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
