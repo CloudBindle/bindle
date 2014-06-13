@@ -85,20 +85,6 @@ supplemented) with Ansible support which should make it easier to maintain
 different clusters and node types.  We will also improve the seperation between
 SeqWare and the generic functionality of this cluster builder.
 
-The profiles been tested to work by provisioning a cluster and running the
-HelloWorld workflow from SeqWare on the following configurations and platforms:
-
-TODO: we need to update this for the 1.2 release
-
-| *Configuration name*                                                          | OpenStack (OICR) | AWS      | vCloud (EBI Embassy) | VirtualBox | OpenStack (BioNimbus PDC) | OpenStack (OICR - IceHouse) |
-|-------------------------------------------------------------------------------|:----------------:|:--------:|:--------------------:|:----------:|:-------------------------:|:----------------------------:|
-|*vagrant_cluster_launch.seqware.install.sge_cluster.json.template*             | &#x2713;         | &#x2713; |                      |            |                           |                             |
-|*vagrant_cluster_launch.seqware.install.sge_node.json.template*                | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |                           |                             |
-|*vagrant_cluster_launch.seqware.sge_cluster.json.template*                     | &#x2713;         | &#x2713; |                      |            |                           |                             |
-|*vagrant_cluster_launch.seqware.sge_node.json.template*                        | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   |                           |                             |
-|*vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template*   | &#x2713;         | &#x2713; | &#x2713;             | NA         | &#x2717; (NFS blocked)    |                             |
-|*vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template*      | &#x2713;         | &#x2713; | &#x2713;             | &#x2713;   | &#x2713;                  |                             |
-
 ## Build & Source Control
 
 Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
@@ -136,7 +122,7 @@ Virtualbox provider is available out of the box with Vagrant. You do this step
 as the user that will run Vagrant and the SeqWare Vagrant wrapper.
 
     vagrant plugin install vagrant-aws
-    vagrant plugin install vagrant-openstack-plugin --plugin-version 0.4.1
+    vagrant plugin install vagrant-openstack-plugin 
     vagrant plugin install vagrant-vcloud
 
 
