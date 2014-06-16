@@ -125,12 +125,10 @@ sub extract_general_config {
   my $pem_file = $default_configs->param('platform.ssh_key_name');
   if ($launch_vcloud){
       $general_config->{'VCLOUD_USER_NAME'} = $default_configs->param('platform.ssh_username');
-      $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file;
   }
-  else{
-      $general_config->{$selected_platform.'_SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
-      $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file.".pem";
-  }
+
+  $general_config->{$selected_platform.'_SSH_PEM_FILE'} = "~/.ssh/".$pem_file.".pem";
+  $general_config->{'SSH_PRIVATE_KEY_PATH'} = "~/.ssh/".$pem_file.".pem";
   
 
   
