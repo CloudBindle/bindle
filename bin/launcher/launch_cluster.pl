@@ -151,7 +151,6 @@ setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
 cluster::setup->prepare_files($cluster_configs, $configs, $work_dir, $vb_ram, $vb_cores, @ebs_vols);
 
 launch_instances($cluster_configs) unless ($skip_launch);
-sleep 100;
 
 # FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them

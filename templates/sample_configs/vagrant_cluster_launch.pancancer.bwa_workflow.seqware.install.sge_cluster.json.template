@@ -40,9 +40,9 @@
     # whitelist option for devices to have volumes from being part of gluster
     # please specify the devices you want to be part of the white list and separate them with a comma
     # and make sure you have no spaces! (Ex: "a1,a2,f,g1")
-    "GLUSTER_DEVICE_WHITELIST": "a1,b,c",
+    "GLUSTER_DEVICE_WHITELIST": "b,c",
     # path to directories you want to use to set up volumes incase you don't have any devices
-    "GLUSTER_DIRECTORYLIST_PATHS": "/mnt/volumes/gluster1,/mnt/volumes/gluster2",
+    "GLUSTER_DIRECTORY_PATH": "/mnt/volumes/gluster1",
     # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
     "SEQWARE_VERSION": "1.0.13"
   },
