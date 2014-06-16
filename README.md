@@ -6,6 +6,8 @@
     * [Note about Versions](#note-about-versions)
     * [Getting "Boxes"](#getting-boxes)
     * [Configuration Profiles](#configuration-profiles)
+      * [Filling in the config file](#filling-in-the-config-file)
+      * [Configuration for VirtualBox](#configuration-for-virtualbox)
     * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
 * [Running the Cluster Launcher](#running-the-cluster-launcher)
 * [Destroying the Clusters](#destroying-the-clusters)
@@ -218,11 +220,80 @@ on filling the config files, please refer to config/sample.cfg:
     
     vim config/os.cfg
     
-   
-At this point you will also want to create a new cluster by copy-pasting cluster1
+### Filling in the config file
+
+One thing you must keep in mind before filling in the config files is not to delete any of the default
+parameters you are not going to be needing. Simply, leave them blank if that is the case.
+
+#### Platform Specific Information
+
+This section of the config file contains all the information that is required to set up the platform.
+You need to fill in the parameters for the specific platform you want to launch clusters in by modifying either 
+os.cfg for OpenStack, aws.cfg for AWs, or vcloud.cfg for VCloud
+
+Let us go through the parameters that might confuse you when you are filling the config file. I will not be going 
+through the most obvious parameters (ie. user, apikey, etc):
+
+    [platform]
+    # can be either openstack(os) or aws or vcloud
+    type=os/aws/vcloud
+    
+    # asks for the name of your pem file. Please make sure you have the pem file under ~/.ssh on your launcher host
+    ssh_key_name=ap-oicr-2
+    
+    # asks for the type of node you want to launch (m1.small, m1.medium, m1.xlarge, etc)
+    instance_type=m1.xlarge
+    
+    # this list is to indicate the devices you want to use to setup volumes.
+    # to find out the list of devices you can use, execute “df | grep /dev/” on the launcher host. 
+    # DO NOT use any device that ends with "a" or "a" and a number following it(sda or sda1) because these are used for root partition
+    # Also, if you want to use all the available devices, please leave the list empty ('')
+    # Now, if you want to use "sdb" and "sdb1" then your list should look like 'b,b1'
+    gluster_device_whitelist='b,c'
+
+    # this list is to indicate the directories you want to use to set up volumes IF you don't have any devices to work with
+    # If you don't want to use directories, simply leave this parameter empty ('')
+    # If you don't have devices, include paths and folder name that can be used instead (Ex. '/mnt/volumes/gluster1,/mnt/volumes/gluster2')
+    gluster_directorylist_paths='/mnt/volumes/gluster1,/mnt/volumes/gluster2'
+    
+The other platform specific parameters are self explanatory. In the config file, there is a "fillmein" value which indicates that you
+defintely have to fill those in to have bindle working properly. The others are deafult values that you may use unless otherwise stated.
+
+#### Cluster Specific Information
+
+This information exists in small blocks name cluster1, cluster2, etc. These blocks contain essential information such as number of nodes,
+target_directory, the json_template file path, and floating ips which is specific to OpenStack only since the other 
+environments have the ability to generate the floating ips on their own.
+    
+Please note that you can create a new cluster by copy-pasting the existing cluster1
 block and modifying the configs for it or you can simply modify cluster1 configs and use that.
 Feel free to change the number of nodes (min 1, max recommended 11). Please note that 
-if the number of nodes is 1, it means that there will be 1 master and 0 worker nodes.
+if the number of nodes is 1, it means that there will be 1 master and 0 worker nodes. 
+Also, you need the same number of floating ips as the number of nodes if you are working with openstack.
+In addition, the list is separated by a comma and there is no need to put this list in quotations.
+An example cluster block will look something like this:
+
+    # Clusters are named cluster1, 2, 3 etc.
+    # When launching a cluster using launch_cluster.pl
+    # use the section name(cluster1 in this case) as a parameter to --launch-cluster
+    [cluster1]
+   
+    # this includes one master and four workers
+    number_of_nodes=4
+   
+    # specific to Openstack only; must have 4 floating ips since we need 4 nodes
+    floating_ips= 10.0.20.123,10.0.20.157,10.0.20.135,10.0.20.136
+   
+    # this specifies the output directory where everything will get installed on the launcher
+    target_directory = target-os-2
+   
+    #this contains the path to the json template file this cluster needs
+    json_template_file_path = templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template
+ 
+To use a specific cluster block, you need to use the section name of that block as a parameter to --launch-cluster when you
+are running the launch_cluster perl script.
+
+### Configuration for VirtualBox
 
 Please note for VirtualBox, you will need to use the old configuration technique:
     
