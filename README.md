@@ -208,12 +208,13 @@ configuration templates in:
 
     templates/sample_configs/
 
-Copy the file path of desired template(for example
+Please remember to copy the file path of desired template(for example
 templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
- and place it in the appropriate config file
+and place it in the appropriate config file described below.
 
-Next, fill in your various platform settings depending on what cloud provider you use
-(Vcloud(vcloud.cfg), Amazon(aws.cfg), or OpenStack(os.cfg)):
+Fill in your various platform settings depending on what cloud provider you use
+(Vcloud(vcloud.cfg), Amazon(aws.cfg), or OpenStack(os.cfg)). In order to get help
+on filling the config files, please refer to config/sample.cfg:
     
     vim config/os.cfg
     
@@ -227,7 +228,7 @@ Please note for VirtualBox, you will need to use the old configuration technique
     
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
     
-Next, you can fill in the required information and move on to the next step.
+You can fill in the required information and move on to the next step.
 
 If you use the template recommended above you will have a 1 node Hadoop cluster
 (with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
@@ -273,8 +274,9 @@ Examples of launching in different environments include:
     perl bin/launcher/launch_cluster.pl --use-virtualbox --use-default-config --launch-cluster <cluster-name>
 
 "clustername" represents the cluster block you want to run from the config file (Ex: cluster1).
+
 Please note that you can still use the old way to set up configurations. That is, copying the template file over 
-like this(please note that you must use this way if you are launching a cluster using virtualbox):
+like this(you must use this way if you are launching a cluster using virtualbox):
 
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
