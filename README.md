@@ -253,8 +253,8 @@ through the most obvious parameters (ie. user, apikey, etc):
 
     # this list is to indicate the directories you want to use to set up volumes IF you don't have any devices to work with
     # If you don't want to use directories, simply leave this parameter empty (gluster_directory_path=''). This should be the case for single node clusters
-    # If you don't have devices, include the path and folder name that can be used instead to set up the volumes for a multi-node cluster 
-    gluster_directory_path='/mnt/volumes/gluster'
+    # If you don't have devices, include the path and folder name that can be used instead to set up the volumes for a multi-node cluster: 
+    gluster_directory_path='--directorypath /mnt/volumes/gluster'
     
 The other platform specific parameters are self explanatory. In the config file, there is a "fillmein" value which indicates that you
 defintely have to fill those in to have bindle working properly. The others are deafult values that you may use unless otherwise stated.
