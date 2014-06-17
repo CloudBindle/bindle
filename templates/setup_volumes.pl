@@ -18,6 +18,8 @@ use Getopt::Long;
 my $out_file = "mount_report.txt";
 my $whitelist;
 my $gluster_directory_list;
+my @wlist;
+my @dir_list;
 
 GetOptions (
   "output=s" => \$out_file,
@@ -25,8 +27,18 @@ GetOptions (
   "directorylist=s" => \$gluster_directory_list,
 );
 
-my @wlist = read_list($whitelist);
-my @dir_list = read_list($gluster_directory_list);
+if (defined $whitelist){
+  @wlist = read_list($whitelist);
+}
+else{
+  @wlist = ();
+}
+if (defined $gluster_directory_list){
+  @dir_list = read_list($gluster_directory_list);
+}
+else{
+  @dir_list = ();
+}
 
 my $mounted_device = 0;
 
@@ -96,6 +108,7 @@ if (not $mounted_device){
   }
 }
 
+$final_list //= "";
 
 # OUTPUT REPORT
 
@@ -119,21 +132,16 @@ sub read_list {
 sub whitelist {
   my ($dev, @whlist) = @_;
 
-  if (scalar @whlist == 0){
-    print "WARNING: USING ALL THE DEVICES TO SET UP VOLUMES!!!! YOU DIDN'T SPECIFY ANY WHITELIST DEVICES!!!!\n";
-    return 1;
-  }
-  else { 
-    foreach (@whlist) {
-      print "DEV $dev\n";
-      my ($option1,$option2,$option3) = ("/dev/sd$_", "/dev/hd$_","/dev/xvd$_");
-      print "option1 $option1\n";
-      if ($dev =~ m/^$option1|$option2|$option3$/i){
-        print " WHITELIST DEV $dev\n";
-        return 1;
-      }
+  foreach (@whlist) {
+    print "DEV $dev\n";
+    my ($option1,$option2,$option3) = ("/dev/sd$_", "/dev/hd$_","/dev/xvd$_");
+    print "option1 $option1\n";
+    if ($dev =~ m/^$option1|$option2|$option3$/i){
+      print " WHITELIST DEV $dev\n";
+      return 1;
     }
   }
+  
   return 0;
 }
 

@@ -39,10 +39,12 @@
     "AWS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
     # whitelist option for devices to have volumes from being part of gluster
     # please specify the devices you want to be part of the white list and separate them with a comma
-    # and make sure you have no spaces! (Ex: "a1,a2,f")
-    "GLUSTER_DEVICE_WHITELIST": "b",
+    # and make sure you have no spaces! (Ex: "--whitelist a1,a2,f")
+    # If you don't want to use any devices, leave it empty ("")
+    "GLUSTER_DEVICE_WHITELIST": "--whitelist b",
     # path to directories you want to use to set up volumes incase you don't have any devices
-    "GLUSTER_DIRECTORY_PATH": "mnt/vol/gluster",
+    # if you don't want any directories, leave it empty ("")
+    "GLUSTER_DIRECTORY_PATH": "/mnt/vol/gluster",
 
     # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
     "SEQWARE_VERSION": "1.0.13"
