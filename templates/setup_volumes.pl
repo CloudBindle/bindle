@@ -24,7 +24,7 @@ my @dir_list;
 GetOptions (
   "output=s" => \$out_file,
   "whitelist=s" => \$whitelist,
-  "directorylist=s" => \$gluster_directory_list,
+  "directorypath=s" => \$gluster_directory_list,
 );
 
 if (defined $whitelist){
@@ -35,6 +35,7 @@ else{
 }
 if (defined $gluster_directory_list){
   @dir_list = read_list($gluster_directory_list);
+  make_directories(@dir_list);
 }
 else{
   @dir_list = ();
@@ -126,6 +127,14 @@ sub read_list {
   my @list = split /,/, $data;
 
   return @list;
+}
+
+# makes the directories cased on the list
+sub make_directories {
+  my (@directories) = @_;
+  foreach my $dir (@directories){
+    system("mkdir -p $dir");
+  }
 }
 
 # determines if the device is permitted to be used as a volume
