@@ -117,6 +117,8 @@ sub setup_vagrantfile {
         # HACK: this is a hack because we don't properly templatize the Vagrantfile... I'm doing this to eliminate empty os.network and os.floating_ip which cause problems on various OpenStack clouds
         $full_output =~ s/os.network = "<FILLMEIN>"//;
         $full_output =~ s/os.network = ""//;
+	$full_output =~ s/os.networks = \[ "<FILLMEIN>" \]/os.networks = \[ \]/;
+	$full_output =~ s/os.networks = \[ "" \]/os.networks = \[ \]/;
         $full_output =~ s/os.floating_ip = "<FILLMEIN>"//;
         $full_output =~ s/os.floating_ip = ""//;
         open my $vout, '>', $node_output;

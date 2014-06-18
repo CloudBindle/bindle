@@ -63,7 +63,7 @@
       os.user_data = "#cloud-config\nmanage_etc_hosts: True"
     end
     
-    %{custom_hostname}.vm.provider :vcloud do |vcloud|
+    %{custom_hostname}.vm.provider :vcloud do |vcloud, override|
       vcloud.hostname = "%{VCLOUD_HOSTNAME}"
       vcloud.username = "%{VCLOUD_USERNAME}"
       vcloud.password = "%{VCLOUD_PASSWORD}"
@@ -78,9 +78,9 @@
 #      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
 #      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
        vcloud.network_bridge=true
+       override.ssh.private_key_path = "%{VCLOUD_SSH_PEM_FILE}"
     end
 
-    config.ssh.private_key_path = "%{SSH_PRIVATE_KEY_PATH}"
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
     %{custom_hostname}.vm.network :forwarded_port, host: 8080, guest: 8080
     %{custom_hostname}.vm.network :forwarded_port, host: 8888, guest: 8888

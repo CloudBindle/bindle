@@ -75,7 +75,7 @@ GetOptions (
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'> NOTE: this is only used if you are not using the config file!] [--config-file <config json file, default is 'vagrant_cluster_launch.json'> NOTE: this is only used if you are not using the new config files!] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--use-default-configs this flag is just to distinguish between whether you are using the new way or old way to insert the configuration. Use this flag if you are using the new way] [--launch-cluster <cluster-name of the cluster you want to launch> NOTE: this is used if you are using the config files instead of the json template] [--use-rsync this flag is used if you want to use the rsync line] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'> NOTE: this is only used if you are not using the config file!] [--config-file <config json file, default is 'vagrant_cluster_launch.json'> NOTE: this is only used if you are not using the new config files!] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--use-default-config  including this flag means you are using the .cfg file to set configurations! So, don't forget to include this flag if you are using a .cfg file] [--launch-cluster <cluster-name of the cluster you want to launch> NOTE: this is used if you are using the config files instead of the json template] [--use-rsync this flag is used if you want to use the rsync line] [--skip-launch] [--help]\n";
 }
 
 $launch_command .= cluster::config->set_launch_command($launch_aws, $launch_os, $launch_vcloud);
@@ -135,7 +135,7 @@ if ($run_ansible){
   } elsif ($launch_vcloud) {
     $launch_cmd = "vagrant up --provider=vcloud";
     $configs->{'BOX'} = "pancancer_1";
-    $configs->{'BOX_URL'} = "https://raw.github.com/SeqWare/vagrant/feature/jmg-vagrant-vcloud/vcloudTest/ubuntu_12_04.box"
+    $configs->{'BOX_URL'} = "https://raw.github.com/CloudBindle/Bindle/develop/vagrant-box/vcloud/ubuntu_12_04.box"
   } else {
     die "Don't understand the launcher type to use: AWS, OpenStack, VirtualBox, or vCloud. Please specify with a --use-* param\n";
   }
@@ -157,7 +157,6 @@ setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
 cluster::setup->prepare_files($cluster_configs, $configs, $work_dir, $vb_ram, $vb_cores, @ebs_vols);
 
 launch_instances($cluster_configs) unless ($skip_launch);
-sleep 100;
 
 # FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them
@@ -249,8 +248,8 @@ sub autoreplace {
     $localconfigs = $configs;
   }
   print "AUTOREPLACE: $src $dest\n";
-  open IN, "<$src" or die "Can't open input file $src\n";
-  open OUT, ">$dest" or die "Can't open output file $dest\n";
+  open IN, '<', $src or die "Can't open input file $src\n";
+  open OUT, '>', $dest or die "Can't open output file $dest\n";
   while(<IN>) {
     foreach my $key (sort keys %{$localconfigs}) {
       my $value = $localconfigs->{$key};
