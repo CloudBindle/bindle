@@ -16,6 +16,13 @@ GetOptions (
   "dir-map=s" => \$dir_map,
 );
 
+my $vol_report = `cat /vagrant/volumes_report.txt`;
+# if there are no volumes present, don't set up gluster volumes!
+if ($vol_report eq ""){
+  print "Not Setting up gluster services because no gluster devices/directory were specified in the config file!\n";
+  exit;
+}
+
 #my $cmd = "gluster peer status; gluster volume info; gluster volume status; gluster volume create gv0 replica 2 transport tcp";
 # turn off replicate for now
 my $cmd = "gluster peer status; gluster volume info; gluster volume status; sleep 30; gluster volume create gv0 transport tcp";

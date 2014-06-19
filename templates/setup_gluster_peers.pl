@@ -14,6 +14,14 @@ GetOptions (
   "host=s" => \$host
 );
 
+my $vol_report = `cat /vagrant/volumes_report.txt`;
+# if there are no volumes present, don't set up gluster volumes!
+if ($vol_report eq ""){
+  print "Not Setting up gluster peers because no gluster devices/directory were specified in the config file!\n";
+  exit;
+}
+
+
 my $out_txt;
 
 open IN, "<$host" or die "Cannot open file $host\n";
