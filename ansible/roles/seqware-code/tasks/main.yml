@@ -101,3 +101,15 @@
       
 - name:  Create home link
   file: state=link src=~{{ user_name }} dest=/home/{{ user_name }} owner={{ user_name }}
+
+
+- name:  Setup OOZIE_URL for oozie CLI 
+  sudo: yes
+  lineinfile: 
+    dest: ~{{ user_name }}/.bash_profile
+    create: yes
+    line: 'export OOZIE_URL=http://master:11000/oozie'
+    state: present
+    insertafter: EOF
+    owner: "{{ user_name }}"
+    
