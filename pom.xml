@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.bindle</groupId>
   <artifactId>Bindle</artifactId>
-  <packaging>rar</packaging>
+  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>Bindle</name>
   <url>http://maven.apache.org</url>
