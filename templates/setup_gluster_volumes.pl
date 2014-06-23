@@ -11,13 +11,18 @@ use Getopt::Long;
 
 my $dir_map;
 my $output;
-my $blacklist;
-my $whitelist;
 
 GetOptions (
   "dir-map=s" => \$dir_map,
   "output=s" => \$output,
 );
+
+my $vol_report = `cat /vagrant/volumes_report.txt`;
+# if there are no volumes present, don't set up gluster volumes!
+if ($vol_report eq ""){
+  print "Not Setting up gluster volumes because no gluster devices/directory were specified in the config file!\n";
+  exit;
+}
 
 my $out_txt;
 

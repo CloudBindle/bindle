@@ -329,9 +329,9 @@ The wrapper script that controls the system described above is called
 "bin/launcher/launch_cluster.pl". 
 
 Please note that a detailed explanation of the cluster launching process
-for virtual box is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/PANCAN_WORKFLOW_DEV_NODE_README.md).
+for virtual box is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/workflow_dev_node_with_bindle.md)
 A detailed explanation of the cluster launching process for other environments 
-is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/PANCAN_CLUSTER_LAUNCH_README.md).
+is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/prod_cluster_with_bindle.md)
 
 Examples of launching in different environments include:
 
