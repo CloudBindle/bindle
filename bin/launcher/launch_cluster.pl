@@ -181,7 +181,7 @@ sub launch_instances {
         push (@threads, $thr);
         # attempt to prevent RequestLimitExceeded on Amazon by sleeping between thread launch 
         # http://docs.aws.amazon.com/AWSEC2/latest/APIReference/api-error-codes.html
-        sleep 30;
+        sleep 90;
     }
     print "  ALL LAUNCH THREADS STARTED\n";
     # Now wait for the threads to finish; this will block if the thread isn't terminated

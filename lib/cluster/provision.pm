@@ -245,7 +245,7 @@ sub provision_files_thread {
 
         # set the current host before processing file
         setup_os_config_scripts_list($script, $tmp_script_name);
-        run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script}, $host_name);
+        run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $tmp_script_name ".$host->{user}."@".$host->{ip}.":".$scripts->{$script}, $host_name, 5);
         system("rm $tmp_script_name");
     }
     
@@ -264,9 +264,10 @@ sub provision_script_list_thread {
         # set the current host before processing file
         $local_configs->{'HOST'} = $host_name;
         setup_os_config_scripts_list($script, "$work_dir/scripts/config_script.$host_name\_$script_name", $local_configs);
-        run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo mkdir -p /vagrant_scripts", $host_name);
-        run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo chmod a+rwx /vagrant_scripts", $host_name);
-        run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name && ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash -i /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
+        run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo mkdir -p /vagrant_scripts", $host_name, 5);
+        run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo chmod a+rwx /vagrant_scripts", $host_name, 5);
+        run("scp -P ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." $work_dir/scripts/config_script.$host_name\_$script_name ".$host->{user}."@".$host->{ip}.":/vagrant_scripts/config_script.$host_name\_$script_name", $host_name, 5);
+        run("ssh -p ".$host->{port}." -o StrictHostKeyChecking=no -i ".$host->{key}." ".$host->{user}."@".$host->{ip}." sudo bash -i /vagrant_scripts/config_script.$host_name\_$script_name", $host_name);
     }
 }
 
@@ -306,7 +307,11 @@ sub autoreplace {
 }
 
 sub run {
-    my ($cmd, $hostname) = @_;
+    my ($cmd, $hostname, $retries) = @_;
+
+    if (!defined($retries) || $retries < 0) {
+      $retries = 0;
+    }
 
     my $outputfile = "";
     # by default pipe to /dev/null if no hostname is specified, this 
@@ -321,11 +326,19 @@ sub run {
     say "RUNNING: $final_cmd";
     if ($final_cmd =~ /vagrant up/) {
         no autodie qw(system);
-        system($final_cmd);
+        while($retries >= 0) { 
+          if (!system($final_cmd)) { last; }
+          $retries--;
+          sleep 10;
+        }
         say 'launched machine!';
     }
     else {
-        system($final_cmd);
+        while($retries >=0) {
+          if (!system($final_cmd)) { last; }
+          $retries--;
+          sleep 10;
+        }
     }
 }
 
