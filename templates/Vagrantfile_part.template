@@ -29,10 +29,17 @@
       }
       aws.access_key_id = "%{AWS_KEY}"
       aws.secret_access_key = "%{AWS_SECRET_KEY}"
+      # requires patching for AWS spot instances
+      #aws.spot_instance = true
+      #aws.spot_max_price = 0.681
       aws.keypair_name = "%{AWS_SSH_KEY_NAME}"
       aws.user_data = File.read("user_data.txt")
+      aws.region = "%{AWS_REGION}"
+      aws.availability_zone = %{AWS_ZONE}
       aws.ami = "%{AWS_IMAGE}"
       aws.instance_type = "%{AWS_INSTANCE_TYPE}"
+      aws.instance_ready_timeout = 6000
+      %{AWS_EBS_VOLS}
       override.ssh.username = "%{AWS_SSH_USERNAME}"
       override.ssh.private_key_path = "%{AWS_SSH_PEM_FILE}"
     end
@@ -50,12 +57,13 @@
       override.ssh.username = "%{OS_SSH_USERNAME}"
       override.ssh.private_key_path = "%{OS_SSH_PEM_FILE}"
       os.network = "%{OS_NETWORK}"
+      os.networks = [ "%{OS_NETWORK}" ]   
       os.floating_ip = "%{OS_FLOATING_IP}"
       os.server_name = "%{custom_hostname}"
       os.user_data = "#cloud-config\nmanage_etc_hosts: True"
     end
     
-    %{custom_hostname}.vm.provider :vcloud do |vcloud|
+    %{custom_hostname}.vm.provider :vcloud do |vcloud, override|
       vcloud.hostname = "%{VCLOUD_HOSTNAME}"
       vcloud.username = "%{VCLOUD_USERNAME}"
       vcloud.password = "%{VCLOUD_PASSWORD}"
@@ -64,11 +72,13 @@
       vcloud.vdc_name = "%{VCLOUD_VDC_NAME}"
 
       vcloud.catalog_name = "%{VCLOUD_CATALOG_NAME}"
-      vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
+      #vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
       vcloud.vdc_network_name = "%{VCLOUD_VDC_NETWORK_NAME}"
 
 #      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
 #      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
+       vcloud.network_bridge=true
+       override.ssh.private_key_path = "%{VCLOUD_SSH_PEM_FILE}"
     end
 
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
