@@ -39,7 +39,9 @@ cd ~seqware/gitroot
 git clone https://github.com/SeqWare/seqware.git
 # download various SeqWare components
 export SEQWARE_VERSION="%{SEQWARE_VERSION}"
+cd seqware
 git checkout ${SEQWARE_VERSION}
+cd ..
 
 # setup bash_profile for seqware
 echo "export MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" >> ~seqware/.bash_profile
