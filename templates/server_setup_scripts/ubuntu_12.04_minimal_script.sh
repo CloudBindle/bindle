@@ -83,6 +83,9 @@ curl -s http://archive.cloudera.com/cdh4/ubuntu/precise/amd64/cdh/archive.key | 
 
 # get packages
 apt-get update
+
+### R
+apt-get install -y r-base
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 cloudera-manager-server-db cloudera-manager-server cloudera-manager-daemons
 #apt-get -q -y --force-yes install oracle-j2sdk1.6 hadoop-0.20-conf-pseudo hue hue-server hue-plugins oozie oozie-client postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2 git maven sysv-rc-conf hbase-master xfsprogs
 # get Java
