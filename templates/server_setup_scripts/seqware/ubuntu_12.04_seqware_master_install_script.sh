@@ -37,6 +37,11 @@ cd gitflow
 # checkout seqware
 cd ~seqware/gitroot
 git clone https://github.com/SeqWare/seqware.git
+# download various SeqWare components
+export SEQWARE_VERSION="%{SEQWARE_VERSION}"
+cd seqware
+git checkout ${SEQWARE_VERSION}
+cd ..
 
 # setup bash_profile for seqware
 echo "export MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" >> ~seqware/.bash_profile
@@ -54,8 +59,6 @@ su - seqware -c 'cd ~seqware/gitroot/seqware; git hf init; git hf update'
 #su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BRANCH_CMD}'
 #su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BUILD_CMD} 2>&1 | tee build.log'
 
-# download various SeqWare components
-export SEQWARE_VERSION="%{SEQWARE_VERSION}"
 # since we're not building, go ahead and setup these dirs as the place to download jars
 mkdir -p ~seqware/gitroot/seqware/seqware-distribution/target/
 mkdir -p ~seqware/gitroot/seqware/seqware-webservice/target/
