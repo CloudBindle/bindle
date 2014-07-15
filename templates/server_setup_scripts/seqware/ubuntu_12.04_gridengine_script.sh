@@ -73,7 +73,13 @@ qconf -aattr queue slots "[$hostName=`nproc`]" main.q
 qconf -mattr queue load_thresholds "np_load_avg=`nproc`" main.q
 
 # Set the amount of memory as the total memory on the system
-qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` $hostName
+# unless it is the master node. For master node, amount of memory = 75%
+if [ "$hostName" != "master" ]
+then
+    qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` $hostName
+else
+    qconf -rattr exechost complex_values h_vmem=`expr $(expr $(free -b |grep Mem | cut -d" " -f5) / 4) \* 3` $hostName
+fi
 
 done
 # loop ends here!
