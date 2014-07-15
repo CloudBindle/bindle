@@ -53,6 +53,7 @@ my $help = (scalar @ARGV == 0)? 1 : 0;
 my $def_config = 0;
 my $json_template_file = "";
 my $use_rsync = 0;
+my $avoid_master = 0;
 
 GetOptions (
     "use-aws"        => \$launch_aws,
@@ -88,7 +89,6 @@ if ($def_config){
   #also reads in all the default configurations for the appropriate platfrom 
   #from the .cfg file in the config folder
   ($configs, $cluster_configs, $work_dir, $json_template_file) = cluster::config->read_default_configs($cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb);
-  
   system("cp $json_template_file $json_config_file");
 
 }
@@ -108,6 +108,8 @@ else{
       $cluster_configs->{$names[$_]} = $node_config_copy;
     }
   }
+
+
   # define the "boxes" used for each provider
   # TODO: these are hardcoded and may change
   # you can override for VirtualBox only via the json config
@@ -135,6 +137,8 @@ else{
   }
 }
 
+# Avoid using master to run jobs if more than two nodes
+$avoid_master = 1 if (defined $cluster_configs->{'worker1'});
 
 # dealing with defaults from the config including various SeqWare-specific items
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
@@ -154,7 +158,7 @@ launch_instances($cluster_configs) unless ($skip_launch);
 
 # FIXME: this is hacking on the configs object which is not good
 # this finds all the host IP addresses and then runs the second provisioning on them
-cluster::provision->provision_instances($configs, $cluster_configs, $work_dir, $launch_vcloud, $use_rsync) unless ($skip_launch);
+cluster::provision->provision_instances($configs, $cluster_configs, $work_dir, $launch_vcloud, $use_rsync, $avoid_master) unless ($skip_launch);
 say "FINISHED";
 
 # SUBROUTINES

@@ -14,7 +14,7 @@ my ($configs, $cluster_configs, $work_dir);
 
 
 sub provision_instances {
-    my ($class, $cfgs, $cluster_cfgs,$target_dir, $launch_vcloud,$use_rsync) = @_;
+    my ($class, $cfgs, $cluster_cfgs,$target_dir, $launch_vcloud,$use_rsync,$avoid_master) = @_;
     ($configs, $cluster_configs, $work_dir)=($cfgs, $cluster_cfgs,$target_dir);
     # first, find all the hosts and get their info
     my $hosts = find_cluster_info($cluster_configs,$work_dir);
@@ -23,7 +23,7 @@ sub provision_instances {
     # general info
     # this is putting in a variable for the /etc/hosts file
     $configs->{HOSTS} =  figure_out_host_str($hosts);
-    $configs->{SGE_HOSTS} = figure_out_sge_host_str($hosts);
+    $configs->{SGE_HOSTS} = figure_out_sge_host_str($hosts,$avoid_master);
 
     # FIXME: notice hard-coded to be "master"
     my $master_pip = $hosts->{master}{pip};
@@ -73,11 +73,11 @@ sub figure_out_host_str {
 
 # this creates the sge host list
 sub figure_out_sge_host_str {
-    my ($hosts) = @_;
+    my ($hosts,$avoid_master) = @_;
 
     my $hosts_str = "";
     foreach my $host (sort keys %{$hosts}) {
-        $hosts_str .= " $host";
+        $hosts_str .= " $host" unless ($avoid_master && $host =~ /master/);
     }
 
     return $hosts_str;
