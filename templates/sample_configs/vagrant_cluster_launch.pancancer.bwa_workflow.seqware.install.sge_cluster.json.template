@@ -48,7 +48,11 @@
     # since you don't need gluster for it (Ex. "")
     "GLUSTER_DIRECTORY_PATH": "",
     # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
-    "SEQWARE_VERSION": "1.0.15"
+    "SEQWARE_VERSION": "1.0.15",
+    # this will use all the available memory for master node for SGE
+    # if you change it, please specify it in bytes (Ex. "4294967296" for 4gb)
+    "SGE_MASTER_NODE_MEMORY":"`free -b |grep Mem | cut -d" " -f5`"
+
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types

@@ -78,7 +78,7 @@ if [ "$hostName" != "master" ]
 then
     qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` $hostName
 else
-    qconf -rattr exechost complex_values h_vmem=`expr $(free -b |grep Mem | cut -d" " -f5) - 4294967296` $hostName
+    qconf -rattr exechost complex_values h_vmem=%{SGE_MASTER_NODE_MEMORY} $hostName
 fi
 
 done
