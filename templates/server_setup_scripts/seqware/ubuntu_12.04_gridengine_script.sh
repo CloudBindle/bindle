@@ -74,7 +74,7 @@ qconf -mattr queue load_thresholds "np_load_avg=`nproc`" main.q
 
 # Set the amount of memory as the total memory on the system
 # unless it is the master node. For master node, amount of memory = 75%
-if [ "$hostName" != "master" ]
+if [ "%{SGE_MASTER_NODE_MEMORY}" == "" ] || [ "$hostName" != "master" ]
 then
     qconf -rattr exechost complex_values h_vmem=`free -b |grep Mem | cut -d" " -f5` $hostName
 else
