@@ -69,13 +69,13 @@ GetOptions (
     "vb-ram=i"       => \$vb_ram,
     "vb-cores=i"     => \$vb_cores,
     "aws-ebs=s{1,}"  => \@ebs_vols,
-  "run-ansible" => \$run_ansible,
+    "run-ansible" => \$run_ansible,
     "help"           => \$help,
 );
 
 # MAIN
 if($help) {
-  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'> NOTE: this is only used if you are not using the config file!] [--config-file <config json file, default is 'vagrant_cluster_launch.json'> NOTE: this is only used if you are not using the new config files!] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--use-default-config  including this flag means you are using the .cfg file to set configurations! So, don't forget to include this flag if you are using a .cfg file] [--launch-cluster <cluster-name of the cluster you want to launch> NOTE: this is used if you are using the config files instead of the json template] [--use-rsync this flag is used if you want to use the rsync line] [--skip-launch] [--help]\n";
+  die "USAGE: $0 --use-aws|--use-virtualbox|--use-openstack|--use-vcloud [--working-dir <working dir path, default is 'target'> NOTE: this is only used if you are not using the config file!] [--config-file <config json file, default is 'vagrant_cluster_launch.json'> NOTE: this is only used if you are not using the new config files!] [--vb-ram <the RAM (in MB) to use with VirtualBox only, HelloWorld expects at least 9G, default is 12G>] [--vb-cores <the number of cores to use with Virtual box only, default is 2>] [--aws-ebs <EBS vol size in MB, space delimited>] [--use-default-config  including this flag means you are using the .cfg file to set configurations! So, don't forget to include this flag if you are using a .cfg file] [--launch-cluster <cluster-name of the cluster you want to launch> NOTE: this is used if you are using the config files instead of the json template] [--use-rsync this flag is used if you want to use the rsync line] [--skip-launch] [--run-ansible to only run ansible with already provisioned VMs for dev or to check state] [--help]\n";
 }
 
 $launch_command .= cluster::config->set_launch_command($launch_aws, $launch_os, $launch_vcloud);
