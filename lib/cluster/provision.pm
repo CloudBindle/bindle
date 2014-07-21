@@ -351,9 +351,14 @@ sub run_ansible_command{
   my $time = `date +%s.%N`;
   # preserve colour for easy readability in head and tail
   # also save a copy without buffering (unlike tee) by using script -c
-  my $command = "export ANSIBLE_FORCE_COLOR=true ; script -c \"ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}\" $work_dir/ansible_run_$time";
-  print "Ansible command: $command";
-  return system($command);
+  open WRAPSCRIPT, ">$work_dir/wrapscript.sh" or die $!;
+  print WRAPSCRIPT "#!/usr/bin/env bash\n";
+  print WRAPSCRIPT "set -o errexit\n";
+  print WRAPSCRIPT "export ANSIBLE_FORCE_COLOR=true\n";
+  print WRAPSCRIPT "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}\n";
+  close (WRAPSCRIPT);
+  print "Ansible command: script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time";
+  return system("script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time");
 }
 
 sub run {
