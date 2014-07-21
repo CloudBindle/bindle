@@ -168,14 +168,14 @@ Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
 * Vagrant: 1.6.3
 * Vagrant plugins:
-    * vagrant-aws (0.4.1)
+    * vagrant-aws (0.5.0)
     * vagrant-openstack-plugin (0.7.0)
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
-* Vagrant: 1.4.3
+* Vagrant: 1.6.3
 * Vagrant plugins:
-    * vagrant-aws (0.4.1)
+    * vagrant-aws (0.5.0)
     * vagrant-vcloud (0.1.1)
 * VirtualBox: 4.2.18 r88780
 
@@ -225,7 +225,8 @@ on filling the config files, please refer to config/sample.cfg:
 ### Filling in the config file
 
 One thing you must keep in mind before filling in the config files is not to delete any of the default
-parameters you are not going to be needing. Simply, leave them blank if that is the case.
+parameters you are not going to be needing. Simply, leave them blank if that is the case. 
+Also, please refer to "Configuration for Virtualbox" if you want to provision clusters on Virtualbox
 
 #### Platform Specific Information
 
@@ -300,7 +301,10 @@ are running the launch_cluster perl script.
 
 Please note for VirtualBox, you will need to use the old configuration technique:
     
+    # copy the json template over
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    # make any required changes to the json template
+    vim vagrant_cluster_launch.json
     
 You can fill in the required information and move on to the next step.
 
@@ -344,14 +348,13 @@ Examples of launching in different environments include:
     perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
     # for OpenStack
     perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-    # for VirtualBox
-    perl bin/launcher/launch_cluster.pl --use-virtualbox --use-default-config --launch-cluster <cluster-name>
 
 "clustername" represents the cluster block you want to run from the config file (Ex: cluster1).
 
-Please note that you can still use the old way to set up configurations. That is, copying the template file over 
-like this(you must use this way if you are launching a cluster using virtualbox):
+Please note that you can still use the old way to set up configurations in the json template file itself for any environment. 
+That is, copying the template file over like this (you must use this way if you are launching a cluster using virtualbox):
 
+    # for Virutalbox
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
     vim vagrant_cluster_launch.json
