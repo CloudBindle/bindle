@@ -349,8 +349,9 @@ sub run_ansible_playbook {
 sub run_ansible_command{
   my ($package, $work_dir, $configs) = @_;
   my $time = `date +%s.%N`;
-  my $command = "export ANSIBLE_FORCE_COLOR=true ; ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}  | tee $work_dir/ansible_run_$time";
-  # preserve color
+  # preserve colour for easy readability in head and tail
+  # also save a copy without buffering (unlike tee) by using script -c
+  my $command = "export ANSIBLE_FORCE_COLOR=true ; script -c \"ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}\" $work_dir/ansible_run_$time";
   print "Ansible command: $command";
   return system($command);
 }
