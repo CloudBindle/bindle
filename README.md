@@ -246,14 +246,15 @@ through the most obvious parameters (ie. user, apikey, etc):
     # asks for the type of node you want to launch (m1.small, m1.medium, m1.xlarge, etc)
     instance_type=m1.xlarge
     
-    # this list is to indicate the devices you want to use to setup volumes.
-    # to find out the list of devices you can use, execute “df | grep /dev/” on the launcher host. 
+    # This list is to indicate the devices you want to use to setup gluster file system on.
+    # To find out the list of devices you can use, execute “df | grep /dev/” on an instance currently running on the same platform. 
     # DO NOT use any device that ends with "a" or "a" and a number following it(sda or sda1) because these are used for root partition
-    # Also, if you don't want to use any devices to set up volumes, please keep the value empty (gluster_device_whitelist=''). You need to do that when you are dealing with a single node cluster or when you have no devices to work with
-    # Now, if you want to use "sdb" and "sdc" then your list should look like the following:
-    gluster_device_whitelist='--whitelist b,c'
+    # Also, if you don't want to use any devices to set up gluster, please keep the value empty (gluster_device_whitelist=''). You need to do that when you are dealing with a single node cluster or when you have no devices to work with
+    # For AWS, when you create an EBS volume by using --aws-ebs parameter, it creates an "sdf" device, so specify "f" in your list gluster_devices
+    # Now, if you want to use "sdb/xvdb" and "sdf/xvdf" then your list should look like the following:
+    gluster_device_whitelist='--whitelist b,f'
 
-    # this list is to indicate the directories you want to use to set up volumes IF you don't have any devices to work with
+    # this parameter indicates the path you want to use to set up gluster IF you don't have any devices to work with
     # If you don't want to use directories, simply leave this parameter empty (gluster_directory_path=''). This should be the case for single node clusters
     # If you don't have devices, include the path and folder name that can be used instead to set up the volumes for a multi-node cluster: 
     gluster_directory_path='--directorypath /mnt/volumes/gluster'
