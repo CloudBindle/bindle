@@ -1,4 +1,0 @@
----
-# file: roles/seqware-master-infrastructure/vars/main.yml
-
-single_node: false

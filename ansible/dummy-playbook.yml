@@ -1,5 +1,0 @@
----
-# file: dummy-playbook.yml
-- hosts: all 
-  sudo: True
-  roles:

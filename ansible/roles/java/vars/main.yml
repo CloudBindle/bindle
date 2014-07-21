@@ -1,4 +1,0 @@
----
-# file: roles/common/vars/main.yml
-
-java_provider: "OpenJDK7"

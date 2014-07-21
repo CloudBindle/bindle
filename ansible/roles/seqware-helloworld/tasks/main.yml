@@ -1,8 +1,0 @@
----
-# file: roles/seqware-helloworld/tasks/main.yml
-
-- include: 'git.yml'
-  when: seqware_provider == "git"
-
-- include: 'artifactory.yml'
-  when: seqware_provider == "artifactory"

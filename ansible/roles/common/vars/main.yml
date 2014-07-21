@@ -1,4 +1,0 @@
----
-# file: roles/common/vars/main.yml
-
-primary_network_interface: "u'ansible_eth1"

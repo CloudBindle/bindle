@@ -1,4 +1,0 @@
----
-# file: roles/seqware-integration-tests/vars/main.yml
-
-seqware_it_cmd: "mvn clean install -DskipITs=false -P 'extITs,!embeddedTomcat'"

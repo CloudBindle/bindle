@@ -1,6 +1,0 @@
-{% for host in groups['all_groups'] %}
-/home  {{ hostvars[host]['ansible_eth0']['ipv4']['address'] }}(rw,sync,no_root_squash,no_subtree_check)
-/mnt/home  {{ hostvars[host]['ansible_eth0']['ipv4']['address'] }}(rw,sync,no_root_squash,no_subtree_check)
-/mnt/datastore  {{ hostvars[host]['ansible_eth0']['ipv4']['address'] }}(rw,sync,no_root_squash,no_subtree_check)
-/mnt/seqware-oozie  {{ hostvars[host]['ansible_eth0']['ipv4']['address'] }}(rw,sync,no_root_squash,no_subtree_check)
-{% endfor %}

@@ -1,4 +1,0 @@
----
-# file: roles/seqware-cron/vars/main.yml
-
-user_name: "seqware"

@@ -1,3 +1,0 @@
-#!/bin/sh
-sleep 1
-perl -pi -e 's/^hostlist.*$/hostlist {% for host in groups['all_groups'] %} {{ host }} {% endfor %} /' $1
