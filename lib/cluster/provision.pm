@@ -359,6 +359,7 @@ sub run_ansible_command{
   print WRAPSCRIPT "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}\n";
   close (WRAPSCRIPT);
   print "Ansible command: script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time";
+  system("chmod a+x $work_dir/wrapscript.sh");
   return system("script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time");
 }
 
