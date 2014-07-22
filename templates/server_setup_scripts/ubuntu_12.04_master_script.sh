@@ -12,13 +12,15 @@ usermod -a -G seqware mapred
 usermod -a -G mapred seqware
 
 # setup zookeeper
-apt-get -q -y --force-yes install zookeeper zookeeper-server
+apt-get -q -y --force-yes install zookeeper=3.4.5+24-1.cdh4.5.0.p0.23~precise-cdh4.5.0 zookeeper-server
 service zookeeper-server init
 service zookeeper-server start
 
 # install Hadoop deps, the master node runs the NameNode, SecondaryNameNode and JobTracker
 # NOTE: shouldn't really use secondary name node on same box for production
 apt-get -q -y --force-yes install hadoop-0.20-mapreduce-jobtracker hadoop-hdfs-namenode hue hue-server hue-plugins hue-oozie oozie oozie-client hbase hbase-master hbase-thrift
+perl -pi -e 's/(from _sre import MAXREPEAT)/try:\n\t$1\nexcept ImportError:\n\timport _sre\n\t_sre.MAXREPEAT = 65535 # Oh man. I hate myself so much./' /usr/share/hue/build/env/lib/python2.7/sre_constants.py
+apt-get install -f -q -y --force-yes
 
 # the repos have been setup in the minimal script
 apt-get -q -y --force-yes install postgresql-9.1 postgresql-client-9.1 tomcat7-common tomcat7 apache2
