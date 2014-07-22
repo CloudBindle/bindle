@@ -355,6 +355,7 @@ sub run_ansible_command{
   print WRAPSCRIPT "#!/usr/bin/env bash\n";
   print WRAPSCRIPT "set -o errexit\n";
   print WRAPSCRIPT "export ANSIBLE_FORCE_COLOR=true\n";
+  print WRAPSCRIPT "export ANSIBLE_HOST_KEY_CHECKING=False\n";
   print WRAPSCRIPT "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}\n";
   close (WRAPSCRIPT);
   print "Ansible command: script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time";
