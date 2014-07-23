@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bindle 1.2 Test Results</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        .wrapper{
+        	margin: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="jumbotron">
+    <h1 style="text-align:center">Bindle 1.2 Test Results</h1>
+</div>
+
+<div class="table-responsive wrapper">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Configuration Name</th>
+                <th>AWS</th>
+                <th>OICR OpenStack - Old</th>
+                <th>OICR OpenStack - New</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        	<tr class="active">
+
+                <th>vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template</th>
+
+                <td class="active" id="bwa_workflow.seqware.install.sge_cluster.json.template-aws">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="bwa_workflow.seqware.install.sge_cluster.json.template-openstack-toronto-old">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="bwa_workflow.seqware.install.sge_cluster.json.template-openstack-toronto-new">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+            </tr>
+
+            <tr class="active">
+
+                <th>vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template</th>
+
+                <td class="active" id="bwa_workflow.seqware.install.sge_node.json.template-aws">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="bwa_workflow.seqware.install.sge_node.json.template-openstack-toronto-old">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="bwa_workflow.seqware.install.sge_node.json.template-openstack-toronto-new">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+            </tr>
+
+            <tr class="active">
+
+                <th>vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template</th>
+
+                <td class="active" id="seqware.install.sge_cluster.json.template-aws">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="sseqware.install.sge_cluster.json.template-openstack-toronto-old">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+                
+                <td class='success' id='seqware.install.sge_cluster.json.template-openstack-toronto-new'><span class="glyphicon glyphicon-repeat"> - DNR</span></td>
+
+            </tr>
+
+            <tr class="active">
+
+                <th>vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template</th>
+
+                <td class="active" id="seqware-sge_node-aws">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="seqware-sge_node-openstack-toronto-old">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+                <td class="active" id="seqware-sge_node-openstack-toronto-new">
+                    <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                </td>
+
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+
+<div class="panel-group wrapper" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          AWS
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div class="panel-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+          OICR OpenStack - New
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+      <div class="panel-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+          OICR OpenStack - Old
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse">
+      <div class="panel-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
