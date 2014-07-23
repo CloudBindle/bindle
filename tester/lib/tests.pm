@@ -13,7 +13,7 @@ sub test_cluster_as_ubuntu{
     # run the seqware sanity check tool to see if seqware is working properly
     $result .= check_seqware_sanity($ssh);
     # check if helloworld workflow runs successfully
-    $result .= check_helloworld_workflow($ssh);
+    #$result .= check_helloworld_workflow($ssh);
 
     return $result;
 }

@@ -36,7 +36,6 @@ my %cfg_path_files = (
                      );
 
 my $html_doc = HTML::Manipulator::Document->from_file('tester/results.html');
-
 GetOptions ("bindle-folder-path=s" => \$bindle_folder_path);
 
 # goes through each environments and launches clusters and single node instances
@@ -48,7 +47,8 @@ while (my ($key,$value) = each(%cfg_path_files)){
     my $config_file = new Config::Simple("config/$value.cfg");
     
     # lauch the clusters
-    my $test_results = launch_clusters($config_file,$key);
+    my $test_results .= launch_clusters($config_file,$key);
+    
     say "--------------------------------------------------------------------------------";
     my $environment = $config_file->param('platform.env');
     say "\tLAUNCHED ALL MULTINODE CLUSTERS FOR $environment";
@@ -60,6 +60,10 @@ while (my ($key,$value) = each(%cfg_path_files)){
     say "\tLAUNCHED ALL SINGLE-NODE CLUSTERS FOR $environment";
     say "--------------------------------------------------------------------------------";   
     say "TEST RESULTS: $test_results";
+
+    # record test results in html file
+    my $results_id = parser->get_cloud_env($key);
+    $html_doc->replace("$results_id-results" => {_content => "$test_results"});
 }
 
 
@@ -85,16 +89,17 @@ sub launch_clusters{
     $platform = 'openstack' if ($platform == 'os');
         
     for (my $i = 1; $i <= $number_of_clusters; $i += 1){
- #       system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster cluster$i");
+        #system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster cluster$i");
         #my $json_file = $cfg_file->param("cluster$i.json_template_file_path");
         #$json_file = (split(/pancancer\./,$json_file))[1];
         # TODO: Need to implement a testing method to test the cluster!
 	my $ssh = launch->connect_to_host(($cfg_file->param("cluster$i.floating_ips"))[0],$cfg_file->param('platform.ssh_key_name'));
-	$result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("cluster$i.number_of_nodes"));
-	
+        my $json_file = parser->get_json_file_name($cfg_file,"cluster$i");
+        $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
+        $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("cluster$i.number_of_nodes"));
         say "RESULTTTT: $result";
-        #my $json_file = parser->get_config_file_name($cfg_file,"cluster$i");
-        #$html_doc->replace("$json_file-$env_file" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'}) if ($result eq "");
+        say "ENV_FILE: $json_file-$cloud_env";
+        $html_doc->replace("$json_file-$cloud_env" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'}) unless ($result =~ /FAIL/);
         say "--------------------------------------------------------------------------------";
         say "\tLaunched cluster: \n\tPLATFORM = $platform\n\t CLUSTER BLOCK = cluster$i";
         say "--------------------------------------------------------------------------------";
