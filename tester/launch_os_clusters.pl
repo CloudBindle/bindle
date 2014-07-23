@@ -12,30 +12,15 @@ use lib "$Bin/lib";
 use tests;
 use launch;
 use parser;
-# Testing
-#my %options = (
- # user => 'ubuntu',
- # key_path => '/home/ubuntu/.ssh/ap-oicr-2.pem',
- # strict_mode => 0,
- # #master_opts => '-vvv',
- # master_opts => [-o => "StrictHostKeyChecking=no"]
-#);
-#my $ssh = connect_to_host('10.0.20.187','ubuntu','ap-oicr-2');
-#my $res = test_cluster_as_ubuntu($ssh,2);
-#my $res = tests->check_helloworld_workflow($ssh);
-#$res .= test_cluster_as_seqware($ssh,2);
-#die "$res";
-
-#die "Testing";
 
 my $bindle_folder_path = "";
 my %cfg_path_files = (
 			'tester/bindle_configs/openstack-toronto-old.cfg' => 'os',
-			#'tester/bindle_configs/openstack-toronto-new.cfg' => 'os',
+			'tester/bindle_configs/openstack-toronto-new.cfg' => 'os',
 			#'bindle_configs/aws.cfg'  		   => 'aws',
                      );
 
-my $html_doc = HTML::Manipulator::Document->from_file('tester/results.html');
+my $html_doc = HTML::Manipulator::Document->from_file('tester/template.html');
 GetOptions ("bindle-folder-path=s" => \$bindle_folder_path);
 
 # goes through each environments and launches clusters and single node instances
@@ -65,10 +50,19 @@ while (my ($key,$value) = each(%cfg_path_files)){
     $html_doc = parser->set_test_result($html_doc,$key,$test_results);
 }
 
-#
-$html_doc->save_as('tester/results1.html');
+$html_doc->save_as('tester/results.html');
 die "Testing";
-#system("cp $cfg_path $bindle_folder_path/config/os.cfg");
+
+
+
+
+
+
+
+
+
+
+
 
 # SUBROUTINES
 
@@ -81,7 +75,7 @@ sub launch_clusters{
     $platform = 'openstack' if ($platform == 'os');
         
     for (my $i = 1; $i <= $number_of_clusters; $i += 1){
-        #system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster cluster$i");
+        system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster cluster$i");
 	
         my $ssh = launch->connect_to_host(($cfg_file->param("cluster$i.floating_ips"))[0],$cfg_file->param('platform.ssh_key_name'));
         my $json_file = parser->get_json_file_name($cfg_file,"cluster$i");
