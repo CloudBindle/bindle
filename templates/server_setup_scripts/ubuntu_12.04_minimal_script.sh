@@ -22,20 +22,10 @@ if [ -d "/glusterfs" ]; then
   mount -o bind /glusterfs/users/BOCONNOR/seqware-oozie /mnt/seqware-oozie
 fi
 
-# basic tools
-export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install curl unzip attr -y
-
 # ulimit
 echo "fs.file-max = 1623050" >> /etc/sysctl.conf
 echo "* soft nofile 162305" >> /etc/security/limits.conf
 echo "* hard nofile 162305" >> /etc/security/limits.conf
-
-# add seqware user
-mkdir -p /mnt/home
-useradd -d /mnt/home/seqware -m seqware -s /bin/bash
-ln -s ~seqware /home/seqware
 
 # ensure locale is set to en-US (and remains so)
 sudo sed "s/^AcceptEnv/#AcceptEnv/" -i /etc/ssh/sshd_config
