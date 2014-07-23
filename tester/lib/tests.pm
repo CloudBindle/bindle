@@ -18,6 +18,18 @@ sub test_cluster_as_ubuntu{
     return $result;
 }
 
+sub test_single_nodes_as_ubuntu{
+    my ($class,$ssh) = @_;
+    my $result = "";
+   
+    # run the seqware sanity check tool to see if seqware is working properly
+    $result .= check_seqware_sanity($ssh);
+    # check if helloworld workflow runs successfully
+    $result .= check_helloworld_workflow($ssh);
+
+    return $result;
+}
+
 sub check_for_gluster_peers{
     my ($ssh,$number_of_nodes) = @_;
     my $findings = "";
