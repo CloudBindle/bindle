@@ -16,7 +16,7 @@ use parser;
 my $bindle_folder_path = "";
 my %cfg_path_files = (
 			'tester/bindle_configs/openstack-toronto-old.cfg' => 'os',
-			#'tester/bindle_configs/openstack-toronto-new.cfg' => 'os',
+			'tester/bindle_configs/openstack-toronto-new.cfg' => 'os',
 			#'bindle_configs/aws.cfg'  		   => 'aws',
                      );
 
@@ -80,8 +80,8 @@ sub launch_multi_node_clusters{
     my ($number_of_clusters,$platform,$cfg_file,$env_file,$result) = @_;
     for (my $i = 1; $i <= $number_of_clusters; $i += 1){
         system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster cluster$i");
-
-        my $ssh = launch->connect_to_host(($cfg_file->param("cluster$i.floating_ips"))[0],$cfg_file->param('platform.ssh_key_name'));
+        my $float_ip = parser->get_float_ip($cfg_file->param("cluster$i.target_directory"),"master.log");
+        my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
         my $json_file = parser->get_json_file_name($cfg_file,"cluster$i");
         $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
         $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("cluster$i.number_of_nodes"));
@@ -100,8 +100,10 @@ sub launch_single_node_clusters{
     my ($number_of_single_nodes,$platform,$cfg_file,$env_file,$result) = @_;
     for (my $i = 1; $i <= $number_of_single_nodes; $i += 1){
         system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster singlenode$i");
+        
+        my $float_ip = parser->get_float_ip($cfg_file->param("singlenode$i.target_directory"),"master.log");
+        my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
 
-        my $ssh = launch->connect_to_host($cfg_file->param("singlenode$i.floating_ips"),$cfg_file->param('platform.ssh_key_name'));
         my $json_file = parser->get_json_file_name($cfg_file,"singlenode$i");
         $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
         $result .= tests->test_single_nodes_as_ubuntu($ssh);

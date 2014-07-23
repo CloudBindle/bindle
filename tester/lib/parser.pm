@@ -11,6 +11,13 @@ sub update_matrix{
     return $html_doc;
 }
 
+sub get_float_ip{
+    my ($class,$working_directory,$log_file) = @_;
+    my $float_ip = `head -25 $working_directory/$log_file`;
+    $float_ip = (split(/Using floating IP /,$float_ip))[1];
+    $float_ip = (split(/\n/,$float_ip))[0];
+    return $float_ip;
+}
 
 sub set_test_result{
     my ($class, $html_doc, $env_file, $test_results) = @_;
