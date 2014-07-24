@@ -349,18 +349,29 @@ sub run_ansible_playbook {
 sub run_ansible_command{
   my ($package, $work_dir, $configs) = @_;
   my $time = `date +%s.%N`;
+  chomp $time;
+  # create JSON file to pass all defined variables
+  # note that ansible variables are lower case by convention while for backwards compatibility, our variables are upper case
+  # thus lc while exporting
+  open ANSIBLE_VARIABLES, ">$work_dir/variables.$time.json" or die $!;
+  my %hash = %{$configs};
+  my %lchash = map { lc $_ => $hash{$_} } keys %hash;
+  my $json = JSON->new->allow_nonref;
+  print ANSIBLE_VARIABLES $json->encode( \%lchash );
+  close ANSIBLE_VARIABLES;
+
   # preserve colour for easy readability in head and tail
   # also save a copy without buffering (unlike tee) by using script -c
-  open WRAPSCRIPT, ">$work_dir/wrapscript.sh" or die $!;
+  open WRAPSCRIPT, ">$work_dir/wrapscript.$time.sh" or die $!;
   print WRAPSCRIPT "#!/usr/bin/env bash\n";
   print WRAPSCRIPT "set -o errexit\n";
   print WRAPSCRIPT "export ANSIBLE_FORCE_COLOR=true\n";
   print WRAPSCRIPT "export ANSIBLE_HOST_KEY_CHECKING=False\n";
-  print WRAPSCRIPT "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK}\n";
+  print WRAPSCRIPT "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK} --extra-vars \"\@$work_dir/variables.$time.json\" \n";
   close (WRAPSCRIPT);
-  print "Ansible command: script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time";
-  system("chmod a+x $work_dir/wrapscript.sh");
-  return system("script -c $work_dir/wrapscript.sh $work_dir/ansible_run_$time");
+  print "Ansible command: script -c $work_dir/wrapscript.$time.sh $work_dir/ansible_run.$time.log\n";
+  system("chmod a+x $work_dir/wrapscript.$time.sh");
+  return system("script -c $work_dir/wrapscript.$time.sh $work_dir/ansible_run.$time.log");
 }
 
 sub run {
