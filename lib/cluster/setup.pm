@@ -41,14 +41,11 @@ sub prepare_files {
         # settings, user data
         copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
         # script for setting up hadoop hdfs
-        copy("templates/setup_hdfs_volumes.pl", "$work_dir/$node/setup_hdfs_volumes.pl");
         copy("templates/setup_volumes.pl", "$work_dir/$node/setup_volumes.pl");
         copy("templates/setup_gluster_peers.pl", "$work_dir/$node/setup_gluster_peers.pl");
         copy("templates/setup_gluster_service.pl", "$work_dir/$node/setup_gluster_service.pl");
         copy("templates/setup_gluster_volumes.pl", "$work_dir/$node/setup_gluster_volumes.pl");
         # these are used for when the box is rebooted, it setups the /etc/hosts file for example
-        replace("templates/hadoop-init-master", "$work_dir/$node/hadoop-init-master", '%{HOST}', $node);
-        replace("templates/hadoop-init-worker", "$work_dir/$node/hadoop-init-worker", '%{HOST}', $node);
         # this is used for the master SGE node to recover when the system is rebooted
         # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
         replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
