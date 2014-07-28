@@ -2,4 +2,4 @@
 *.swo
 *.json
 *.cfg
-/target-sweng-pancancer/
+/target-*/
