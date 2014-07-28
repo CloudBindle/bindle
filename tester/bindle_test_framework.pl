@@ -68,7 +68,7 @@ sub launch_clusters{
 
 
     # launch all the multinode cluster for a particular cloud environment (ex. aws)
-    $result .= launch_multi_node_clusters($number_of_clusters, $platform,$cfg_file,$env_file,$result); 
+    $result .= launch_multi_node_clusters($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
     say "--------------------------------------------------------------------------------";
     my $environment = $cfg_file->param('platform.env');
     say "\tLAUNCHED ALL MULTINODE CLUSTERS FOR $environment";
@@ -85,7 +85,7 @@ sub launch_clusters{
 
 
 sub launch_multi_node_clusters{
-    my ($number_of_clusters,$platform,$cfg_file,$env_file,$result) = @_;
+    my ($number_of_clusters,$number_of_nodes,$platform,$cfg_file,$env_file,$result) = @_;
 
 
     my %threads = {};
@@ -109,11 +109,20 @@ sub launch_multi_node_clusters{
        # say "\tLaunched cluster: \n\tPLATFORM = $platform\n\t CLUSTER BLOCK = cluster$i";
        # say "--------------------------------------------------------------------------------";
     }
+
+    for (my $i = 1; $i <= $number_of_nodes; $i += 1){
+        say "STARTING A THREAD TO LAUNCH SINGLE NODE CLUSTERS FRO $env_file, singlenode$i";
+        my $node_name = "singlenode$i";
+        my $thr = threads->create(\&launch_multi_node_cluster,$number_of_nodes,$platform,$cfg_file,$env_file,$result,$node_name);
+        $threads{"$node_name"} = $thr;
+        sleep 30;
+    }
     say " ALL LAUNCH THREADS STARTED";
 
-    for (my $k = 1; $k <= $number_of_clusters; $k += 1){
-        $result .= $threads{"cluster$k"}->join();
+    while (my ($key,$value) = each(%threads)){
+        $result .= $value->join();
     }
+    say "ALL LAUNCH THREADS COMPLETED FOR $env_file";
     return $result;
 }
 
@@ -126,8 +135,12 @@ sub launch_multi_node_cluster{
         my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
         my $json_file = parser->get_json_file_name($cfg_file,"$cluster_name");
         $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
-        $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("$cluster_name.number_of_nodes"));
-
+        if ($cluster_name =~ /cluster/){
+            $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("$cluster_name.number_of_nodes"));
+        }
+	else{
+	    $result .= tests->test_single_nodes_as_ubuntu($ssh);
+        }
         # record the result in the matrix
         $html_doc = parser->update_matrix($html_doc,$json_file,$env_file,$result);
         say "RESULT: $result";
