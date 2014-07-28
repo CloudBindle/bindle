@@ -684,6 +684,19 @@ Note that Ansible playbooks should be designed to run idempotently (and Ansible 
 
     perl bin/launcher/launch_cluster.pl --working-dir target-os-cluster --config-file vagrant_cluster_launch.json  --run-ansible
 
+## AWS - Regions and Availability Zones
+
+In order to specify regions and zones, JSON templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
+
+   "AWS_REGION": "us-east-1",
+   "AWS_ZONE": "a",
+
+## AWS - Additional EBS Space
+
+In order to add extra EBS volumes across the board, use the following syntax in order to provision a 400 and 500 GB volume attached to each node:
+
+     perl bin/launcher/launch_cluster.pl --use-aws --aws-ebs 400 500
+
 
 ## Controlling the VM
 
