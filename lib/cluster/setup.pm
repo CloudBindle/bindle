@@ -12,19 +12,6 @@ use Carp::Always;
 
 my $configs;
 my $work_dir;
-sub setup_os_config_scripts {
-    my ($class,$configs, $output_dir, $output_file) = @_;
-    $work_dir = $output_dir;
-    foreach my $host (sort keys %{$configs}) {
-        run("mkdir $output_dir/$host");
-        foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
-            autoreplace($script, "$output_file.temp", $configs);
-            run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
-            run("rm $output_file.temp");
-        }
-    }
-}
-
 
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
@@ -40,15 +27,10 @@ sub prepare_files {
     foreach my $node (sort keys %{$cluster_configs}) {
         # settings, user data
         copy("templates/user_data.txt", "$work_dir/$node/user_data.txt");
-        # these are used for when the box is rebooted, it setups the /etc/hosts file for example
-        # this is used for the master SGE node to recover when the system is rebooted
-        # NOTE: it's not easy to get this same thing to work with reboot for whole clusters
-        replace("templates/sge-init-master", "$work_dir/$node/sge-init-master", '%{HOST}', $node);
     }
     return $configs;
 }
 
-# this assumes the first pass script was created per host by setup_os_config_scripts
 sub setup_vagrantfile {
     my ($start, $part, $end, $cluster_configs, $configs, $work_dir, $ram, $cores, @ebs_vols) = @_;
     foreach my $node (sort keys %{$cluster_configs}) {

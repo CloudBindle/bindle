@@ -25,13 +25,3 @@ fi
 # setup ephemeral and EBS volumes that are attached to this system
 apt-get update
 apt-get -q -y --force-yes install ecryptfs-utils xfsprogs
-perl /vagrant/setup_volumes.pl --output /vagrant/volumes_report.txt %{GLUSTER_DEVICE_WHITELIST} %{GLUSTER_DIRECTORY_PATH}
-
-# now setup volumes for use with gluster
-# the default version of gluster (3.2?) appears to suffer from the problem described here: https://bugzilla.redhat.com/show_bug.cgi?id=807976
-# version 3.4 appears to suffer from the problem described here: https://bugzilla.redhat.com/show_bug.cgi?id=977497
-# see Gluster's site for more info, this is the official way to install 3.5: http://download.gluster.org/pub/gluster/glusterfs/3.5/3.5.0/Ubuntu/Ubuntu.README
-add-apt-repository -y ppa:semiosis/ubuntu-glusterfs-3.5
-apt-get update
-apt-get -q -y --force-yes install glusterfs-server
-perl /vagrant/setup_gluster_volumes.pl --dir-map /vagrant/volumes_report.txt --output /vagrant/gluster_volumes_report.txt 

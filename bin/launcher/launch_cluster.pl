@@ -27,14 +27,9 @@ use cluster::setup;
 # TODO:
 # * parallel node launching, each with their own target dir (vs. having Vagrant launch multiple nodes). This will be faster but more work on my part.
 # * the box URLs are hardcoded, add them to the config JSON file instead
-# * there's a lot of hard-coded (but relative) file paths in this code which could cause problems if we move around or rename template files
-# * this is closely tied to SeqWare so we waste some time downloading and building that tool for other projects that use this tool but don't depend on SeqWare
-# * related to the above, there are sections of the code below that are SeqWare-specific, Hadoop-specific, and DCC-specific. Consider breaking these out into their own scripts and defining these in the JSON instead. So this core script is a very lean cluster builder script and anything tool-specific (except maybe hadoop or SGE) are out on their own. For now I'm leaving SeqWare items in the below since it causes no harm to other projects using this cluster launcher.
-# * or an alternative is just to sync all the config files instead
 # * there's a lot of hacking on the $configs hash in the code, for example defining the master private IP. This is dangerous.
 # * It would be great to use Template::Toolkit for the Vagrantfile and other files we need to do token replacement in
 # * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
-# * a better way to handle output from multiple VMs run simultaneously... probably just a nice output for each launched instance with the stderr/stdout going to distinct files in the target dir
 
 # skips all unit and integration tests
 my $aws_key = '';
@@ -141,16 +136,10 @@ if ($run_ansible){
   }
 }
 
-
-# dealing with defaults from the config including various SeqWare-specific items
-my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
-$configs->{'SEQWARE_BUILD_CMD'} //= $default_seqware_build_cmd; 
-$configs->{'MAVEN_MIRROR'} //= ""; 
-
-# process server scripts into single bash script
-# this basically cats files together after doing an autoreplace
-# that fills in variables from the config part of the JSON
-setup_os_config_scripts($cluster_configs, $work_dir, "os_server_setup.sh");
+# create our working directories for Vagrantfile(s)
+foreach my $host (sort keys %{$cluster_configs}) {
+    run("mkdir $work_dir/$host");
+}
 
 # this assumes the first pass setup script was created per host by setup_os_config_scripts
 # FIXME: should remove the non-generic files processed (bin/cluster/setup.pm) if possible, notice how there are project-specific file copies!
@@ -164,20 +153,6 @@ cluster::provision->provision_instances($configs, $cluster_configs, $work_dir, $
 say "FINISHED";
 
 # SUBROUTINES
-
-# this basically cats files together after doing an autoreplace
-# that fills in variables from the config part of the JSON
-sub setup_os_config_scripts {
-  my ($configs, $output_dir, $output_file) = @_;
-  foreach my $host (sort keys %{$configs}) {
-    run("mkdir $output_dir/$host");
-    foreach my $script (@{$configs->{$host}{first_pass_scripts}}) {
-      autoreplace($script, "$output_file.temp");
-      run("cat $output_file.temp >> $output_dir/$host/$host\_$output_file");
-      run("rm $output_file.temp");
-    }
-  }
-}
 
 sub launch_instances {
     my @threads;
@@ -239,24 +214,4 @@ sub read_json_config {
   close IN;
   my $temp_configs = decode_json($json_txt);
   return($temp_configs->{general}, $temp_configs->{node_config});
-}
-
-
-sub autoreplace {
-  my ($src, $dest, $localconfigs) = @_;
-  unless (defined $localconfigs) {
-    $localconfigs = $configs;
-  }
-  print "AUTOREPLACE: $src $dest\n";
-  open IN, '<', $src or die "Can't open input file $src\n";
-  open OUT, '>', $dest or die "Can't open output file $dest\n";
-  while(<IN>) {
-    foreach my $key (sort keys %{$localconfigs}) {
-      my $value = $localconfigs->{$key};
-      $_ =~ s/%{$key}/$value/g;
-    }
-    print OUT $_;
-  }
-  close IN;
-  close OUT;
 }
