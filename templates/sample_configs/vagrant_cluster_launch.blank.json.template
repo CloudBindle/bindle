@@ -40,7 +40,7 @@
     # SEQWARE
     # NOTE: you can checkout whatever branch you like, see our GitHub site
     # NOTE: you can setup a Maven mirror by adding the variable m2_maven_mirror
-    "ANSIBLE_PLAYBOOK": "../seqware-bag/seqware-install.yml --extra-vars \"seqware_version=1.0.15 seqware_provider=artifactory \""
+    "ANSIBLE_PLAYBOOK": "<FILLMEIN>.yml"
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types
@@ -50,18 +50,12 @@
     {
       "name": ["master"],
       "type": "master",
-      "floatip": ["<FILLMEIN>"],
-      "first_pass_scripts": [
-        "templates/server_setup_scripts/ubuntu_12.04_dummy_script.sh"
-      ] 
+      "floatip": ["<FILLMEIN>"]
     },
     {
       "name": ["worker1", "worker2", "worker3"],
       "type": "worker",
-      "floatip": ["<FILLMEIN>", "<FILLMEIN>", "<FILLMEIN>"],
-      "first_pass_scripts": [
-        "templates/server_setup_scripts/ubuntu_12.04_dummy_script.sh"
-      ] 
+      "floatip": ["<FILLMEIN>", "<FILLMEIN>", "<FILLMEIN>"]
     }
   ]
 }
