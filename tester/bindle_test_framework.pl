@@ -15,6 +15,7 @@ use parser;
 use threads;
 
 my $bindle_folder_path = "";
+my $config_paths = "";
 my %cfg_path_files = (
 			'tester/bindle_configs/openstack-toronto-old.cfg' => 'os',
 			#'tester/bindle_configs/openstack-toronto-new.cfg' => 'os',
@@ -22,15 +23,28 @@ my %cfg_path_files = (
                      );
 
 my $html_doc = HTML::Manipulator::Document->from_file('tester/template.html');
-GetOptions ("bindle-folder-path=s" => \$bindle_folder_path);
+GetOptions ("bindle-folder-path=s" => \$bindle_folder_path,
+            "use-config-paths=s" => \$config_paths);
+my %cfg_path_files = ();
+my @config_path_files = split(/,/,$config_paths);
+for my $config_path (@config_path_files){
+    my $val = "";
+    if ($config_path =~ /openstack/){
+        $val = "os";
+    }
+    elsif ($config_path =~ /aws/){
+        $val = "aws";
+    }
+    elsif ($config_path =~ /vcloud/){
+        $val = "vcloud";
+    }
+    $cfg_path_files{"$config_path"} = $val;
+}
 
-#my %threads = {};
+
 # goes through each environments and launches clusters and single node instances
 while (my ($key,$value) = each(%cfg_path_files)){
     say "$key => $value";
-    #say "STARTING A THREAD TO LAUNCH CLUSTERS FOR $key";
-    #my $thr = threads->create(\&launch_clusters,$config_file,$key);
-    #$threads{$key} = $thr;
 
     system("cp $key config/$value.cfg");
     
@@ -87,41 +101,30 @@ sub launch_clusters{
 sub launch_multi_node_clusters{
     my ($number_of_clusters,$number_of_nodes,$platform,$cfg_file,$env_file,$result) = @_;
 
-
-    my %threads = {};
+    my %threads;
     for (my $i = 1; $i <= $number_of_clusters; $i += 1){
          say "STARTING A THREAD TO LAUNCH CLUSTERS FOR $env_file,cluster$i";
          my $cluster_name = "cluster$i";
          my $thr = threads->create(\&launch_multi_node_cluster,$number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name);
          $threads{"cluster$i"} = $thr;
-         sleep 30;
-       # system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster cluster$i");
-       # my $float_ip = parser->get_float_ip($cfg_file->param("cluster$i.target_directory"),"master.log");
-       # my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
-       # my $json_file = parser->get_json_file_name($cfg_file,"cluster$i");
-       # $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
-       # $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("cluster$i.number_of_nodes"));
-
-        # record the result in the matrix
-       # $html_doc = parser->update_matrix($html_doc,$json_file,$env_file,$result);
-       # say "RESULT: $result";
-       # say "--------------------------------------------------------------------------------";
-       # say "\tLaunched cluster: \n\tPLATFORM = $platform\n\t CLUSTER BLOCK = cluster$i";
-       # say "--------------------------------------------------------------------------------";
+         sleep 60;
     }
 
     for (my $i = 1; $i <= $number_of_nodes; $i += 1){
-        say "STARTING A THREAD TO LAUNCH SINGLE NODE CLUSTERS FRO $env_file, singlenode$i";
         my $node_name = "singlenode$i";
+        say "STARTING A THREAD TO LAUNCH SINGLE NODE CLUSTERS FRO $env_file, singlenode$i";
         my $thr = threads->create(\&launch_multi_node_cluster,$number_of_nodes,$platform,$cfg_file,$env_file,$result,$node_name);
         $threads{"$node_name"} = $thr;
-        sleep 30;
+        sleep 60;
     }
     say " ALL LAUNCH THREADS STARTED";
+    print Dumper(%threads);
 
     while (my ($key,$value) = each(%threads)){
         $result .= $value->join();
     }
+
+    
     say "ALL LAUNCH THREADS COMPLETED FOR $env_file";
     return $result;
 }
@@ -150,24 +153,3 @@ sub launch_multi_node_cluster{
 	return $result;
 }
 
-sub launch_single_node_clusters{
-    my ($number_of_single_nodes,$platform,$cfg_file,$env_file,$result) = @_;
-    for (my $i = 1; $i <= $number_of_single_nodes; $i += 1){
-        system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster singlenode$i");
-        
-        my $float_ip = parser->get_float_ip($cfg_file->param("singlenode$i.target_directory"),"master.log");
-        my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
-
-        my $json_file = parser->get_json_file_name($cfg_file,"singlenode$i");
-        $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
-        $result .= tests->test_single_nodes_as_ubuntu($ssh);
-
-        # record the result in the matrix
-        $html_doc = parser->update_matrix($html_doc,$json_file,$env_file,$result);
-        say "RESULT: $result";
-        say "--------------------------------------------------------------------------------";
-        say "\tLaunched Single Node Cluster: \n\tPLATFORM = $platform\n\t CLUSTER BLOCK = singlenode$i";
-        say "--------------------------------------------------------------------------------";
-    }
-    return $result;
-}
