@@ -12,26 +12,11 @@
 * [Running the Cluster Launcher](#running-the-cluster-launcher)
 * [Destroying the Clusters](#destroying-the-clusters)
 * [SeqWare Examples](#seqware-examples)
-    * [SeqWare - Single Node](#seqware---single-node)
-        * [Oozie Hadoop](#oozie-hadoop)
-        * [Oozie SGE](#oozie-sge)
-    * [SeqWare - Cluster](#seqware---cluster)
-        * [Oozie Hadoop](#oozie-hadoop-1)
-        * [Oozie SGE](#oozie-sge-1)
-    * [SeqWare - Install Only](#seqware---install-only)
-    * [SeqWare - CentOS](#seqware---centos)
-    * [SeqWare Query Engine - Single node](#seqware-query-engine---single-node)
-* [TCGA/ICGC PanCancer Examples](#tcgaicgc-pancancer-examples)
 * [Persistance of Ephemeral Disks - AWS](#persistance-of-ephemeral-disks---aws)
 * [Launching a single node instance from an AMI Image](#launching-a-single-node-instance-from-an-ami-image)
-* [OICR Examples](#oicr-examples)
-    * [General OICR Settings](#general-oicr-settings)
-    * [ICGC DCC Portal - Small Cluster](#icgc-dcc-portal---small-cluster)
-    * [ICGC DCC Portal - Large Cluster](#icgc-dcc-portal---large-cluster)
 * [Logging](#logging)
 * [Controlling the VM](#controlling-the-vm)
-    * [CentOS Information](#centos-information)
-        * [Veewee Installation and Usage Instructions (Mac)](#veewee-installation-and-usage-instructions-mac)
+* [CentOS Information](#centos-information)
 * [Debugging](#debugging)
 * [TODO](#todo)
 
@@ -373,6 +358,27 @@ vagrant_cluster_launch.json (or another file, using the --config-file option).
 
 The following templates exist for SeqWare-bag, they will be described in more
 detail in that repo's [README](https://github.com/SeqWare/seqware-bag):
+
+
+In brief, in order to use these projects together
+
+	mkdir working_dir
+	cd working_dir
+	git clone git@github.com:CloudBindle/Bindle.git
+	cd Bindle && git checkout 2.0-alpha.0
+	cd ..
+	git clone https://github.com/SeqWare/seqware-bag
+	cd seqware-bag && git checkout 1.0-alpha.0 
+	cd ../Bindle
+	cp ../seqware-bag/sample_configs/vagrant_cluster_launch.seqware.install.sge_cluster.json.template vagrant_cluster_launch.seqware.install.sge_cluster.json 
+        vim vagrant_cluster_launch.seqware.install.sge_cluster.json
+        perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target --config-file vagrant_cluster_launch.seqware.install.sge_node.json
+        
+In order to re-run Ansible when doing development:
+
+        perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target --config-file vagrant_cluster_launch.seqware.install.sge_node.json --run-ansible
+
+In order to run with pan-cancer modifications as well, please checkout and use the contents of [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag) as well. 
 
 
 ## Persistance of Ephemeral Disks - AWS
