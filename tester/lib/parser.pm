@@ -21,15 +21,6 @@ sub get_float_ip{
 
 sub set_test_result{
     my ($class, $html_doc, $env_file, $test_results) = @_;
-    
-    my $results_id = get_cloud_env($class,$env_file);
-    say "RESULT_ID: $results_id";
-    $html_doc->replace("$results_id-results" => {_content => "$test_results"});
-    return $html_doc;
-}
-
-sub set_test_result{
-    my ($class, $html_doc, $env_file, $test_results) = @_;
     my $results_id = get_cloud_env($class,$env_file);
 
     my @json_templates = split(/<b>/,$test_results);
