@@ -37,18 +37,22 @@
     "AWS_SSH_KEY_NAME": "<FILLMEIN e.g. key-1>",
     "AWS_SSH_USERNAME": "ubuntu",
     "AWS_SSH_PEM_FILE": "<FILLMEIN e.g. /home/user/.ssh/key-1.pem>",
-    # whitelist option for devices to have volumes from being part of gluster
-    # please specify the devices you want to be part of the white list and separate them with a comma
-    # and make sure you have no spaces! (Ex: "--whitelist b,b1,f")
-    # if you don't want gluster to be set up(for singlenode clusters and clusters on BioNimbus) , leave it blank (Ex. "")
+    # For any single node cluster or a cluster in bionimbus environment, please leave this empty(Ex. '')
+    # Else for a multi-node cluster, please specify the devices you want to use to setup gluster
+    # To find out the list of devices you can use, execute “df | grep /dev/” on an instance currently running on the same platform.
+    # (Ex. '--whitelist b,f' if you want to use sdb/xvdb and sdf/xvdf). 
+    # Note, if your env. doesn't have devices, use the gluster_directory_path param
     "GLUSTER_DEVICE_WHITELIST": "",
-    # path to directories you want to use to set up volumes incase you don't have any devices
-    # This can be used if you have no devices to setup gluster with (Ex. "--directorypath /mnt/vols/gluster)
-    # leave this blank otherwise; leave it blank for singlenode cluster and clusters on BioNimbus
-    # since you don't need gluster for it (Ex. "")
+    # For any single node cluster or a cluster in bionimbus environment, please leave this empty(Ex. '')
+    # Else for a multi-node cluster, please specify the directory if you are not using devices to set up gluster
+    # (Ex. '--directorypath /mnt/volumes/gluster1')
     "GLUSTER_DIRECTORY_PATH": "",
     # SEQWARE VERSION: use a released version, see https://github.com/SeqWare/seqware/releases
-    "SEQWARE_VERSION": "1.0.13"
+    "SEQWARE_VERSION": "1.0.15",
+    # leaving it blank will use all the available memory for master node for SGE
+    # if you change it, please specify it in bytes (Ex. "4294967296" for 4gb)
+    "SGE_MASTER_NODE_MEMORY":""
+
   },
   # NODE CONFIG
   # type=[master|worker], in the future we may have more types

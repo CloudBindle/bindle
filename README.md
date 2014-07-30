@@ -22,6 +22,8 @@
     * [SeqWare - CentOS](#seqware---centos)
     * [SeqWare Query Engine - Single node](#seqware-query-engine---single-node)
 * [TCGA/ICGC PanCancer Examples](#tcgaicgc-pancancer-examples)
+* [Persistance of Ephemeral Disks - AWS](#persistance-of-ephemeral-disks---aws)
+* [Launching a single node instance from an AMI Image](#launching-a-single-node-instance-from-an-ami-image)
 * [OICR Examples](#oicr-examples)
     * [General OICR Settings](#general-oicr-settings)
     * [ICGC DCC Portal - Small Cluster](#icgc-dcc-portal---small-cluster)
@@ -166,14 +168,14 @@ Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 
 * Vagrant: 1.6.3
 * Vagrant plugins:
-    * vagrant-aws (0.4.1)
+    * vagrant-aws (0.5.0)
     * vagrant-openstack-plugin (0.7.0)
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
-* Vagrant: 1.4.3
+* Vagrant: 1.6.3
 * Vagrant plugins:
-    * vagrant-aws (0.4.1)
+    * vagrant-aws (0.5.0)
     * vagrant-vcloud (0.1.1)
 * VirtualBox: 4.2.18 r88780
 
@@ -223,7 +225,8 @@ on filling the config files, please refer to config/sample.cfg:
 ### Filling in the config file
 
 One thing you must keep in mind before filling in the config files is not to delete any of the default
-parameters you are not going to be needing. Simply, leave them blank if that is the case.
+parameters you are not going to be needing. Simply, leave them blank if that is the case. 
+Also, please refer to "Configuration for Virtualbox" if you want to provision clusters on Virtualbox
 
 #### Platform Specific Information
 
@@ -244,14 +247,15 @@ through the most obvious parameters (ie. user, apikey, etc):
     # asks for the type of node you want to launch (m1.small, m1.medium, m1.xlarge, etc)
     instance_type=m1.xlarge
     
-    # this list is to indicate the devices you want to use to setup volumes.
-    # to find out the list of devices you can use, execute “df | grep /dev/” on the launcher host. 
+    # This list is to indicate the devices you want to use to setup gluster file system on.
+    # To find out the list of devices you can use, execute “df | grep /dev/” on an instance currently running on the same platform. 
     # DO NOT use any device that ends with "a" or "a" and a number following it(sda or sda1) because these are used for root partition
-    # Also, if you don't want to use any devices to set up volumes, please keep the value empty (gluster_device_whitelist=''). You need to do that when you are dealing with a single node cluster or when you have no devices to work with
-    # Now, if you want to use "sdb" and "sdc" then your list should look like the following:
-    gluster_device_whitelist='--whitelist b,c'
+    # Also, if you don't want to use any devices to set up gluster, please keep the value empty (gluster_device_whitelist=''). You need to do that when you are dealing with a single node cluster or when you have no devices to work with
+    # For AWS, when you create an EBS volume by using --aws-ebs parameter, it creates an "sdf" device, so specify "f" in your list gluster_devices
+    # Now, if you want to use "sdb/xvdb" and "sdf/xvdf" then your list should look like the following:
+    gluster_device_whitelist='--whitelist b,f'
 
-    # this list is to indicate the directories you want to use to set up volumes IF you don't have any devices to work with
+    # this parameter indicates the path you want to use to set up gluster IF you don't have any devices to work with
     # If you don't want to use directories, simply leave this parameter empty (gluster_directory_path=''). This should be the case for single node clusters
     # If you don't have devices, include the path and folder name that can be used instead to set up the volumes for a multi-node cluster: 
     gluster_directory_path='--directorypath /mnt/volumes/gluster'
@@ -297,7 +301,10 @@ are running the launch_cluster perl script.
 
 Please note for VirtualBox, you will need to use the old configuration technique:
     
+    # copy the json template over
     cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    # make any required changes to the json template
+    vim vagrant_cluster_launch.json
     
 You can fill in the required information and move on to the next step.
 
@@ -341,14 +348,13 @@ Examples of launching in different environments include:
     perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
     # for OpenStack
     perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-    # for VirtualBox
-    perl bin/launcher/launch_cluster.pl --use-virtualbox --use-default-config --launch-cluster <cluster-name>
 
 "clustername" represents the cluster block you want to run from the config file (Ex: cluster1).
 
-Please note that you can still use the old way to set up configurations. That is, copying the template file over 
-like this(you must use this way if you are launching a cluster using virtualbox):
+Please note that you can still use the old way to set up configurations in the json template file itself for any environment. 
+That is, copying the template file over like this (you must use this way if you are launching a cluster using virtualbox):
 
+    # for Virutalbox
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
     vim vagrant_cluster_launch.json
@@ -511,6 +517,75 @@ technology to use.
 
 Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
 more information about this project.
+
+## Persistance of Ephemeral Disks - AWS
+
+Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on an EBS volume instead. Follow the steps below to get an AMI image up and running with a single node instance!
+
+### Step 1 - Creating and Formatting an EBS volume
+
+1. Log onto the Amazon Web Console and navigate to EC2 -> Elastic Block Store -> Volumes. 
+2. Click on "Create Volume"
+   * The size for the EBS volume should be large enough to fit everything from the ephemeral drive. It is recommended to use 1000 GB. 
+   * Choose "Magnetic" as the Volume type
+   * IMPORTANT: Make sure the availability zone of the volume is the same as that of the single node instance!
+3. Click Create!
+4. Now, Right click on the volume we just created and attach it to the single node instance you want to create an image out of and choose /dev/sdf as the device
+
+Log onto the single node instance via SSH and follow these steps to format the EBS volume:
+
+    # login as root user
+    sudo su -
+    # format the device /dev/xvdf
+    mkfs.ext4 /dev/xvdf
+
+    
+### Step 2 - Mounting the EBS Volume at Ephemeral Storage's mountpoint
+
+This step assumes you have logged into the single node instance and logged in as the root user
+
+    # Create a back up of the contents in /mnt
+    mkdir /temp_mnt
+    # Copy the contents of /mnt to your temporary location. Preserve timestamps and permissions 
+    cp -R -p /mnt/* /temp_mnt
+    # Unmount the /mnt
+    umount -l /mnt
+    # Mount /mnt on the EBS volume
+    mount /dev/xvdf /mnt
+    # Copy the contents of /temp_mnt to /mnt. Preserve timestamps and permissions
+    cp -R -p /mnt/* /temp_mnt
+    # update /etc/fstab. Add the following line to it: 
+    # /dev/xvdf       /mnt    auto    defaults,nobootwait,comment=cloudconfig 0       2
+    # Also get rid of the /dev/xvdb line
+    vim /etc/fstab
+
+After this step, please reboot the instance from the AWS console and then run the helloworld workflow to make sure
+that the mounting process did not break anything.
+
+### Step 3 - Creating a Snapshot of the EBS Volume
+
+1. Log onto the Amazon Web Console and navigate to EC2 -> Elastic Block Store -> Volumes. 
+2. Right click the EBS volume you are working with and select "Create Snapshot"
+3. Give it an appropriate name(Ex. Seqware_1.0.13_Bindle_1.2) and hit create
+
+### Step 4 - Creating the AMI image if the single node instance
+
+1. Log onto the Amazon Web Console and navigate to EC2 -> Instances -> Instances
+2. Right click on the single node instance and select "Create Image"
+3. Give it an appropriate Image name(Ex. Seqware_1.0.13_Bindle_1.2) and choose the snapshot we just created for the EBS volume. 
+4. Click Create Image! 
+
+You should now have a functioning AMI. The next step would be to launching an instance from the AMI image and running the HelloWorld Workflow to make sure it works. The guide to creating an instance from an AMI image is located below.
+
+## Launching a single node instance from an AMI image
+
+1. Log onto the Amazon Web Console and navigate to EC2 -> Images -> AMI
+2. Choose the appropriate AMI and select Launch
+3. Choose the Instance Type and then, navigate to step 4. In this step, remove the Instance Store 0 volume from the list if it exists.
+4. Click Review and Launch and you are done!
+
+You now have a workflow development environment and a place where you can run workflows!
+
 
 ## OICR Examples
 
