@@ -139,10 +139,10 @@ sub launch_multi_node_cluster{
         my $json_file = parser->get_json_file_name($cfg_file,"$cluster_name");
         $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
         if ($cluster_name =~ /cluster/){
-            $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("$cluster_name.number_of_nodes"));
+            $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("$cluster_name.number_of_nodes"),$working_dir);
         }
 	else{
-	    $result .= tests->test_single_nodes_as_ubuntu($ssh);
+	    $result .= tests->test_single_nodes_as_ubuntu($ssh,$working_dir);
         }
         # record the result in the matrix
         $html_doc = parser->update_matrix($html_doc,$json_file,$env_file,$result);

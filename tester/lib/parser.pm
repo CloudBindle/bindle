@@ -28,10 +28,10 @@ sub set_test_result{
         next if ($template eq '');
         my $temp_id = (split(/Configuration Profile: /,(split(/<\/b>/,$template))[0]))[1];
         if ($template =~ /FAIL/){
-            $html_doc->replace("$template-$results_id" => {class => "warning", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'})
+            $html_doc->replace("$temp_id-$results_id" => {class => "warning", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'})
         }
         else{
- 	   $html_doc->replace("$template-$results_id" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'})
+ 	   $html_doc->replace("$temp_id-$results_id" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'})
         }
 
     }
