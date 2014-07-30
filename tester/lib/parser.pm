@@ -21,11 +21,35 @@ sub get_float_ip{
 
 sub set_test_result{
     my ($class, $html_doc, $env_file, $test_results) = @_;
+    
     my $results_id = get_cloud_env($class,$env_file);
     say "RESULT_ID: $results_id";
     $html_doc->replace("$results_id-results" => {_content => "$test_results"});
     return $html_doc;
 }
+
+sub set_test_result{
+    my ($class, $html_doc, $env_file, $test_results) = @_;
+    my $results_id = get_cloud_env($class,$env_file);
+
+    my @json_templates = split(/<b>/,$test_results);
+    for my $template (@json_templates){
+        next if ($template eq '');
+        my $temp_id = (split(/Configuration Profile: /,(split(/<\/b>/,$template))[0]))[1];
+        if ($template =~ /FAIL/){
+            $html_doc->replace("$template-$results_id" => {class => "warning", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'})
+        }
+        else{
+ 	   $html_doc->replace("$template-$results_id" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'})
+        }
+
+    }
+
+    say "RESULT_ID: $results_id";
+    $html_doc->replace("$results_id-results" => {_content => "$test_results"});
+    return $html_doc;
+}
+
 
 
 sub get_json_file_name{
