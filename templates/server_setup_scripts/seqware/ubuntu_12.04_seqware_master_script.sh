@@ -45,7 +45,7 @@ su - seqware -c 'cd ~seqware/gitroot/seqware; git hf init; git hf update'
 su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BRANCH_CMD}'
 su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BUILD_CMD} 2>&1 | tee build.log'
 
-export SEQWARE_VERSION=`ls ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+(-SNAPSHOT)?' | head -1`
+export SEQWARE_VERSION=`ls ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-*-full.jar | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+.*' | head --bytes -10`
 
 # setup jar
 cp ~seqware/gitroot/seqware/seqware-distribution/target/seqware-distribution-${SEQWARE_VERSION}-full.jar ~seqware/jars/

@@ -37,6 +37,11 @@ cd gitflow
 # checkout seqware
 cd ~seqware/gitroot
 git clone https://github.com/SeqWare/seqware.git
+# download various SeqWare components
+export SEQWARE_VERSION="%{SEQWARE_VERSION}"
+cd seqware
+git checkout ${SEQWARE_VERSION}
+cd ..
 
 # setup bash_profile for seqware
 echo "export MAVEN_OPTS='-Xmx1024m -XX:MaxPermSize=512m'" >> ~seqware/.bash_profile
@@ -54,8 +59,6 @@ su - seqware -c 'cd ~seqware/gitroot/seqware; git hf init; git hf update'
 #su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BRANCH_CMD}'
 #su - seqware -c 'cd ~seqware/gitroot/seqware; %{SEQWARE_BUILD_CMD} 2>&1 | tee build.log'
 
-# download various SeqWare components
-export SEQWARE_VERSION="%{SEQWARE_VERSION}"
 # since we're not building, go ahead and setup these dirs as the place to download jars
 mkdir -p ~seqware/gitroot/seqware/seqware-distribution/target/
 mkdir -p ~seqware/gitroot/seqware/seqware-webservice/target/
@@ -140,7 +143,7 @@ chmod a+x ~seqware/crons/status.cron
 su - seqware -c '(echo "* * * * * ~seqware/crons/status.cron >> ~seqware/logs/status.log") | crontab -'
 
 cd ~seqware
-wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
-su - seqware -c "seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip"
-rm Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13.zip
+wget https://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.15.zip
+su - seqware -c "seqware bundle install --zip Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.15.zip"
+rm Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.15.zip
 
