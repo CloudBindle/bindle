@@ -89,6 +89,9 @@ Install dependencies:
 Install bindle dependencies:
 
     sudo apt-get update
+    sudo apt-get install software-properties-common
+    sudo apt-add-repository ppa:ansible/ansible
+    sudo apt-get update
     sudo apt-get install ansible libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
 
 Install Vagrant using the package from their
