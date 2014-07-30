@@ -11,7 +11,7 @@
     * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
 * [Running the Cluster Launcher](#running-the-cluster-launcher)
 * [Destroying the Clusters](#destroying-the-clusters)
-* [SeqWare Examples](#seqware-examples)
+* [SeqWare Examples](#seqware-bag)
 * [Persistance of Ephemeral Disks - AWS](#persistance-of-ephemeral-disks---aws)
 * [Launching a single node instance from an AMI Image](#launching-a-single-node-instance-from-an-ami-image)
 * [Logging](#logging)
@@ -350,7 +350,7 @@ The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). 
 the cluster from the appropriate environment but it is advised to check the web interface to make sure
 that the nodes are deleted.
 
-## SeqWare-bag
+## seqware-bag
 
 Using these
 examples, you will need to modify the configuration template and copy them to
