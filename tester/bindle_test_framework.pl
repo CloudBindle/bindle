@@ -41,6 +41,7 @@ for my $config_path (@config_path_files){
     $cfg_path_files{"$config_path"} = $val;
 }
 
+print Dumper(%cfg_path_files);
 
 # goes through each environments and launches clusters and single node instances
 while (my ($key,$value) = each(%cfg_path_files)){
@@ -50,7 +51,6 @@ while (my ($key,$value) = each(%cfg_path_files)){
     
     # read in the cluster informations from the config file
     my $config_file = new Config::Simple("config/$value.cfg");
-    
     # lauch the clusters
     my $test_results = launch_clusters($config_file,$key);    
 
@@ -77,9 +77,7 @@ sub launch_clusters{
     my $platform = $cfg_file->param('platform.type');
     my $number_of_clusters = $cfg_file->param('platform.number_of_clusters');
     my $number_of_single_nodes = $cfg_file->param('platform.number_of_single_node_clusters');
-    $platform = 'openstack' if ($platform == 'os');
-    
-
+    $platform = 'openstack' if ($platform eq 'os');
 
     # launch all the multinode cluster for a particular cloud environment (ex. aws)
     $result .= launch_multi_node_clusters($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
