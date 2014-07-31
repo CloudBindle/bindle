@@ -80,7 +80,7 @@ sub launch_clusters{
     my $platform = $cfg_file->param('platform.type');
     my $number_of_clusters = $cfg_file->param('platform.number_of_clusters');
     my $number_of_single_nodes = $cfg_file->param('platform.number_of_single_node_clusters');
-    $platform = 'openstack' if ($platform eq 'os');
+    $platform = 'openstack' if ($platform eq 'OS');
 
     # launch all the multinode cluster for a particular cloud environment (ex. aws)
     $result .= launch_multi_node_clusters($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
@@ -134,7 +134,7 @@ sub launch_multi_node_cluster{
         my ($number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name) = @_;
         my $working_dir = $cfg_file->param("$cluster_name.target_directory");
         system("mkdir $working_dir");
-        #system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
+        system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
         my $float_ip = parser->get_float_ip($cfg_file->param("$cluster_name.target_directory"),"master");
         say "FLOATIP: $float_ip";
         my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
