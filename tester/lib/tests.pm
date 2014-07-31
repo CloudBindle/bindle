@@ -55,7 +55,7 @@ sub check_for_gluster_volumes{
     # TEST FOR GLUSTER VOLUMES
     my $gluster_vol = $ssh->capture("sudo gluster volume status");
     $ssh->error and die "Gluster volumes aren't set up: ".$ssh->error;
-    system("$gluster_vol >> $working_dir/cluster.log");
+    system("echo '$gluster_vol' >> $working_dir/cluster.log");
     my $failed = 0;
     for(my $i = 1; $i < $number_of_nodes; $i += 1){
         $failed = 1 unless ($gluster_vol =~ "worker$i");
@@ -78,7 +78,9 @@ sub check_seqware_sanity{
     # get the seqware sanity check tool
     my $sanity_tool = $ssh->capture("sudo su - seqware -c 'cd jars;wget https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'");
     $ssh->error and die "Unable to get the seqware sanity check tool: ".$ssh->error;
-    system("$sanity_tool >> $working_dir/cluster.log");    
+    #system("echo '$ssh->capture(\"sudo su - seqware -c 'cd jars;wget https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'\")' >> $working_dir/cluster.log");    
+    #$ssh->error and die "Unable to get the seqware sanity check tool: ".$ssh->error;
+    system("echo '$sanity_tool' >> $working_dir/cluster.log");
 
     if ($ssh->test("sudo su - seqware -c 'java -jar jars/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'")){
         $findings .= "PASS: Seqware sanity check tool ran successfully!\n";
@@ -102,10 +104,12 @@ sub check_helloworld_workflow{
     my $workflow_launch = $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13/'");
     $ssh->error and die "Unable to launch the helloworld workflow: ".$ssh->error;
     sleep 300;
-    system("$workflow_launch >> $working_dir/cluster.log"); 
+    #system("echo '$ssh->capture(\"sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13/'\")' >> $working_dir/cluster.log"); 
+    #$ssh->error and die "Unable to launch the helloworld workflow: ".$ssh->error;
+    #sleep 300;
     my $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
     $ssh->error and die "Something might be wrong with oozie: ".$ssh->error;
-    system("$workflow_result >> $working_dir/cluster.log");
+    system("echo '$workflow_result' >> $working_dir/cluster.log");
     if ($workflow_result =~ "HelloWorld   SUCCEEDED"){
         $findings .= "PASS: Hello World workflow ran successfully!\n";
     }
@@ -114,6 +118,25 @@ sub check_helloworld_workflow{
     }
 
     return $findings;
+}
+
+sub check_bwa_workflow{
+    my ($ssh,$working_dir,$time,$workflow_name) = @_;
+    system("echo '$ssh->capture(\"sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'\") >> $working_dir/cluster.log");
+    $ssh->error and die "Unable to launch $workflow_name: ".$ssh_error;
+    my $time_interval = $time/300;
+    my $findings = "";
+    my $workflow_result = "";
+    for (my $i = 0; $i < $time_interval; $i += 1){
+        $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
+        $ssh->error and die "Something went wrong with oozie: ",$ssh->error;
+        if ($workflow_result =~ "SUCCEEDED"){
+            $findings .= "PASS: $workflow_name ran successfully!\n";
+            return $findings;
+        }
+    }
+   $findings .= "FAIL: $workflow_name failed with the following output: $workflow_result\n";
+   return $findings;
 }
 
 1;
