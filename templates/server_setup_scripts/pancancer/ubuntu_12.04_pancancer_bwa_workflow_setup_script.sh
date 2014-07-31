@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION=2.5.0
-SWVERSION=1.0.13
+VERSION=2.6.0
+SWVERSION=1.0.15
 cd ~seqware/released-bundles/
 wget http://s3.amazonaws.com/oicr.workflow.bundles/released-bundles/Workflow_Bundle_BWA_${VERSION}_SeqWare_${SWVERSION}.zip
 chown seqware:seqware Workflow_Bundle_BWA_${VERSION}_SeqWare_${SWVERSION}.zip
