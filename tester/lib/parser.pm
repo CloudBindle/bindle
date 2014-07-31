@@ -3,7 +3,7 @@ use Config::Simple;
 use autodie;
 use common::sense;
 use HTML::Manipulator;
-
+use Data::Dumper;
 sub update_matrix{
     my ($class,$html_doc,$json_file,$cloud_env,$result) = @_;
     $cloud_env = get_cloud_env($class,$cloud_env);
@@ -12,10 +12,11 @@ sub update_matrix{
 }
 
 sub get_float_ip{
-    my ($class,$working_directory,$log_file) = @_;
-    my $float_ip = `head -25 $working_directory/$log_file`;
-    $float_ip = (split(/Using floating IP /,$float_ip))[1];
+    my ($class,$working_directory,$node_name) = @_;
+    my $float_ip = `cd $working_directory/$node_name; vagrant ssh-config`;
+    $float_ip = (split(/HostName /,$float_ip))[1];
     $float_ip = (split(/\n/,$float_ip))[0];
+    print Dumper($float_ip);
     return $float_ip;
 }
 

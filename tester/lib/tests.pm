@@ -109,6 +109,7 @@ sub check_helloworld_workflow{
     #sleep 300;
     my $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
     $ssh->error and die "Something might be wrong with oozie: ".$ssh->error;
+
     system("echo '$workflow_result' >> $working_dir/cluster.log");
     if ($workflow_result =~ "HelloWorld   SUCCEEDED"){
         $findings .= "PASS: Hello World workflow ran successfully!\n";

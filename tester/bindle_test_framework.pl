@@ -43,6 +43,9 @@ for my $config_path (@config_path_files){
 
 print Dumper(%cfg_path_files);
 
+#parser->get_float_ip("target-aws-1","master");
+#die;
+
 # goes through each environments and launches clusters and single node instances
 while (my ($key,$value) = each(%cfg_path_files)){
     say "$key => $value";
@@ -131,8 +134,9 @@ sub launch_multi_node_cluster{
         my ($number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name) = @_;
         my $working_dir = $cfg_file->param("$cluster_name.target_directory");
         system("mkdir $working_dir");
-        system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
-        my $float_ip = parser->get_float_ip($cfg_file->param("$cluster_name.target_directory"),"master.log");
+        #system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
+        my $float_ip = parser->get_float_ip($cfg_file->param("$cluster_name.target_directory"),"master");
+        say "FLOATIP: $float_ip";
         my $ssh = launch->connect_to_host($float_ip,$cfg_file->param('platform.ssh_key_name'));
         my $json_file = parser->get_json_file_name($cfg_file,"$cluster_name");
         $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
