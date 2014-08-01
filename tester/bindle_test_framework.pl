@@ -109,7 +109,8 @@ sub launch_cluster_threads{
          my $cluster_name = "cluster$i";
          my $thr = threads->create(\&launch_multi_node_cluster,$number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name);
          $threads{"cluster$i"} = $thr;
-         $update_progress = show_update_progress_bar($update_progress,1,$progress);
+         $update_progress += 1;
+         $progress->update($update_progress);
          sleep 60;
     }
 
@@ -118,7 +119,8 @@ sub launch_cluster_threads{
         say "STARTING A THREAD TO LAUNCH SINGLE NODE CLUSTERS FRO $env_file, singlenode$i";
         my $thr = threads->create(\&launch_multi_node_cluster,$number_of_nodes,$platform,$cfg_file,$env_file,$result,$node_name);
         $threads{"$node_name"} = $thr;
-        $update_progress = show_update_progress_bar($update_progress,1,$progress);
+        $update_progress += 1;
+        $progress->update($update_progress);
         sleep 60;
     }
     say " ALL LAUNCH THREADS STARTED";
@@ -126,7 +128,8 @@ sub launch_cluster_threads{
 
     while (my ($key,$value) = each(%threads)){
         $result .= $value->join();
-        $update_progress = show_update_progress_bar($update_progress,2,$progress);
+        $update_progress += 2;
+        $progress->update($update_progress);
     }
 
     $progress->update($progress_count);
@@ -137,6 +140,7 @@ sub launch_cluster_threads{
 sub show_update_progress_bar {
     my ($update_progress,$num,$progress) = $_;
     $update_progress += $num;
+    say "$progress";
     $progress->update($update_progress);
     return $update_progress;
 }
