@@ -27,4 +27,14 @@ sub launch_cluster{
     system("$pl_cmd"); 
 }
 
+sub destroy_clusters{
+   my ($class,$cluster_blocks) = @_;
+   my @blocks = split (/,/,$cluster_blocks);
+
+   for my $cluster_block (@blocks){
+       system("perl bin/launcher/destroy_cluster.pl --cluster-name $cluster_block");
+       say "Destroyed $cluster_block";
+   }
+
+}
 1;
