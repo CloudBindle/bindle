@@ -16,17 +16,19 @@ use threads;
 
 my $bindle_folder_path = "";
 my $config_paths = "";
-my %cfg_path_files = (
-			'tester/bindle_configs/openstack-toronto-old.cfg' => 'os',
-			#'tester/bindle_configs/openstack-toronto-new.cfg' => 'os',
-			#'bindle_configs/aws.cfg'  		   => 'aws',
-                     );
-
 my $html_doc = HTML::Manipulator::Document->from_file('tester/template.html');
+my $help = 0;
 GetOptions ("bindle-folder-path=s" => \$bindle_folder_path,
-            "use-config-paths=s" => \$config_paths);
+            "use-config-paths=s" => \$config_paths,
+            "help" => \$help);
+if ($help){
+    die "\n--------------------------------------------------------------------------------\nUSAGE: \n\t --use-config-paths <bindle_config file paths> Note: Pass in a list of bindle config paths relative to the bindle directory separated by comma(Ex. tester/bindle_configs/aws.cfg,tester/bindle_configs/vcloud.cfg\n--------------------------------------------------------------------------------\n";
+}
+
 my %cfg_path_files = ();
 my @config_path_files = split(/,/,$config_paths);
+
+# hash to determine which config file to replace in the bindle folder
 for my $config_path (@config_path_files){
     my $val = "";
     if ($config_path =~ /openstack/){
@@ -43,13 +45,10 @@ for my $config_path (@config_path_files){
 
 print Dumper(%cfg_path_files);
 
-#parser->get_float_ip("target-aws-1","master");
-#die;
-
 # goes through each environments and launches clusters and single node instances
 while (my ($key,$value) = each(%cfg_path_files)){
-    say "$key => $value";
-
+    
+    # copy over the bindle configs from tester folder to bindle folder
     system("cp $key config/$value.cfg");
     
     # read in the cluster informations from the config file
@@ -83,20 +82,17 @@ sub launch_clusters{
     $platform = 'openstack' if ($platform eq 'OS');
 
     # launch all the multinode cluster for a particular cloud environment (ex. aws)
-    $result .= launch_multi_node_clusters($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
+    $result .= launch_cluster_threads($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
     say "--------------------------------------------------------------------------------";
     my $environment = $cfg_file->param('platform.env');
     say "\tLAUNCHED ALL CLUSTERS FOR $environment";
     say "--------------------------------------------------------------------------------";
 
-    # launch all the single node clusters for a particular cloud environment (ex. aws)
-    #$result .= launch_single_node_clusters($number_of_single_nodes, $platform, $cfg_file, $env_file,$result);
-
     return $result;
 }
 
 
-sub launch_multi_node_clusters{
+sub launch_cluster_threads{
     my ($number_of_clusters,$number_of_nodes,$platform,$cfg_file,$env_file,$result) = @_;
 
     my %threads;
