@@ -2,7 +2,7 @@ package tests;
 use Net::OpenSSH;
 
 sub test_cluster_as_ubuntu{
-    my ($class,$ssh,$number_of_nodes,$working_dir,$seq_version) = @_;
+    my ($class,$ssh,$number_of_nodes,$working_dir,$seq_version,$bwa_version) = @_;
     my $result = "";
 
     # check for gluster peers
@@ -14,17 +14,21 @@ sub test_cluster_as_ubuntu{
     # check if helloworld workflow runs successfully
     $result .= check_helloworld_workflow($ssh,$working_dir,$seq_version);
 
+    #$result .= check_bwa_workflow($ssh,$working_dir,$seq_version,$bwa_version);
+
     return $result;
 }
 
 sub test_single_nodes_as_ubuntu{
-    my ($class,$ssh,$working_dir,$seq_version) = @_;
+    my ($class,$ssh,$working_dir,$seq_version,$bwa_version) = @_;
     my $result = "";
    
     # run the seqware sanity check tool to see if seqware is working properly
     $result .= check_seqware_sanity($ssh,$working_dir);
     # check if helloworld workflow runs successfully
     $result .= check_helloworld_workflow($ssh,$working_dir,$seq_version);
+
+    #$result .= check_bwa_workflow($ssh,$working_dir,$seq_version,$bwa_version);
 
     return $result;
 }
@@ -122,8 +126,8 @@ sub check_helloworld_workflow{
 }
 
 sub check_bwa_workflow{
-    my ($ssh,$working_dir,$time,$workflow_name) = @_;
-    system("echo '$ssh->capture(\"sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'\") >> $working_dir/cluster.log");
+    my ($ssh,$working_dir,$time,$seq_version,$bwa_version) = @_;
+    system("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_BWA_$bwa_version\_SeqWare_$seq_version'");
     $ssh->error and die "Unable to launch $workflow_name: ".$ssh_error;
     my $time_interval = $time/300;
     my $findings = "";
