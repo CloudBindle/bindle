@@ -2,7 +2,7 @@ package tests;
 use Net::OpenSSH;
 
 sub test_cluster_as_ubuntu{
-    my ($class,$ssh,$number_of_nodes,$working_dir) = @_;
+    my ($class,$ssh,$number_of_nodes,$working_dir,$seq_version) = @_;
     my $result = "";
 
     # check for gluster peers
@@ -12,19 +12,19 @@ sub test_cluster_as_ubuntu{
     # run the seqware sanity check tool to see if seqware is working properly
     $result .= check_seqware_sanity($ssh,$working_dir);
     # check if helloworld workflow runs successfully
-    $result .= check_helloworld_workflow($ssh,$working_dir);
+    $result .= check_helloworld_workflow($ssh,$working_dir,$seq_version);
 
     return $result;
 }
 
 sub test_single_nodes_as_ubuntu{
-    my ($class,$ssh,$working_dir) = @_;
+    my ($class,$ssh,$working_dir,$seq_version) = @_;
     my $result = "";
    
     # run the seqware sanity check tool to see if seqware is working properly
     $result .= check_seqware_sanity($ssh,$working_dir);
     # check if helloworld workflow runs successfully
-    $result .= check_helloworld_workflow($ssh,$working_dir);
+    $result .= check_helloworld_workflow($ssh,$working_dir,$seq_version);
 
     return $result;
 }
@@ -76,7 +76,7 @@ sub check_seqware_sanity{
     my $findings = "";
 
     # get the seqware sanity check tool
-    my $sanity_tool = $ssh->capture("sudo su - seqware -c 'cd jars;wget https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'");
+    my $sanity_tool = $ssh->capture("sudo su - seqware -c 'cd jars;wget -q https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'");
     $ssh->error and die "Unable to get the seqware sanity check tool: ".$ssh->error;
     #system("echo '$ssh->capture(\"sudo su - seqware -c 'cd jars;wget https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'\")' >> $working_dir/cluster.log");    
     #$ssh->error and die "Unable to get the seqware sanity check tool: ".$ssh->error;
@@ -97,11 +97,11 @@ sub check_seqware_sanity{
 
 
 sub check_helloworld_workflow{
-    my ($ssh,$working_dir) = @_;
+    my ($ssh,$working_dir,$seq_version) = @_;
     my $findings = "";
 
     # launch the workflow, sleep for 10 minutes and then check the status of the workflow
-    my $workflow_launch = $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13/'");
+    my $workflow_launch = $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_$seq_version/'");
     $ssh->error and die "Unable to launch the helloworld workflow: ".$ssh->error;
     sleep 300;
     #system("echo '$ssh->capture(\"sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13/'\")' >> $working_dir/cluster.log"); 
