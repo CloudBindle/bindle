@@ -13,6 +13,7 @@ use tests;
 use launch;
 use parser;
 use threads;
+use Term::ProgressBar;
 
 my $bindle_folder_path = "";
 my $config_paths = "";
@@ -80,11 +81,14 @@ sub launch_clusters{
     my $number_of_clusters = $cfg_file->param('platform.number_of_clusters');
     my $number_of_single_nodes = $cfg_file->param('platform.number_of_single_node_clusters');
     $platform = 'openstack' if ($platform eq 'OS');
-
-    # launch all the multinode cluster for a particular cloud environment (ex. aws)
-    $result .= launch_cluster_threads($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
+    
     say "--------------------------------------------------------------------------------";
     my $environment = $cfg_file->param('platform.env');
+    say "\tSTARTING TO LAUNCH ALL CLUSTERS FOR $environment";
+    say "--------------------------------------------------------------------------------";
+    # launch all the clusters for a particular cloud environment (ex. aws)
+    $result .= launch_cluster_threads($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
+    say "--------------------------------------------------------------------------------";
     say "\tLAUNCHED ALL CLUSTERS FOR $environment";
     say "--------------------------------------------------------------------------------";
 
@@ -94,13 +98,18 @@ sub launch_clusters{
 
 sub launch_cluster_threads{
     my ($number_of_clusters,$number_of_nodes,$platform,$cfg_file,$env_file,$result) = @_;
-
+    
+    my $progress_count = 3*$number_of_clusters + 3*$number_of_nodes;
+    my $progress = Term::ProgressBar->new ({count => $progress_count ,name => 'Progress'});
+    my $update_progress = 0;
     my %threads;
+    
     for (my $i = 1; $i <= $number_of_clusters; $i += 1){
          say "STARTING A THREAD TO LAUNCH CLUSTERS FOR $env_file,cluster$i";
          my $cluster_name = "cluster$i";
          my $thr = threads->create(\&launch_multi_node_cluster,$number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name);
          $threads{"cluster$i"} = $thr;
+         $update_progress = show_update_progress_bar($update_progress,1,$progress);
          sleep 60;
     }
 
@@ -109,6 +118,7 @@ sub launch_cluster_threads{
         say "STARTING A THREAD TO LAUNCH SINGLE NODE CLUSTERS FRO $env_file, singlenode$i";
         my $thr = threads->create(\&launch_multi_node_cluster,$number_of_nodes,$platform,$cfg_file,$env_file,$result,$node_name);
         $threads{"$node_name"} = $thr;
+        $update_progress = show_update_progress_bar($update_progress,1,$progress);
         sleep 60;
     }
     say " ALL LAUNCH THREADS STARTED";
@@ -116,11 +126,19 @@ sub launch_cluster_threads{
 
     while (my ($key,$value) = each(%threads)){
         $result .= $value->join();
+        $update_progress = show_update_progress_bar($update_progress,2,$progress);
     }
 
-    
+    $progress->update($progress_count);
     say "ALL LAUNCH THREADS COMPLETED FOR $env_file";
     return $result;
+}
+
+sub show_update_progress_bar {
+    my ($update_progress,$num,$progress) = $_;
+    $update_progress += $num;
+    $progress->update($update_progress);
+    return $update_progress;
 }
 
 sub launch_multi_node_cluster{
