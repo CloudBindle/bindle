@@ -86,14 +86,11 @@ sub launch_clusters{
     $result .= launch_multi_node_clusters($number_of_clusters, $number_of_single_nodes, $platform,$cfg_file,$env_file,$result); 
     say "--------------------------------------------------------------------------------";
     my $environment = $cfg_file->param('platform.env');
-    say "\tLAUNCHED ALL MULTINODE CLUSTERS FOR $environment";
+    say "\tLAUNCHED ALL CLUSTERS FOR $environment";
     say "--------------------------------------------------------------------------------";
 
     # launch all the single node clusters for a particular cloud environment (ex. aws)
     #$result .= launch_single_node_clusters($number_of_single_nodes, $platform, $cfg_file, $env_file,$result);
-    say "--------------------------------------------------------------------------------";
-    say "\tLAUNCHED ALL SINGLE-NODE CLUSTERS FOR $environment";
-    say "--------------------------------------------------------------------------------";
 
     return $result;
 }
@@ -149,10 +146,10 @@ sub launch_multi_node_cluster{
         }
         # record the result in the matrix
         $html_doc = parser->update_matrix($html_doc,$json_file,$env_file,$result);
-        say "RESULT: $result";
-        say "--------------------------------------------------------------------------------";
+        say "\n--------------------------------------------------------------------------------";
         say "\tLaunched cluster: \n\tPLATFORM = $platform\n\t CLUSTER BLOCK = $cluster_name";
         say "--------------------------------------------------------------------------------";
-	return $result;
+        say "RESULT: $result";
+        return $result;
 }
 
