@@ -150,7 +150,7 @@ sub launch_multi_node_cluster{
         my ($number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name) = @_;
         my $working_dir = $cfg_file->param("$cluster_name.target_directory");
         my $seq_version = $cfg_file->param("platform.seqware_version");
-        my $bwa_version = $cfg_file->param("platfomr.bwa_workflow_version");
+        my $bwa_version = $cfg_file->param("platform.bwa_workflow_version");
         system("mkdir $working_dir");
         system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
         my $float_ip = parser->get_float_ip($cfg_file->param("$cluster_name.target_directory"),"master");
