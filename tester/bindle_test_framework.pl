@@ -150,6 +150,7 @@ sub launch_multi_node_cluster{
         my ($number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name) = @_;
         my $working_dir = $cfg_file->param("$cluster_name.target_directory");
         my $seq_version = $cfg_file->param("platform.seqware_version");
+        my $bwa_version = $cfg_file->param("platfomr.bwa_workflow_version");
         system("mkdir $working_dir");
         system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
         my $float_ip = parser->get_float_ip($cfg_file->param("$cluster_name.target_directory"),"master");
@@ -158,10 +159,10 @@ sub launch_multi_node_cluster{
         my $json_file = parser->get_json_file_name($cfg_file,"$cluster_name");
         $result .= "\n<b>Configuration Profile: vagrant_cluster_launch.pancancer.$json_file</b>\n";
         if ($cluster_name =~ /cluster/){
-            $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("$cluster_name.number_of_nodes"),$working_dir,$seq_version);
+            $result .= tests->test_cluster_as_ubuntu($ssh,$cfg_file->param("$cluster_name.number_of_nodes"),$working_dir,$seq_version,$bwa_version);
         }
 	else{
-	    $result .= tests->test_single_nodes_as_ubuntu($ssh,$working_dir,$seq_version);
+	    $result .= tests->test_single_nodes_as_ubuntu($ssh,$working_dir,$seq_version,$bwa_version);
         }
         # record the result in the matrix
         $html_doc = parser->update_matrix($html_doc,$json_file,$env_file,$result);
