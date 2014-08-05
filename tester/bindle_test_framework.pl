@@ -19,8 +19,10 @@ my $bindle_folder_path = "";
 my $config_paths = "";
 my $html_doc = HTML::Manipulator::Document->from_file('tester/template.html');
 my $help = 0;
+my $destroy_clusters = 0;
 GetOptions ("bindle-folder-path=s" => \$bindle_folder_path,
             "use-config-paths=s" => \$config_paths,
+            "destroy-clusters" => \$destroy_clusters,
             "help" => \$help);
 if ($help){
     die "\n--------------------------------------------------------------------------------\nUSAGE: \n\t --use-config-paths <bindle_config file paths> Note: Pass in a list of bindle config paths relative to the bindle directory separated by comma(Ex. tester/bindle_configs/aws.cfg,tester/bindle_configs/vcloud.cfg\n--------------------------------------------------------------------------------\n";
@@ -59,6 +61,12 @@ while (my ($key,$value) = each(%cfg_path_files)){
 
     # record test results in html file
     $html_doc = parser->set_test_result($html_doc,$key,$test_results);
+
+    # destroy the clusters used for testing
+    if ($destroy_clusters){
+        my $cluster_blocks = parser->get_cluster_dirs($config_file);
+        launch->destroy_clusters($cluster_blocks);
+    }
 }
 
 $html_doc->save_as('tester/results.html');
@@ -137,13 +145,6 @@ sub launch_cluster_threads{
     return $result;
 }
 
-sub show_update_progress_bar {
-    my ($update_progress,$num,$progress) = $_;
-    $update_progress += $num;
-    say "$progress";
-    $progress->update($update_progress);
-    return $update_progress;
-}
 
 sub launch_multi_node_cluster{
         my ($number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name) = @_;

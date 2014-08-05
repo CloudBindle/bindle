@@ -58,4 +58,20 @@ sub get_cloud_env{
     return $env_file;
 }
 
+sub get_cluster_dirs{
+    my ($class,$config) = @_;
+    my $cluster_blocks = "";
+    my $number_of_single_nodes = $config->param('platform.number_of_single_node_clusters');
+    my $number_of_clusters = $config->param('platform.number_of_clusters');
+    for (my $i=1; $i <= $number_of_single_nodes; $i += 1){
+        my $target_dir = $config->param("singlenode$i.target_directory");
+        $cluster_blocks .= "$target_dir,";
+    } 
+    for (my $i=1; $i <= $number_of_clusters; $i += 1){
+        my $target_dir = $config->param("cluster$i.target_directory");
+        $cluster_blocks .= "$target_dir,";
+    } 
+    return $cluster_blocks;
+}
+
 1;
