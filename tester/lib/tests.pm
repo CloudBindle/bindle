@@ -107,7 +107,7 @@ sub check_helloworld_workflow{
     # launch the workflow, sleep for 10 minutes and then check the status of the workflow
     my $workflow_launch = $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_$seq_version/'");
     $ssh->error and die "Unable to launch the helloworld workflow: ".$ssh->error;
-    sleep 300;
+    # sleep 300;
     #system("echo '$ssh->capture(\"sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13/'\")' >> $working_dir/cluster.log"); 
     #$ssh->error and die "Unable to launch the helloworld workflow: ".$ssh->error;
     #sleep 300;
@@ -131,17 +131,18 @@ sub check_bwa_workflow{
     print "$workflow_name\n";
     $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'");
     $ssh->error and die "Unable to launch $workflow_name: ".$ssh_error;
-    my $time_interval = $time/300;
+    #my $time_interval = $time/300;
     my $findings = "";
     my $workflow_result = "";
-    for (my $i = 0; $i < $time_interval; $i += 1){
+    #for (my $i = 0; $i < $time_interval; $i += 1){
         $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
         $ssh->error and die "Something went wrong with oozie: ",$ssh->error;
-        if ($workflow_result =~ "SUCCEEDED"){
+        system("echo '$workflow_result' >> $working_dir/cluster.log"); 
+        if ($workflow_result =~ "BWA          SUCCEEDED"){
             $findings .= "PASS: $workflow_name ran successfully!\n";
             return $findings;
         }
-    }
+    #}
    $findings .= "FAIL: $workflow_name failed with the following output: $workflow_result\n";
    return $findings;
 }
