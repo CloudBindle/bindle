@@ -18,19 +18,25 @@ sub read_default_configs {
   my $default_configs = new Config::Simple();
   my $abs_path = "";
   if ($launch_aws){
-    $abs_path = `readlink -f ~/.bindle/aws.cfg`;
+      $abs_path = `readlink -f ~/.bindle/aws.cfg`;
   }
   elsif ($launch_os){ 
-    $abs_path = `readlink -f ~/.bindle/os.cfg`;
+      $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vcloud){
-    $abs_path = `readlink -f ~/.bindle/os.cfg`;
+      $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vb) {
     $abs_path = `readlink -f ~/.bindle/vb.cfg`;
   }
+  $abs_path = (split(/\n/,$abs_path))[0];
   my $rel_path = File::Spec->abs2rel($abs_path,'.');  
-  $default_configs->read((split(/\n/,$rel_path))[0]) or die $default_configs->error();
+    
+  if (-e $abs_path){
+    $default_configs->read($rel_path) or die $default_configs->error();
+  }else{
+    copy_over_config_templates();
+  }
 
   print Dumper($default_configs);  
   die "Testing";
@@ -193,9 +199,12 @@ sub set_launch_command {
 
 # copies the configs over to ~/.bindle/ and notifies the user to fill in the required info
 sub copy_over_config_templates {
-  my ($class) = @_;
   system("rsync -r config/* ~/.bindle/");
-  say "Please fill in the config file for the corresponding environment you want to launch clusters on at ~/.bindle/";  
+  system("echo 'export BINDLE_SETTINGS=~/.bindle' >> ~/.profile");
+  system ("export BINDLE_SETTINGS=~/.bindle");
+  $ENV{'BINDLE_SETTINGS'} = '/home/apatel/.bindle/';
+  say "The config file doesn't exist! Please fill in the config file for the corresponding environment you want to launch clusters on by executing 'vim \$BINDLE_SETTINGS/<os/aws/vcloud>.cfg' and try again!";
+  exit 1;  
 }
 
 1;    
