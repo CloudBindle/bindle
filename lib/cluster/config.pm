@@ -7,27 +7,33 @@ use autodie qw(:all);
 use JSON;
 use Config;
 use Storable 'dclone';
-
+use Data::Dumper;
+use File::Spec;
+use Cwd 'abs_path';
 #reads in all the data written to the appropriate config file located at config/
 #and constructs an object in the form of configs and default_configs to match
 #the format the original script expects it to be in
 sub read_default_configs {
   my ($class, $cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb) = @_;
-  my $default_configs;
+  my $default_configs = new Config::Simple();
+  my $abs_path = "";
   if ($launch_aws){
-    $default_configs = new Config::Simple('~/.bindle/aws.cfg');
+    $abs_path = `readlink -f ~/.bindle/aws.cfg`;
   }
   elsif ($launch_os){ 
-    $default_configs = new Config::Simple('~/.bindle/os.cfg');
+    $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vcloud){
-    $default_configs = new Config::Simple('~/.bindle/vcloud.cfg');
+    $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vb) {
-    $default_configs = new Config::Simple('~/.bindle/vb.cfg');
+    $abs_path = `readlink -f ~/.bindle/vb.cfg`;
   }
-    
-  
+  my $rel_path = File::Spec->abs2rel($abs_path,'.');  
+  $default_configs->read((split(/\n/,$rel_path))[0]) or die $default_configs->error();
+
+  print Dumper($default_configs);  
+  die "Testing";
   my $config_file = $default_configs->param("$cluster_name.json_template_file_path");
   my $work_dir = make_target_directory($cluster_name,$default_configs);
   my $temp_configs = read_json_config($config_file);
