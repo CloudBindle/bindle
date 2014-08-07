@@ -15,16 +15,16 @@ sub read_default_configs {
   my ($class, $cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb) = @_;
   my $default_configs;
   if ($launch_aws){
-    $default_configs = new Config::Simple('config/aws.cfg');
+    $default_configs = new Config::Simple('~/.bindle/aws.cfg');
   }
   elsif ($launch_os){ 
-    $default_configs = new Config::Simple('config/os.cfg');
+    $default_configs = new Config::Simple('~/.bindle/os.cfg');
   }
   elsif ($launch_vcloud){
-    $default_configs = new Config::Simple('config/vcloud.cfg');
+    $default_configs = new Config::Simple('~/.bindle/vcloud.cfg');
   }
   elsif ($launch_vb) {
-    $default_configs = new Config::Simple('config/vb.cfg');
+    $default_configs = new Config::Simple('~/.bindle/vb.cfg');
   }
     
   
@@ -183,6 +183,13 @@ sub set_launch_command {
     $launch_command = ' --provider=vcloud';
   }
   return $launch_command;
+}
+
+# copies the configs over to ~/.bindle/ and notifies the user to fill in the required info
+sub copy_over_config_templates {
+  my ($class) = @_;
+  system("rsync -r config/* ~/.bindle/");
+  say "Please fill in the config file for the corresponding environment you want to launch clusters on at ~/.bindle/";  
 }
 
 1;    
