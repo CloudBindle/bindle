@@ -38,8 +38,6 @@ sub read_default_configs {
     copy_over_config_templates();
   }
 
-  print Dumper($default_configs);  
-  die "Testing";
   my $config_file = $default_configs->param("$cluster_name.json_template_file_path");
   my $work_dir = make_target_directory($cluster_name,$default_configs);
   my $temp_configs = read_json_config($config_file);
