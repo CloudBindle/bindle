@@ -203,7 +203,7 @@ sub copy_over_config_templates {
   system("echo 'export BINDLE_SETTINGS=~/.bindle' >> ~/.profile");
   system ("export BINDLE_SETTINGS=~/.bindle");
   $ENV{'BINDLE_SETTINGS'} = '/home/apatel/.bindle/';
-  say "The config file doesn't exist! Please fill in the config file for the corresponding environment you want to launch clusters on by executing 'vim \$BINDLE_SETTINGS/<os/aws/vcloud>.cfg' and try again!";
+  say "The config file doesn't exist! The file has now been included! Please fill in the config file for the corresponding environment you want to launch clusters on by executing 'vim ~/.bindle/<os/aws/vcloud>.cfg' and try again!";
   exit 1;  
 }
 
@@ -219,7 +219,7 @@ sub upgrade_outdated_configs {
       return 0;
   }else{
       system("rsync -r config/* ~/.bindle/");
-      say "The config file is outdated! Upgraded the config files. Please go to \$BINDLE_SETTINGS/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
+      say "The config file is outdated! Upgraded the config files. Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
       exit 2;
   }
 }
