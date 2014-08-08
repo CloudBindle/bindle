@@ -219,7 +219,6 @@ and place it in the appropriate config file described below.
 
 Fill in your various platform settings depending on what cloud provider you use
 (Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/os.cfg)). 
-In order to get helpon filling the config files, please refer to ~/.bindle/sample.cfg. 
 If ~/.bindle doesn't exist, please run the launch_cluster script:
 
     perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster1
