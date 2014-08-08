@@ -17,6 +17,7 @@ sub read_default_configs {
   my ($class, $cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb) = @_;
   my $default_configs = new Config::Simple();
   my $abs_path = "";
+  # gets the absolute path (ex. /home/ubuntu/.bindle/<platform>.cfg)
   if ($launch_aws){
       $abs_path = `readlink -f ~/.bindle/aws.cfg`;
   }
@@ -31,13 +32,14 @@ sub read_default_configs {
   }
   $abs_path = (split(/\n/,$abs_path))[0];
   my $rel_path = File::Spec->abs2rel($abs_path,'.');  
-    
-  if (-e $abs_path){
+  
+  # upgrade or copy the configs over to ~/.bindle/ if it doesn't exist
+  if (-e $abs_path and not upgrade_outdated_configs($abs_path,$rel_path)){
     $default_configs->read($rel_path) or die $default_configs->error();
   }else{
     copy_over_config_templates();
   }
-
+  
   my $config_file = $default_configs->param("$cluster_name.json_template_file_path");
   my $work_dir = make_target_directory($cluster_name,$default_configs);
   my $temp_configs = read_json_config($config_file);
@@ -205,4 +207,21 @@ sub copy_over_config_templates {
   exit 1;  
 }
 
-1;    
+# upgrade the configs to default templates if the keys don't match for the platform block
+sub upgrade_outdated_configs {
+  my ($abs_path,$rel_path) = @_;
+  my $cfg_template = (split(/\//,$abs_path))[-1];
+  my $template_configs = new Config::Simple("config/$cfg_template");
+  my $tmplate_platform = $template_configs->param(-block=>'platform');
+  my $default_configs = new Config::Simple($rel_path);
+  my $cfg_platform = $default_configs->param(-block=>'platform');
+  if (keys %$tmplate_platform == keys %$cfg_platform){
+      return 0;
+  }else{
+      system("rsync -r config/* ~/.bindle/");
+      say "The config file is outdated! Upgraded the config files. Please go to \$BINDLE_SETTINGS/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
+      exit 2;
+  }
+}
+
+1;
