@@ -126,7 +126,7 @@ sub check_helloworld_workflow{
 }
 
 sub check_bwa_workflow{
-    my ($class,$ssh,$working_dir,$time,$seq_version,$bwa_version) = @_;
+    my ($ssh,$working_dir,$time,$seq_version,$bwa_version) = @_;
     my $workflow_name = "Workflow_Bundle_BWA_$bwa_version\_SeqWare_$seq_version";
     print "$workflow_name\n";
     $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'");
