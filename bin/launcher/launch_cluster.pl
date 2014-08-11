@@ -135,7 +135,6 @@ else{
   }
 }
 
-
 # dealing with defaults from the config including various SeqWare-specific items
 my $default_seqware_build_cmd = 'mvn clean install -DskipTests';
 $configs->{'SEQWARE_BUILD_CMD'} //= $default_seqware_build_cmd; 
