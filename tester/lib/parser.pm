@@ -7,7 +7,12 @@ use Data::Dumper;
 sub update_matrix{
     my ($class,$html_doc,$json_file,$cloud_env,$result) = @_;
     $cloud_env = get_cloud_env($class,$cloud_env);
-    $html_doc->replace("$json_file-$cloud_env" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'}) unless ($result =~ /FAIL/);
+    if ($results =~ /FAIL/){
+	$html_doc->replace("$json_file-$cloud_env" => {class => "danger", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'});
+    }
+    else{
+    	$html_doc->replace("$json_file-$cloud_env" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'});
+    }
     return $html_doc;
 }
 
