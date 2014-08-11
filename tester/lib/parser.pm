@@ -4,10 +4,11 @@ use autodie;
 use common::sense;
 use HTML::Manipulator;
 use Data::Dumper;
+use File::Spec;
 sub update_matrix{
     my ($class,$html_doc,$json_file,$cloud_env,$result) = @_;
     $cloud_env = get_cloud_env($class,$cloud_env);
-    if ($results =~ /FAIL/){
+    if ($result =~ /FAIL/){
 	$html_doc->replace("$json_file-$cloud_env" => {class => "danger", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'});
     }
     else{
@@ -77,6 +78,14 @@ sub get_cluster_dirs{
         $cluster_blocks .= "$target_dir,";
     } 
     return $cluster_blocks;
+}
+
+sub get_rel_path{
+   my ($class,$path) = @_;
+   my $abs_path = `readlink -f $path`;
+   $abs_path = (split(/\n/,$abs_path))[0];
+   my $rel_path = File::Spec->abs2rel($abs_path,'.');
+   return $rel_path
 }
 
 1;

@@ -1,3 +1,5 @@
+BEGIN {push @INC, '~/perl5/lib/perl5'};
+BEGIN {push @INC, '~/perl5/man/man3'};
 use common::sense;
 use Getopt::Long;
 use IPC::System::Simple;
@@ -52,10 +54,13 @@ print Dumper(%cfg_path_files);
 while (my ($key,$value) = each(%cfg_path_files)){
     
     # copy over the bindle configs from tester folder to bindle folder
-    system("cp $key config/$value.cfg");
-    
+    # system("cp $key ~/.bindle/$value.cfg");
+
+    # get the relative path of config file
+    my $rel_path = parser->get_rel_path("~/.bindle/$value.cfg");    
+
     # read in the cluster informations from the config file
-    my $config_file = new Config::Simple("config/$value.cfg");
+    my $config_file = new Config::Simple("$rel_path");
     # lauch the clusters
     my $test_results = launch_clusters($config_file,$key);    
 
