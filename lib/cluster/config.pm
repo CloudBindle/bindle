@@ -200,9 +200,6 @@ sub set_launch_command {
 # copies the configs over to ~/.bindle/ and notifies the user to fill in the required info
 sub copy_over_config_templates {
   system("rsync -r config/* ~/.bindle/");
-  system("echo 'export BINDLE_SETTINGS=~/.bindle' >> ~/.profile");
-  system ("export BINDLE_SETTINGS=~/.bindle");
-  $ENV{'BINDLE_SETTINGS'} = '/home/apatel/.bindle/';
   say "The config file doesn't exist! The file has now been included! Please fill in the config file for the corresponding environment you want to launch clusters on by executing 'vim ~/.bindle/<os/aws/vcloud>.cfg' and try again!";
   exit 1;  
 }
