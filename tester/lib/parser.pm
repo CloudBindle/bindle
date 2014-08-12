@@ -88,4 +88,11 @@ sub get_rel_path{
    return $rel_path
 }
 
+sun get_latest_commit{
+  my ($class,$path) = @_;
+  my $commit =  `cd $path ; git log | head -n 1`;
+  $commit = (split(' ',$commit))[1];
+  return $commit;
+}
+
 1;
