@@ -17,6 +17,7 @@ use parser;
 use threads;
 use Term::ProgressBar;
 
+
 my $bindle_folder_path = "";
 my $config_paths = "";
 my $html_doc = HTML::Manipulator::Document->from_file('tester/template.html');
@@ -73,6 +74,10 @@ while (my ($key,$value) = each(%cfg_path_files)){
         launch->destroy_clusters($cluster_blocks);
     }
 }
+
+# get all the commit SHA's for the repos if they exist (Bindle, seqware-bag, and pancancer-bag)
+my $commit_SHAs = parser->get_latest_commits();
+$html_doc->replace("other-info" => { _content => $commit_SHAs});
 
 $html_doc->save_as('tester/results.html');
 die "Testing";

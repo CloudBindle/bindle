@@ -88,11 +88,21 @@ sub get_rel_path{
    return $rel_path
 }
 
-sub get_latest_commit{
-  my ($class,$path) = @_;
-  my $commit = `cd $path ; git log | head -n 1`;
-  $commit = (split(' ',$commit))[1];
-  return $commit;
+sub get_latest_commits{
+  my ($class) = @_;
+  my %paths;
+  $paths{'Bindle'} = '.';
+  $paths{'Seqware-bag'} = '../seqware-bag/';
+  $paths{'Pancancer-bag'} = '../pancancer-bag/';
+  my $all_commits = "<b>Latest Commits</b>";
+  while ( my ($key, $value) = each(%paths) ) {
+    if (-e $value){
+       my $commit = `cd $value ; git log | head -n 1`;
+       $commit = (split(' ',$commit))[1];
+       $all_commits .= "\n$key: $commit";
+    }
+  }
+  return $all_commits;
 }
 
 1;
