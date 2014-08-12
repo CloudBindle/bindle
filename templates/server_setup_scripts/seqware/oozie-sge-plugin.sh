@@ -60,9 +60,9 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
             fi
 
             if $OOZIE_SGE_DEBUG_LOG; then
-                echo "log4j.logger.io.seqware.oozie.action.sge=DEBUG, oozie" >> $OOZIE_CONF_DIR/oozie-log4j.properties
+                echo "log4j.logger.io.seqware.oozie.action.sge=WARN, oozie" >> $OOZIE_CONF_DIR/oozie-log4j.properties
             fi
-
+            sed -i "s/log4j.appender.oozie.RollingPolicy.MaxHistory=720/log4j.appender.oozie.RollingPolicy.MaxHistory=168/g" $OOZIE_CONF_DIR/oozie-log4j.properties          
             echo '# Allow oozie user to qsub as other users:' >> /etc/sudoers
             echo "oozie ALL=(ALL) NOPASSWD: $QSUB" >> /etc/sudoers
             # not sure why I needed this
