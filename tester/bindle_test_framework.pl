@@ -54,7 +54,10 @@ print Dumper(%cfg_path_files);
 my $abs_path = `readlink -f ~/.bindle/test_framework_configs`;
 $abs_path = (split(/\n/,$abs_path))[0];
 my $rel_path = File::Spec->abs2rel($abs_path,'.');
-system("rsync -r tester/config_templates/* ~/.bindle/test_framework_configs") unless (-e $rel_path);
+if (not -e $rel_path){
+    system("rsync -r tester/config_templates/* ~/.bindle/test_framework_configs"); 
+    die "Copied the test_framework configs to ~/.bindle/test_framework_configs. Please fill in the desired config files and try again!";
+}
 
 
 # goes through each environments and launches clusters and single node instances
