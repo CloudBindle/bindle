@@ -51,10 +51,11 @@ for my $config_path (@config_path_files){
 }
 
 print Dumper(%cfg_path_files);
-my $abs_path = `readlink -f ~/.bindle/test_framework_configs`;
+my $abs_path = `readlink -f ~/.bindle/`;
 $abs_path = (split(/\n/,$abs_path))[0];
 my $rel_path = File::Spec->abs2rel($abs_path,'.');
-if (not -e $rel_path){
+if (not -e "$rel_path/test_framework_configs"){
+    system("rsync -r config/* ~/.bindle/");    
     system("rsync -r tester/config_templates/* ~/.bindle/test_framework_configs"); 
     die "Copied the test_framework configs to ~/.bindle/test_framework_configs. Please fill in the desired config files and try again!";
 }
