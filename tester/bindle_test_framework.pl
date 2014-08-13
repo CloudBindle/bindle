@@ -69,7 +69,6 @@ while (my ($key,$value) = each(%cfg_path_files)){
     # read in the cluster informations from the config file
     my $config_file = new Config::Simple("$rel_path");
     print Dumper($config_file);
-    die "TEST";
     # lauch the clusters
     my $test_results = launch_clusters($config_file,$key);    
 
