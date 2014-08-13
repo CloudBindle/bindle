@@ -16,6 +16,7 @@ use launch;
 use parser;
 use threads;
 use Term::ProgressBar;
+use File::Spec;
 
 
 my $bindle_folder_path = "";
@@ -50,18 +51,25 @@ for my $config_path (@config_path_files){
 }
 
 print Dumper(%cfg_path_files);
+my $abs_path = `readlink -f ~/.bindle/test_framework_configs`;
+$abs_path = (split(/\n/,$abs_path))[0];
+my $rel_path = File::Spec->abs2rel($abs_path,'.');
+system("rsync -r tester/config_templates/* ~/.bindle/test_framework_configs") unless (-e $rel_path);
+
 
 # goes through each environments and launches clusters and single node instances
 while (my ($key,$value) = each(%cfg_path_files)){
-    
+
     # copy over the bindle configs from tester folder to bindle folder
-    # system("cp $key ~/.bindle/$value.cfg");
+    system("cp $key ~/.bindle/$value.cfg");
 
     # get the relative path of config file
     my $rel_path = parser->get_rel_path("~/.bindle/$value.cfg");    
 
     # read in the cluster informations from the config file
     my $config_file = new Config::Simple("$rel_path");
+    print Dumper($config_file);
+    die "TEST";
     # lauch the clusters
     my $test_results = launch_clusters($config_file,$key);    
 
