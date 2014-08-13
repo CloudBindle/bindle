@@ -215,8 +215,24 @@ sub upgrade_outdated_configs {
   if (keys %$tmplate_platform == keys %$cfg_platform){
       return 0;
   }else{
-      system("rsync -r config/* ~/.bindle/");
-      say "The config file is outdated! Upgraded the config files. Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
+      if (-e "$abs_path.old"){
+          my $i = 1;
+          my $stop = 0;
+          while (not $stop){
+              if (-e "$abs_path.old.$i"){
+                  $i += 1;
+              }
+              else{
+                  $stop = 1;
+                  system("cp $abs_path $abs_path.old.$i");
+              }
+          }
+      }
+      else{
+           system("cp $abs_path $abs_path.old");
+      }
+      system("cp config/$cfg_template ~/.bindle/$cfg_template");
+      say "The config file is outdated! Upgraded the config files and created back up of the older one. Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
       exit 2;
   }
 }
