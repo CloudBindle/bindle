@@ -224,15 +224,17 @@ sub upgrade_outdated_configs {
               }
               else{
                   $stop = 1;
+                  say "The config file is outdated! Created backup of your config file and is located at $abs_path.old.$i";
                   system("cp $abs_path $abs_path.old.$i");
               }
           }
       }
       else{
            system("cp $abs_path $abs_path.old");
+           say "The config file is outdated! Created backup of your config file and is located at $abs_path.old";
       }
       system("cp config/$cfg_template ~/.bindle/$cfg_template");
-      say "The config file is outdated! Upgraded the config files and created back up of the older one. Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
+      say "Upgraded $cfg_template to the newer version! Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
       exit 2;
   }
 }
