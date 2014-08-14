@@ -25,7 +25,7 @@ sub read_default_configs {
       $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vcloud){
-      $abs_path = `readlink -f ~/.bindle/os.cfg`;
+      $abs_path = `readlink -f ~/.bindle/vcloud.cfg`;
   }
   elsif ($launch_vb) {
     $abs_path = `readlink -f ~/.bindle/vb.cfg`;
