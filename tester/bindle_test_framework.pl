@@ -15,7 +15,7 @@ use tests;
 use launch;
 use parser;
 use threads;
-use Term::ProgressBar;
+#use Term::ProgressBar;
 use File::Spec;
 
 
@@ -72,15 +72,15 @@ while (my ($key,$value) = each(%cfg_path_files)){
 
     # read in the cluster informations from the config file
     my $config_file = new Config::Simple("$rel_path");
-    print Dumper($config_file);
     # lauch the clusters
     my $test_results = launch_clusters($config_file,$key);    
-
+    say "All the clusters have been launched and tested for $value! \nNow, generating an html document to show the test results!";
     # record test results in html file
     $html_doc = parser->set_test_result($html_doc,$key,$test_results);
-
+    say "Test results have been generated for $value!";
     # destroy the clusters used for testing
     if ($destroy_clusters){
+        say "Destroying all the clusters for $value!";
         my $cluster_blocks = parser->get_cluster_dirs($config_file);
         launch->destroy_clusters($cluster_blocks);
     }
@@ -91,7 +91,8 @@ my $commit_SHAs = parser->get_latest_commits();
 $html_doc->replace("other-info" => { _content => $commit_SHAs});
 
 $html_doc->save_as('tester/results.html');
-die "Testing";
+say "FINISHED: Saved the results to html page!";
+exit 0;
 
 
 
@@ -128,9 +129,9 @@ sub launch_clusters{
 sub launch_cluster_threads{
     my ($number_of_clusters,$number_of_nodes,$platform,$cfg_file,$env_file,$result) = @_;
     
-    my $progress_count = 3*$number_of_clusters + 3*$number_of_nodes;
-    my $progress = Term::ProgressBar->new ({count => $progress_count ,name => 'Progress'});
-    my $update_progress = 0;
+    #my $progress_count = 3*$number_of_clusters + 3*$number_of_nodes;
+    #my $progress = Term::ProgressBar->new ({count => $progress_count ,name => 'Progress'});
+    #my $update_progress = 0;
     my %threads;
     
     for (my $i = 1; $i <= $number_of_clusters; $i += 1){
@@ -138,8 +139,8 @@ sub launch_cluster_threads{
          my $cluster_name = "cluster$i";
          my $thr = threads->create(\&launch_multi_node_cluster,$number_of_clusters,$platform,$cfg_file,$env_file,$result,$cluster_name);
          $threads{"cluster$i"} = $thr;
-         $update_progress += 1;
-         $progress->update($update_progress);
+         #$update_progress += 1;
+         #$progress->update($update_progress);
          sleep 60;
     }
 
@@ -148,8 +149,8 @@ sub launch_cluster_threads{
         say "STARTING A THREAD TO LAUNCH SINGLE NODE CLUSTERS FRO $env_file, singlenode$i";
         my $thr = threads->create(\&launch_multi_node_cluster,$number_of_nodes,$platform,$cfg_file,$env_file,$result,$node_name);
         $threads{"$node_name"} = $thr;
-        $update_progress += 1;
-        $progress->update($update_progress);
+        #$update_progress += 1;
+        #$progress->update($update_progress);
         sleep 60;
     }
     say " ALL LAUNCH THREADS STARTED";
@@ -157,11 +158,11 @@ sub launch_cluster_threads{
 
     while (my ($key,$value) = each(%threads)){
         $result .= $value->join();
-        $update_progress += 2;
-        $progress->update($update_progress);
+        #$update_progress += 2;
+        #$progress->update($update_progress);
     }
 
-    $progress->update($progress_count);
+    #$progress->update($progress_count);
     say "ALL LAUNCH THREADS COMPLETED FOR $env_file";
     return $result;
 }
