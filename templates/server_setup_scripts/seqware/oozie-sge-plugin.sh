@@ -44,7 +44,7 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
 	    # set appropriate default for oozie retries max
             perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.action.retries.max<\/name><value>60<\/value><\/property>/;" oozie-site.xml
 	    
-            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.error.code.ext</name><value>SGE1</value></property>/;" oozie-site.xml
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.error.code.ext<\/name><value>SGE1<\/value><\/property>/;" oozie-site.xml
 
             # set appropriate default for oozie user-level retries max
             perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.max<\/name><value>60<\/value><\/property>/;" oozie-site.xml
