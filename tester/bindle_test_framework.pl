@@ -24,6 +24,7 @@ my $config_paths = "";
 my $html_doc = HTML::Manipulator::Document->from_file('tester/template.html');
 my $help = 0;
 my $destroy_clusters = 0;
+my $exit_code = 0;
 GetOptions ("bindle-folder-path=s" => \$bindle_folder_path,
             "use-config-paths=s" => \$config_paths,
             "destroy-clusters" => \$destroy_clusters,
@@ -75,6 +76,9 @@ while (my ($key,$value) = each(%cfg_path_files)){
     # lauch the clusters
     my $test_results = launch_clusters($config_file,$key);    
     say "All the clusters have been launched and tested for $value! \nNow, generating an html document to show the test results!";
+    if ($test_results =~ /FAIL/){
+        $exit_code = 1;
+    }
     # record test results in html file
     $html_doc = parser->set_test_result($html_doc,$key,$test_results);
     say "Test results have been generated for $value!";
@@ -92,7 +96,7 @@ $html_doc->replace("other-info" => { _content => $commit_SHAs});
 
 $html_doc->save_as('tester/results.html');
 say "FINISHED: Saved the results to html page!";
-exit 0;
+exit $exit_code;
 
 
 
