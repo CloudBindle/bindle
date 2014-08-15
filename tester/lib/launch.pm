@@ -10,7 +10,6 @@ sub connect_to_host{
         user => "ubuntu",
         key_path => "/home/ubuntu/.ssh/$ssh_key_name.pem",
         strict_mode => 0,
-        #master_opts => '-vvv',
         master_opts => [-o => "StrictHostKeyChecking=no"]
      );
 
@@ -22,11 +21,7 @@ sub connect_to_host{
      return $ssh;
 }
 
-sub launch_cluster{
-    my ($class,$pl_cmd) = @_;
-    system("$pl_cmd"); 
-}
-
+# terminates all the clusters that were passed in (ex. target-aws-1,target-aws-2)
 sub destroy_clusters{
    my ($class,$cluster_blocks) = @_;
    my @blocks = split (/,/,$cluster_blocks);
