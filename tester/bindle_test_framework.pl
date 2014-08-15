@@ -60,7 +60,7 @@ if (not -e "$rel_path/test_framework_configs"){
     die "Copied the test_framework configs to ~/.bindle/test_framework_configs. Please fill in the desired config files and try again!";
 }
 
-
+system("rm -r ~/.ssh/known_hosts");
 # goes through each environments and launches clusters and single node instances
 while (my ($key,$value) = each(%cfg_path_files)){
 
