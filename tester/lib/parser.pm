@@ -5,6 +5,8 @@ use common::sense;
 use HTML::Manipulator;
 use Data::Dumper;
 use File::Spec;
+
+# update the test matrix for a particular configuration profile and environment
 sub update_matrix{
     my ($class,$html_doc,$json_file,$cloud_env,$result) = @_;
     $cloud_env = get_cloud_env($class,$cloud_env);
@@ -17,6 +19,7 @@ sub update_matrix{
     return $html_doc;
 }
 
+# gets the floating ip for a node so that we can get the ssh access to it
 sub get_float_ip{
     my ($class,$working_directory,$node_name) = @_;
     my $float_ip = `cd $working_directory/$node_name; vagrant ssh-config`;
@@ -26,6 +29,7 @@ sub get_float_ip{
     return $float_ip;
 }
 
+# record the results in text form for a particular environment
 sub set_test_result{
     my ($class, $html_doc, $env_file, $test_results) = @_;
     my $results_id = get_cloud_env($class,$env_file);
@@ -35,7 +39,7 @@ sub set_test_result{
         next if ($template eq '');
         my $temp_id = (split(/Configuration Profile: /,(split(/<\/b>/,$template))[0]))[1];
         if ($template =~ /FAIL/){
-            $html_doc->replace("$temp_id-$results_id" => {class => "warning", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'})
+            $html_doc->replace("$temp_id-$results_id" => {class => "danger", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'})
         }
         else{
  	   $html_doc->replace("$temp_id-$results_id" => {class => "success", _content => '<span class="glyphicon glyphicon-thumbs-up"> - PASS</span>'})
@@ -48,8 +52,7 @@ sub set_test_result{
     return $html_doc;
 }
 
-
-
+# gets most of the json file and this is used for id purposes when populating results.html  
 sub get_json_file_name{
     my ($class,$config_file,$cluster_name) = @_;
     my $json_file = $config_file->param("$cluster_name.json_template_file_path");
@@ -57,6 +60,7 @@ sub get_json_file_name{
     return $json_file;
 }
 
+# this will get us the platform we are working with(openstack-toronto-old) from the template_config path
 sub get_cloud_env{
     my ($class,$env_file) = @_;
     $env_file = (split(/\//,$env_file))[-1];
@@ -64,6 +68,8 @@ sub get_cloud_env{
     return $env_file;
 }
 
+# retreives all the target directories of a specific config file
+# output is used for destroying clusters
 sub get_cluster_dirs{
     my ($class,$config) = @_;
     my $cluster_blocks = "";
@@ -88,6 +94,7 @@ sub get_rel_path{
    return $rel_path
 }
 
+# returns a text with latest commits of Bindle, Seqware-bag, and Pancancer-bag
 sub get_latest_commits{
   my ($class) = @_;
   my %paths;

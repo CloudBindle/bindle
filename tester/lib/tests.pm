@@ -82,8 +82,6 @@ sub check_seqware_sanity{
     # get the seqware sanity check tool
     my $sanity_tool = $ssh->capture("sudo su - seqware -c 'cd jars;wget -q https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'");
     $ssh->error and return "FAIL: Unable to get the seqware sanity check tool: ".$ssh->error;
-    #system("echo '$ssh->capture(\"sudo su - seqware -c 'cd jars;wget https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'\")' >> $working_dir/cluster.log");    
-    #$ssh->error and die "Unable to get the seqware sanity check tool: ".$ssh->error;
     system("echo '$sanity_tool' >> $working_dir/cluster.log");
 
     if ($ssh->test("sudo su - seqware -c 'java -jar jars/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'")){
@@ -92,7 +90,6 @@ sub check_seqware_sanity{
     else{
         $findings .= "FAIL: Seqware Sanity check tool was unsuccessful!\n";
     }
-    #$findings .= $ssh->capture("sudo su - seqware -c 'java -jar jars/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'");
     $ssh->error and return "FAIL: Unable to run the seqware sanity check tool: ".$ssh->error;
 
     return $findings;
@@ -104,16 +101,14 @@ sub check_helloworld_workflow{
     my ($ssh,$working_dir,$seq_version) = @_;
     my $findings = "";
     my $workflow_result = "";
-    # launch the workflow, sleep for 10 minutes and then check the status of the workflow
+ 
+    # launch the workflow; check if it succeeded by using oozie jobs
     my $workflow_launch = $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_$seq_version/'");
     $ssh->error and return "FAIL: Unable to launch the helloworld workflow: ".$ssh->error;
-    # sleep 300;
-    #system("echo '$ssh->capture(\"sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_1.0.13/'\")' >> $working_dir/cluster.log"); 
-    #$ssh->error and die "Unable to launch the helloworld workflow: ".$ssh->error;
-    #sleep 300;
     $workflow_result .= $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
     $ssh->error and return "FAIL: Something might be wrong with oozie: ".$ssh->error;
-
+    
+    # pass the output of "oozie jobs" into the log
     system("echo '$workflow_result' >> $working_dir/cluster.log");
     if ($workflow_result =~ "HelloWorld   SUCCEEDED"){
         $findings .= "PASS: Hello World workflow ran successfully!\n";
@@ -128,21 +123,25 @@ sub check_helloworld_workflow{
 sub check_bwa_workflow{
     my ($ssh,$working_dir,$time,$seq_version,$bwa_version) = @_;
     my $workflow_name = "Workflow_Bundle_BWA_$bwa_version\_SeqWare_$seq_version";
-    print "$workflow_name\n";
-    my $workflow_resulr = "";
+    
+    # launch the workflow; check if it succeeded by using oozie jobs
     $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'");
     $ssh->error and return "FAIL: Unable to launch $workflow_name: ".$ssh_error;
     my $findings = "";
     my $workflow_result = "";
     $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
     $ssh->error and return "FAIL: Something went wrong with oozie: ",$ssh->error;
+    
+    # pass the output of "oozie jobs" into the log"
     system("echo '$workflow_result' >> $working_dir/cluster.log"); 
     if ($workflow_result =~ "BWA          SUCCEEDED"){
         $findings .= "PASS: $workflow_name ran successfully!\n";
-        return $findings;
     }
-   $findings .= "FAIL: $workflow_name failed with the following output: $workflow_result\n";
-   return $findings;
+    else{
+        $findings .= "FAIL: $workflow_name failed with the following output: $workflow_result\n";
+    }
+
+    return $findings;
 }
 
 1;
