@@ -337,8 +337,6 @@ sub run {
         while($retries >=0) {
           
         if (!system($final_cmd)) { last; }
-          my $output = `$final_cmd`;
-          die "Stopping provisioning because of the following output: $output" if ($output =~ /No route to host/);
           $retries--;
           sleep 10;
         }
