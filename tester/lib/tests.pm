@@ -155,11 +155,11 @@ sub check_bwa_workflow{
     
     # launch the workflow; check if it succeeded by using oozie jobs
     $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'");
-    $ssh->error and return "FAIL: Unable to launch $workflow_name: ".$ssh_error;
+    $ssh->error and return "FAIL: Unable to launch $workflow_name: $ssh_error";
     my $findings = "";
     my $workflow_result = "";
     $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
-    $ssh->error and return "FAIL: Something went wrong with oozie: ",$ssh->error;
+    $ssh->error and return "FAIL: Something went wrong with oozie: $ssh->error";
     
     # pass the output of "oozie jobs" into the log"
     system("echo '$workflow_result' >> $working_dir/cluster.log"); 
