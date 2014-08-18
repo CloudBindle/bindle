@@ -10,6 +10,7 @@ use File::Spec;
 sub update_matrix{
     my ($class,$html_doc,$json_file,$cloud_env,$result) = @_;
     $cloud_env = get_cloud_env($class,$cloud_env);
+    # replace the content and attributes by accessing element's ids(format: <config_profile>-<cloud_platform>) 
     if ($result =~ /FAIL/){
 	$html_doc->replace("$json_file-$cloud_env" => {class => "danger", _content => '<span class="glyphicon glyphicon-thumbs-down"> - FAIL</span>'});
     }

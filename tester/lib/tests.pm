@@ -52,6 +52,7 @@ sub check_for_gluster_peers{
     else{
         $findings .= "PASS: Gluster peers are properly connected!\n"
     }
+    say "Tested gluster peers for $working_dir. The results are: \n\t$findings";
     return $findings;
 }
 
@@ -73,6 +74,7 @@ sub check_for_gluster_volumes{
     else{
         $findings .= "PASS: Gluster volumes are set up successfully!\n";
     }
+    say "Tested gluster volumes for $working_dir. The results are: \n\t$findings";
     return $findings;
 
 }
@@ -95,6 +97,9 @@ sub check_SGE_nodes{
     else{
         $findings .= "PASS: SGE nodes are set up correctly (checked via qhost)!\n";
     }
+    say "Tested SGE nodes for $working_dir. The results are: \n\t$findings";
+    
+    return $findings;
 }
 
 sub check_seqware_sanity{
@@ -113,6 +118,7 @@ sub check_seqware_sanity{
         $findings .= "FAIL: Seqware Sanity check tool was unsuccessful!\n";
     }
     $ssh->error and return "FAIL: Unable to run the seqware sanity check tool: ".$ssh->error;
+    say "Tested seqware sanity check for $working_dir. The results are: \n\t$findings";
 
     return $findings;
 
@@ -138,6 +144,7 @@ sub check_helloworld_workflow{
     else{
         $findings .= "FAIL: Hello World Workflow Failed with the follwoing output: $workflow_result\n";
     }
+    say "Tested helloworld workflow for $working_dir. The results are: \n\t$findings";
 
     return $findings;
 }
@@ -162,6 +169,7 @@ sub check_bwa_workflow{
     else{
         $findings .= "FAIL: $workflow_name failed with the following output: $workflow_result\n";
     }
+    say "Tested bwa workflow for $working_dir. The results are: \n\t$findings";
 
     return $findings;
 }
