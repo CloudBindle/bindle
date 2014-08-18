@@ -1,4 +1,5 @@
 package tests;
+use common::sense;
 use Net::OpenSSH;
 
 sub test_cluster_as_ubuntu{
@@ -52,7 +53,7 @@ sub check_for_gluster_peers{
     else{
         $findings .= "PASS: Gluster peers are properly connected!\n"
     }
-    say "Tested gluster peers for $working_dir. The results are: \n\t$findings";
+    say "Tested gluster peers for $working_dir. The results are:\n\t $findings";
     return $findings;
 }
 
@@ -155,7 +156,7 @@ sub check_bwa_workflow{
     
     # launch the workflow; check if it succeeded by using oozie jobs
     $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'");
-    $ssh->error and return "FAIL: Unable to launch $workflow_name: $ssh_error";
+    $ssh->error and return "FAIL: Unable to launch $workflow_name: $ssh->error";
     my $findings = "";
     my $workflow_result = "";
     $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
