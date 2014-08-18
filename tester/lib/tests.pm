@@ -9,6 +9,8 @@ sub test_cluster_as_ubuntu{
     $result .= check_for_gluster_peers($ssh,$number_of_nodes,$working_dir);
     # check for gluster volumes
     $result .= check_for_gluster_volumes($ssh,$number_of_nodes,$working_dir);
+    # check for SGE
+    $result .= check_SGE_nodes($ssh,$number_of_nodes,$working_dir);
     # run the seqware sanity check tool to see if seqware is working properly
     $result .= check_seqware_sanity($ssh,$working_dir);
     # check if helloworld workflow runs successfully
@@ -45,7 +47,7 @@ sub check_for_gluster_peers{
     }
     
     if ($failed){
-        $findings .= "FAIL: Gluster Peer status failed with the following output:\n$gluster_peers";
+        $findings .= "FAIL: Gluster Peer status failed with the following output:\n$gluster_peers\n";
     }
     else{
         $findings .= "PASS: Gluster peers are properly connected!\n"
@@ -66,13 +68,33 @@ sub check_for_gluster_volumes{
     }
 
     if ($failed){
-        $findings .= "FAIL: Gluster Peer status failed with the following output:\n$gluster_vol";
+        $findings .= "FAIL: Gluster Peer status failed with the following output:\n$gluster_vol\n";
     }
     else{
         $findings .= "PASS: Gluster volumes are set up successfully!\n";
     }
     return $findings;
 
+}
+
+sub check_SGE_nodes{
+    my ($ssh, $number_of_nodes, $working_dir) = @_;
+    my $findings = "";
+    # Test to check if SGE is set up properly
+    my $failed = 0;
+    my $qhost_output = $ssh->capture("qhost");
+    $failed = 1 if $ssh->error;
+    system("echo '$qhost_output' >> $working_dir/cluster.log");
+    for(my $i = 1; $i < $number_of_nodes; $i += 1){
+        $failed = 1 unless ($qhost_output =~ /worker$i/);
+    }
+
+    if ($failed){
+        $findings .= "FAIL: SGE isn't set up correctly: \n$qhost_output\n";
+    } 
+    else{
+        $findings .= "PASS: SGE nodes are set up correctly (checked via qhost)!\n";
+    }
 }
 
 sub check_seqware_sanity{
