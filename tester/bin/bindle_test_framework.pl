@@ -10,7 +10,7 @@ use HTML::Manipulator::Document;
 use FileHandle;
 use Net::OpenSSH;
 use FindBin qw($Bin);
-use lib "$Bin/lib";
+use lib "$Bin/../lib";
 use tests;
 use launch;
 use parser;
