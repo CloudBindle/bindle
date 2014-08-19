@@ -46,7 +46,7 @@ It also uses other perl modules but those should already exist on your machine s
 
 To check to see if you have these, you can do:
 
-      perl -c tester/bin/bindle_test_framework.pl
+	perl -c tester/bin/bindle_test_framework.pl
 
 It should exit without an error message. 
 
