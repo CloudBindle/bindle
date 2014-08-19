@@ -1,6 +1,9 @@
 ## Table of Contents
 
 * [About Bindle Tester](#about-bindle-tester)
+* [Step by step Tutorial](#step-by-step-tutorial)
+  * [Manually launching the test framework](#manually-launching-the-test-framework)
+* [Bindle Tester Dependencies](#installing)
 
 ### About Bindle Tester
 
@@ -11,3 +14,23 @@ This framework has been primarily constructed to follow the continous integratio
 You can manually execute this project by executing the perl script under the bin folder of this directory. More on this later. However, the project has been integrated with jenkins which has the capability to automatically detect when someone makes changes to the Bindle repository. The bindle jenkins node contains all the configuration information of the different environments which need to be updated if required in order for the automated testing process of Bindle to work. This will be discussed in detail later. 
 
 In the latest version of the script, we support automated testing on AWS and OICR openstack environments. In the near future, we will be looking into adding vCloud to the test framework as well. There will be a section which will discuss the pseudo process of how you can add a new cloud environment to this tool. The main goal of this project is minimize the long and tedious process of manual testing since provisioning a cluster itself takes about 30 minutes and testing it takes another 30 minutes. 
+
+### What is Jenkins?
+You might be wondering what Jenkins is all about because I certianly did when I first got introduced to it. For our purposes, it is an open source continous integration tool that is able to detect if there are any code changes to the repository on github and if so, then it has the ability to monitor a build system. This is the perfect way to catch errors quickly and locate them more easily. Jenkins can also provide reports and notifications to alert developers on success or on errors. So, we utilitze jenkins just for this purpose; we use the test framework as the "build" and generate a html report at the end of the build which contains the test results! Some tips/tutorial I found helpful while working with jenkins:
+* http://www.vogella.com/tutorials/Jenkins/article.html
+* http://jenkins-ci.org/views/hudson-tutorials
+* Look at the existing configuration of seqware projects that Denis has already set up or the existing bindle project's configurations if you need to setup a new project with jenkins!
+
+I would like to end off this section with a fun fact: Some of the companies that use this are 4linux, Cloudera, Dell, eBay, Facebook, GitHub, linkedIn, Netflix, yahoo, tumblr, and many more! Oh, and of course OICR! 
+
+### Step by step Tutorial
+
+There are two ways you can use the test framework. 
+
+#### Manually launching the test framework
+One way is to manually launching the bindle_test_framework script whenever you made a change to your local repository and want to test that chaange without having to monitor the console output. For example, you might want to run the test framework overnight but on your local repository and not the remote repository. Since jenkins only takes care of remote repository(and that too, only for develop branch, release branch, and pull requests), you will want to execute this framework on your machine itself. I have  created a detailed step-by-step tutorial for this option which is located [here](https://github.com/CloudBindle/Bindle/edit/feature/bindle_test_framework/tester/test_framework_manual_launch.md)
+
+#### Integrating the test framework with jenkins
+I have already set up the test framework with jenkins for the develop branch, 
+
+### Bindle Tester Dependencies
