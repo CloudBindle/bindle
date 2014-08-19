@@ -67,7 +67,32 @@ Now, you can modify these as many times as you want because they are on your loc
     vim ~/.bindle/test_framework_configs/aws.cfg
     vim ~/.bindle/test_framework_configs/openstack-toronto-new.cfg
     
+To get more information on filling in the configuration file, please refer to the bindle readme's "Filling the config file" section. However, I will go through the test framework specific parameters here.
+
+    # seqware version and bwa workflow version should be the same version as 
+    # the versions used by Bindle (currently its 1.0.15 and 2.6.0, respectively)
+    seqware_version = 1.0.15
+    bwa_workflow_version = 2.6.0
+    # number of clusters should match the number of cluster blocks 
+    # where the json_template_file_path is pointing to a "cluster" profile and not a "node" profile
+    number_of_clusters = 1
+    # number of single node clusters should match the number of single node blocks 
+    # where the json_template_file_path is pointing to a "node" profile and not a "singlenode" profile    
+    number_of_single_node_clusters = 1
+
+Another thing to keep in mind while setting up configuration is to always name your cluster blocks by appending a number starting from 1 to "cluster" and "singlenode". For example, If you want to launch 4 clusters(2 multi-node and 2 single-node) in a cloud environment, then your cluster blocks should have the following headings:
+    [cluster1],
+    [cluster2],
+    [singlenode1], and
+    [singlenode2]
+
 ### Running Bindle Tester
+Once everything has been configured properly, we are ready to execute the following command:
+
+    # launch the test framework
+    perl tester/bin/bindle_test_framework.pl --use-config-paths ~/.bindle/test_framework_configs/aws.cfg,~/.bindle/test_framework_configs/openstack-toronto-new.cfg --destroy-clusters
+    
+The "--use-config-paths" parameter is required and we need to specify the paths of all the config templates we want to launch (ex. if you only want to launch aws, then only include "~/.bindle/test_framework_configs/aws.cfg"). The list you can include is comma delimmited. The "--destroy-clusters" parameter simply destroys all the clusters that were launched and tested using this tool.  
 
 ### Adding Tests 
 
