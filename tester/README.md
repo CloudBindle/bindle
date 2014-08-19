@@ -3,6 +3,7 @@
 * [About Bindle Tester](#about-bindle-tester)
 * [Step by step Tutorial](#step-by-step-tutorial)
   * [Manually launching the test framework](#manually-launching-the-test-framework)
+  * [Integrating the test framework with jenkins](#integrating-the-test-framework-with-jenkins)
 * [Bindle Tester Dependencies](#installing)
 * [TODOs](#todos)
 
@@ -35,6 +36,19 @@ One way is to manually launching the bindle_test_framework script whenever you m
 I have already set up the test framework with jenkins for the develop branch, release branch, and for pull requests. However, in the near future, if you want to include any other branches to jenkins or need to modify the configuration currently set up for bindle, I have created a detailed tutorial on this as well which is located [here](https://github.com/CloudBindle/Bindle/edit/feature/bindle_test_framework/tester/test_framework_jenkins.md)
 
 ### Bindle Tester Dependencies
+
+The tester/bin/bindle_test_framework.pl script requires Perl (of course) and also a few modules. They should already be installed if you are using a jenkins node but if not, you can install these using CPAN or via your distribution's package management system. Google "cpan perl install" for more information if you're unfamiliar with installing Perl packages. I highly recommend using PerlBrew to simplify working with Perl dependencies if you do not use your native package manager as shown below for Ubuntu:
+* Net::OpenSSH
+* HTML::Manipulator
+* FileHandle
+* File::Spec
+It also uses other perl modules but those should already exist on your machine since they are needed for bindle. Please refer to bindle's readme if you don't have the other perl modules installed.
+
+To check to see if you have these, you can do:
+
+      perl -c tester/bin/bindle_test_framework.pl
+
+It should exit without an error message. 
 
 ### TODOs
 * Configure jenkins so that it doesn't build the test framework if the documentation is the only thing that has been changed and pushed to github. In other words, jenkins should build the test framework when there is "actual" code change.
