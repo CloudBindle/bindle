@@ -5,6 +5,10 @@
   * [Manually launching the test framework](#manually-launching-the-test-framework)
   * [Integrating the test framework with jenkins](#integrating-the-test-framework-with-jenkins)
 * [Bindle Tester Dependencies](#installing)
+* [Configuration Files](#configuration-files)
+* [Running Bindle Tester](#running-bindle-tester)
+* [Adding Tests](#adding-tests)
+* [Adding Cloud Environments](#adding-cloud-environments)
 * [TODOs](#todos)
 
 ### About Bindle Tester
@@ -46,9 +50,29 @@ It also uses other perl modules but those should already exist on your machine s
 
 To check to see if you have these, you can do:
 
-	perl -c tester/bin/bindle_test_framework.pl
-
+    perl -c tester/bin/bindle_test_framework.pl
+	  
 It should exit without an error message. 
+
+### Configuration Files
+
+Since the test framework launches clusters on multiple encironments, there are multiple configuration templates located at tester/config_templates. NOTE: Do not modify these templates! These are just there for the purposes of updating configuration templates in the future. If it is your first time executing the test_framework script, it will create a copy of all the templates in tester/config_templates at ~/.bindle/test_framework_configs/:
+
+    perl tester/bin/bindle_test_framework.pl
+
+Now, you can modify these as many times as you want because they are on your local machine. The reason why we do this is because these files contain sensitive information like passwords which we don't accidently want to commit on github ans make it public. You can fill in the required information in all the configuration files:
+
+    # fill in the information for both the cloud environments 
+    # there will be a config for vcloud once the test framework supports that as well
+    vim ~/.bindle/test_framework_configs/aws.cfg
+    vim ~/.bindle/test_framework_configs/openstack-toronto-new.cfg
+    
+### Running Bindle Tester
+
+### Adding Tests 
+
+### Adding Cloud Environments
+
 
 ### TODOs
 * Configure jenkins so that it doesn't build the test framework if the documentation is the only thing that has been changed and pushed to github. In other words, jenkins should build the test framework when there is "actual" code change.
