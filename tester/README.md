@@ -4,6 +4,7 @@
 * [Step by step Tutorial](#step-by-step-tutorial)
   * [Manually launching the test framework](#manually-launching-the-test-framework)
 * [Bindle Tester Dependencies](#installing)
+* [TODOs](#todos)
 
 ### About Bindle Tester
 
@@ -21,7 +22,7 @@ You might be wondering what Jenkins is all about because I certianly did when I 
 * http://jenkins-ci.org/views/hudson-tutorials
 * Look at the existing configuration of seqware projects that Denis has already set up or the existing bindle project's configurations if you need to setup a new project with jenkins!
 
-I would like to end off this section with a fun fact: Some of the companies that use this are 4linux, Cloudera, Dell, eBay, Facebook, GitHub, linkedIn, Netflix, yahoo, tumblr, and many more! Oh, and of course OICR! 
+I would like to end off this section with a fun fact: Some of the other companies that use this are 4linux, Cloudera, Dell, eBay, Facebook, GitHub, linkedIn, Netflix, yahoo, tumblr, and many more! 
 
 ### Step by step Tutorial
 
@@ -31,6 +32,12 @@ There are two ways you can use the test framework.
 One way is to manually launching the bindle_test_framework script whenever you made a change to your local repository and want to test that chaange without having to monitor the console output. For example, you might want to run the test framework overnight but on your local repository and not the remote repository. Since jenkins only takes care of remote repository(and that too, only for develop branch, release branch, and pull requests), you will want to execute this framework on your machine itself. I have  created a detailed step-by-step tutorial for this option which is located [here](https://github.com/CloudBindle/Bindle/edit/feature/bindle_test_framework/tester/test_framework_manual_launch.md)
 
 #### Integrating the test framework with jenkins
-I have already set up the test framework with jenkins for the develop branch, 
+I have already set up the test framework with jenkins for the develop branch, release branch, and for pull requests. However, in the near future, if you want to include any other branches to jenkins or need to modify the configuration currently set up for bindle, I have created a detailed tutorial on this as well which is located [here](https://github.com/CloudBindle/Bindle/edit/feature/bindle_test_framework/tester/test_framework_jenkins.md)
 
 ### Bindle Tester Dependencies
+
+### TODOs
+* Configure jenkins so that it doesn't build the test framework if the documentation is the only thing that has been changed and pushed to github. In other words, jenkins should build the test framework when there is "actual" code change.
+* Add vCloud to the test framework (need to figure out how to login to EBI's equivalent of chickenwire)
+* Distinguish between heavy test and light test. For now, all the tests are heavy but we would probably want to re-examine something like running a bwa workflow which takes 30 minutes in the future when vCloud also gets integrated into the framework.
+* Need to make the multi-threading process more dynamic - currently, it is concurrent for launching multiple clusters within an environment, but the environments themselves are ran sequentially. Instead of this, we can make it parallel if we expand to other cloud environments such as vCloud.
