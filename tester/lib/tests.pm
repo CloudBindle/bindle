@@ -133,9 +133,11 @@ sub check_helloworld_workflow{
  
     # launch the workflow; check if it succeeded by using oozie jobs
     my $workflow_launch = $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/Workflow_Bundle_HelloWorld_1.0-SNAPSHOT_SeqWare_$seq_version/'");
-    $ssh->error and return "FAIL: Unable to launch the helloworld workflow: ".$ssh->error;
+    my $res = $ssh->error;
+    return "FAIL: Unable to launch the helloworld workflow: $res" if $res;
     $workflow_result .= $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
-    $ssh->error and return "FAIL: Something might be wrong with oozie: ".$ssh->error;
+    $res = $ssh->error;
+    return "FAIL: Something might be wrong with oozie: $res" if $res;
     
     # pass the output of "oozie jobs" into the log
     system("echo '$workflow_result' >> $working_dir/cluster.log");
@@ -156,11 +158,13 @@ sub check_bwa_workflow{
     
     # launch the workflow; check if it succeeded by using oozie jobs
     $ssh->capture("sudo su - seqware -c 'seqware bundle launch --dir provisioned-bundles/$workflow_name'");
-    $ssh->error and return "FAIL: Unable to launch $workflow_name: $ssh->error";
+    my $res = $ssh->error;
+    return "FAIL: Unable to launch $workflow_name: $res" if $res;
     my $findings = "";
     my $workflow_result = "";
     $workflow_result = $ssh->capture("sudo su - seqware -c 'export OOZIE_URL=http://master:11000/oozie;oozie jobs'");
-    $ssh->error and return "FAIL: Something went wrong with oozie: $ssh->error";
+    $res = $ssh->error;
+    return "FAIL: Something went wrong with oozie: $res" if $res;
     
     # pass the output of "oozie jobs" into the log"
     system("echo '$workflow_result' >> $working_dir/cluster.log"); 
