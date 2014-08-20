@@ -196,11 +196,22 @@ Please remember to copy the file path of desired template(for example
 templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
 and place it in the appropriate config file described below.
 
+
 Fill in your various platform settings depending on what cloud provider you use
-(Vcloud(vcloud.cfg), Amazon(aws.cfg), or OpenStack(os.cfg)). In order to get help
-on filling the config files, please refer to config/sample.cfg:
+(Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/os.cfg)). 
+If ~/.bindle doesn't exist, please run the launch_cluster script:
+
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster1
     
-    vim config/os.cfg
+Now, you can navigate to ~/.bindle/ and fill the required information in the appropriate config file:
+   
+    vim ~/.bindle/<aws/os/vcloud>.cfg
+
+Please refer to the section below if you require help filling all the information in the config file.
+Once you have finished filling everything up, you can simply execute the following commad again to launch the cluster:
+
+    perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
+    
     
 ### Filling in the config file
 
