@@ -23,7 +23,7 @@ You can manually execute this project by executing the perl script under the bin
 In the latest version of the script, we support automated testing on AWS and OICR openstack environments. In the near future, we will be looking into adding vCloud to the test framework as well. There will be a section which will discuss the pseudo process of how you can add a new cloud environment to this tool. The main goal of this project is minimize the long and tedious process of manual testing since provisioning a cluster itself takes about 30 minutes and testing it takes another 30 minutes. 
 
 ### What is Jenkins?
-You might be wondering what Jenkins is all about because I certianly did when I first got introduced to it. For our purposes, it is an open source continous integration tool that is able to detect if there are any code changes to the repository on github and if so, then it has the ability to monitor a build system. This is the perfect way to catch errors quickly and locate them more easily. Jenkins can also provide reports and notifications to alert developers on success or on errors. So, we utilitze jenkins just for this purpose; we use the test framework as the "build" and generate a html report at the end of the build which contains the test results! Some tips/tutorial I found helpful while working with jenkins:
+You might be wondering what Jenkins is all about because I certianly did when I first got introduced to it. For our purposes, it is an open source continous integration tool that is able to detect if there are any code changes to the repository on github and if so, then it has the ability to monitor a build system. This is the perfect way to catch errors quickly and locate them more easily. Jenkins can also provide reports and notifications to alert developers on success or on errors. So, we utilize jenkins just for this purpose; we use the test framework as the "build" and generate a html report at the end of the build which contains the test results! Some tips/tutorial I found helpful while working with jenkins:
 * http://www.vogella.com/tutorials/Jenkins/article.html
 * http://jenkins-ci.org/views/hudson-tutorials
 * Look at the existing configuration of seqware projects that Denis has already set up or the existing bindle project's configurations if you need to setup a new project with jenkins!
@@ -61,7 +61,7 @@ Since the test framework launches clusters on multiple encironments, there are m
 
     perl tester/bin/bindle_test_framework.pl
 
-Now, you can modify these as many times as you want because they are on your local machine. The reason why we do this is because these files contain sensitive information like passwords which we don't accidently want to commit on github ans make it public. You can fill in the required information in all the configuration files:
+Now, you can modify these as many times as you want because they are on your local machine. The reason why we do this is because these files contain sensitive information like passwords which we don't accidently want to commit on github and make it public. You can fill in the required information in all the configuration files:
 
     # fill in the information for both the cloud environments 
     # there will be a config for vcloud once the test framework supports that as well
