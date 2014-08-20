@@ -52,7 +52,7 @@ Next, we need to provision the launcher host by using an existing ansible playbo
      # run the playbook
      ansible-playbook -i jenkins_seqware_inventory site.yml
 
-#### Step 3 - Verify all the dependencies are installed on your bindle slave
+#### Step 3 - Verify all the dependencies are installed on your jenkins slave
 Next, we need you to ssh into the bindle slave you created and make sure all the dependencies are installed correctly. We need to verfiy that all vagrant is installed properly and is the correct version used by Bindle(1.6.3). Then, we need to make sure all the vagrant cloud plugins used by Bindle Tester are installed properly(vagrant-aws and vagrant-openstack-plugin). We also need to make sure all the dependencies for Bindle and Bindle Tester are installed.
 
      # verify all the vagrant components are installed
@@ -72,4 +72,14 @@ Next, we need you to ssh into the bindle slave you created and make sure all the
 If something isn't installed, please do install the required component. You can take a look at Bindle and Bindle Tester readme to figure out how to install vagrant/vagrant plugins and the required perl modules. Then, verify the compenents again before moving on to the next step.
 
 #### Step 4 - Configuring the project with jenkins
+Finally, we need to add and configure a jenkins job. After that, jenkins will automatically detect code changes in the develop branch and generate an html page with the test results for every build. 
 
+1. Navigate to jenkins web console by typing "jenkins" in the address bar of your web browser
+2. Create a jenkins project if you don't have one already by navigating to New Item
+ * Give it a useful name (Ex. bindle-develop) and you can either choose Build a free-style software project or copy from an existing item
+3. Navigate to the project page and click "Configure" to bring up configuration screen. If you don't see any Configure option, you might have have the required permissions.
+4. To get help in filling out the configuration, please take a look at one of the existing projects for bindle or seqware
+ * An excellent project would be "bindle-develop" if you want to add branch monitoring to jenkins or "bindle-pullrequest" to add pull request monitoring.
+
+Now, you should have a functional monitoring system where Bindle Tester will get invoked whenever a change has been committed to the branch or whenever a pull request has been made, depending on what you are wanting to do with jenkins. Then, it will report you with the test results at the end of every build.
+    
