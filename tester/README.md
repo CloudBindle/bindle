@@ -101,14 +101,14 @@ The "--use-config-paths" parameter is required and we need to specify the paths 
 
 
 ### Commit ids from the latest build that was successful
-Seqware-bag: 00d4ae6eb8333616ca1cdad26f27a57c5babde90
-Bindle: fca12b40e7e500cec4ea6d1b8f0fb115358131a6
-Pancancer-bag: b0c9fbe949fc3c2a8ed1e2269a900f852a186ab9
-Seqware version: 1.0.15
-BWA version: 2.6.0
-Vagrant version used for Bindle: 1.6.3
-vagrant-aws version: 0.5.0
-vagrant-openstack-plugin version: 0.7.0
+* Seqware-bag: 00d4ae6eb8333616ca1cdad26f27a57c5babde90
+* Bindle: fca12b40e7e500cec4ea6d1b8f0fb115358131a6
+* Pancancer-bag: b0c9fbe949fc3c2a8ed1e2269a900f852a186ab9
+* Seqware version: 1.0.15
+* BWA version: 2.6.0
+* Vagrant version used for Bindle: 1.6.3
+* vagrant-aws version: 0.5.0
+* vagrant-openstack-plugin version: 0.7.0
 
 ### TODOs
 * Configure jenkins so that it doesn't build the test framework if the documentation is the only thing that has been changed and pushed to github. In other words, jenkins should build the test framework when there is "actual" code change.
