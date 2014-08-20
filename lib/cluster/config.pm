@@ -25,7 +25,7 @@ sub read_default_configs {
       $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vcloud){
-      $abs_path = `readlink -f ~/.bindle/os.cfg`;
+      $abs_path = `readlink -f ~/.bindle/vcloud.cfg`;
   }
   elsif ($launch_vb) {
     $abs_path = `readlink -f ~/.bindle/vb.cfg`;
@@ -215,8 +215,26 @@ sub upgrade_outdated_configs {
   if (keys %$tmplate_platform == keys %$cfg_platform){
       return 0;
   }else{
-      system("rsync -r config/* ~/.bindle/");
-      say "The config file is outdated! Upgraded the config files. Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
+      if (-e "$abs_path.old"){
+          my $i = 1;
+          my $stop = 0;
+          while (not $stop){
+              if (-e "$abs_path.old.$i"){
+                  $i += 1;
+              }
+              else{
+                  $stop = 1;
+                  say "The config file is outdated! Created backup of your config file and is located at $abs_path.old.$i";
+                  system("cp $abs_path $abs_path.old.$i");
+              }
+          }
+      }
+      else{
+           system("cp $abs_path $abs_path.old");
+           say "The config file is outdated! Created backup of your config file and is located at $abs_path.old";
+      }
+      system("cp config/$cfg_template ~/.bindle/$cfg_template");
+      say "Upgraded $cfg_template to the newer version! Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
       exit 2;
   }
 }
