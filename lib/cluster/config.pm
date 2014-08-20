@@ -7,26 +7,38 @@ use autodie qw(:all);
 use JSON;
 use Config;
 use Storable 'dclone';
-
+use Data::Dumper;
+use File::Spec;
+use Cwd 'abs_path';
 #reads in all the data written to the appropriate config file located at config/
 #and constructs an object in the form of configs and default_configs to match
 #the format the original script expects it to be in
 sub read_default_configs {
   my ($class, $cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb) = @_;
-  my $default_configs;
+  my $default_configs = new Config::Simple();
+  my $abs_path = "";
+  # gets the absolute path (ex. /home/ubuntu/.bindle/<platform>.cfg)
   if ($launch_aws){
-    $default_configs = new Config::Simple('config/aws.cfg');
+      $abs_path = `readlink -f ~/.bindle/aws.cfg`;
   }
   elsif ($launch_os){ 
-    $default_configs = new Config::Simple('config/os.cfg');
+      $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vcloud){
-    $default_configs = new Config::Simple('config/vcloud.cfg');
+      $abs_path = `readlink -f ~/.bindle/vcloud.cfg`;
   }
   elsif ($launch_vb) {
-    $default_configs = new Config::Simple('config/vb.cfg');
+    $abs_path = `readlink -f ~/.bindle/vb.cfg`;
   }
-    
+  $abs_path = (split(/\n/,$abs_path))[0];
+  my $rel_path = File::Spec->abs2rel($abs_path,'.');  
+  
+  # upgrade or copy the configs over to ~/.bindle/ if it doesn't exist
+  if (-e $abs_path and not upgrade_outdated_configs($abs_path,$rel_path)){
+    $default_configs->read($rel_path) or die $default_configs->error();
+  }else{
+    copy_over_config_templates();
+  }
   
   my $config_file = $default_configs->param("$cluster_name.json_template_file_path");
   my $work_dir = make_target_directory($cluster_name,$default_configs);
@@ -185,4 +197,46 @@ sub set_launch_command {
   return $launch_command;
 }
 
-1;    
+# copies the configs over to ~/.bindle/ and notifies the user to fill in the required info
+sub copy_over_config_templates {
+  system("rsync -r config/* ~/.bindle/");
+  say "The config file doesn't exist! The file has now been included! Please fill in the config file for the corresponding environment you want to launch clusters on by executing 'vim ~/.bindle/<os/aws/vcloud>.cfg' and try again!";
+  exit 1;  
+}
+
+# upgrade the configs to default templates if the keys don't match for the platform block
+sub upgrade_outdated_configs {
+  my ($abs_path,$rel_path) = @_;
+  my $cfg_template = (split(/\//,$abs_path))[-1];
+  my $template_configs = new Config::Simple("config/$cfg_template");
+  my $tmplate_platform = $template_configs->param(-block=>'platform');
+  my $default_configs = new Config::Simple($rel_path);
+  my $cfg_platform = $default_configs->param(-block=>'platform');
+  if (keys %$tmplate_platform == keys %$cfg_platform){
+      return 0;
+  }else{
+      if (-e "$abs_path.old"){
+          my $i = 1;
+          my $stop = 0;
+          while (not $stop){
+              if (-e "$abs_path.old.$i"){
+                  $i += 1;
+              }
+              else{
+                  $stop = 1;
+                  say "The config file is outdated! Created backup of your config file and is located at $abs_path.old.$i";
+                  system("cp $abs_path $abs_path.old.$i");
+              }
+          }
+      }
+      else{
+           system("cp $abs_path $abs_path.old");
+           say "The config file is outdated! Created backup of your config file and is located at $abs_path.old";
+      }
+      system("cp config/$cfg_template ~/.bindle/$cfg_template");
+      say "Upgraded $cfg_template to the newer version! Please go to ~/.bindle/<os/aws/vcloud>.cfg, fill in the corresponding config file and then try again";
+      exit 2;
+  }
+}
+
+1;

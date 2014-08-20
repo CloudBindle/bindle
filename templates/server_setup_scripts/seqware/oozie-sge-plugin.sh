@@ -42,10 +42,12 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
 	    # set appropriate default for maximum workflow length 
             perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.WorkflowAppService.WorkflowDefinitionMaxLength<\/name><value>10000000<\/value><\/property>/;" oozie-site.xml
 	    # set appropriate default for oozie retries max
-            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.action.retries.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
-	    # set appropriate default for oozie user-level retries max
-            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.max<\/name><value>30<\/value><\/property>/;" oozie-site.xml
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.action.retries.max<\/name><value>60<\/value><\/property>/;" oozie-site.xml
+	    
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.error.code.ext<\/name><value>SGE1<\/value><\/property>/;" oozie-site.xml
 
+            # set appropriate default for oozie user-level retries max
+            perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.LiteWorkflowStoreService.user.retry.max<\/name><value>60<\/value><\/property>/;" oozie-site.xml
 
             if [ ! -z "$OOZIE_ACTION_RECHECK_PERIOD" ]; then
                perl -pi -e  "s/<configuration>/<configuration>\n<property><name>oozie.service.ActionCheckerService.action.check.delay<\/name><value>${OOZIE_ACTION_RECHECK_PERIOD}<\/value><\/property>/;" oozie-site.xml
@@ -60,9 +62,9 @@ if [ ! -z "$OOZIE_HOME_DIR" ]; then
             fi
 
             if $OOZIE_SGE_DEBUG_LOG; then
-                echo "log4j.logger.io.seqware.oozie.action.sge=DEBUG, oozie" >> $OOZIE_CONF_DIR/oozie-log4j.properties
+                echo "log4j.logger.io.seqware.oozie.action.sge=WARN, oozie" >> $OOZIE_CONF_DIR/oozie-log4j.properties
             fi
-
+            sed -i 's/log4j.appender.oozie.RollingPolicy.MaxHistory=720/log4j.appender.oozie.RollingPolicy.MaxHistory=24/g' $OOZIE_CONF_DIR/oozie-log4j.properties          
             echo '# Allow oozie user to qsub as other users:' >> /etc/sudoers
             echo "oozie ALL=(ALL) NOPASSWD: $QSUB" >> /etc/sudoers
             # not sure why I needed this

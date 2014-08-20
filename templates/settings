@@ -42,6 +42,10 @@ OOZIE_SGE_THREADS_PARAM_FORMAT=-pe serial ${threads}
 # Format of qsub flag for specifying the max memory.
 # If present, ${maxMemory} will be replaced with the job-specific value.
 OOZIE_SGE_MAX_MEMORY_PARAM_FORMAT=-l h_vmem=${maxMemory}M
+# Number of times that Oozie will retry user steps in workflows
+OOZIE_RETRY_MAX=5
+# Minutes to wait before retry for user steps in workflows
+OOZIE_RETRY_INTERVAL=5
 #
 # SEQWARE QUERY ENGINE (OPTIONAL)
 #    
