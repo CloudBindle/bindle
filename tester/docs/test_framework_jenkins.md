@@ -25,3 +25,51 @@ Please note that some of the steps described here can be skipped. For example, i
   * Fill in all the required information of the config_files located at ~/.bindle/test_framework_configs
 * You are fully set up and can run a build by making code changes to the particular branch you chose to set up or pressing the build now button in jenkins console!
 
+
+### Detailed Example - Configuring Jenkins to monitor the develop branch 
+Let's go through the steps described above in detail by going through what we had to do to add the monitoring of the develop branch with jenkins. That way, in furture, if you need to make changes or add the monitoring of another branch, you can refer to this example as a guide. Please note that this example shows you how to do this from scratch. That is, it includes steps where you need to get a node and configure it as a jenkins slave. If you already have that done, feel free to skip those steps.
+
+#### Step 1 - Get a launcher host for jenkins
+You can get a launcher host for jenkins by launching an instance from OICR openstack's web console (https://sweng.os.oicr.on.ca/horizon/). Please make sure you use a keypair that can be shared with others so that others can get access to the jenkins node as well. The recommended instance type for this launcher would be "m1.xlarge" since the server needs to be pretty powerfull so that it has the ability launch and provision multiple clusters concurrently. Also, give a descriptive name to the node (ex. bindle_jenkins_slave_1) so that it is recognizable by others as well. This will be the node that will be used by jenkins to launch and provision clusters using Bindle and testing them using the Bindle Tester.
+
+#### Step 2 - Provision the slave node via seqware-sandbox
+Next, we need to provision the launcher host by using an existing ansible playbook that creates jenkins slave nodes and also installs the required dependencies to it. Before we dive into the usage of ansible playbook, please ssh into the launcher host you created and copy the contents of you pub key located at "~/.ssh/id_rsa.pub". Once you have that done, follow this:
+
+     # clone seqware-sandbox on your computer
+     git clone https://github.com/SeqWare/seqware-sandbox.git
+     # navigate to seqware-sandbox/ansible_jenkins_slaves
+     cd seqware-sandbox/ansible_jenkins_slaves
+     # Add your public keys to files/public_keys and edit the listed keys
+     mkdir files/public_keys
+     # Add the public key of your launcher host here and save it
+     vim files/public_keys/jenkins
+     # Delete the "Copy maven configuration" task from site.yml if it hasn't been done already
+     vim site.yml
+     # Change the inventory to include your host's ip address under both "jenkins" and "jenkins_bindle". 
+     # Follow the same format as the ones that already exist. 
+     # Comment the other hosts out since you only want to run the playbook for your launcher host
+     vim jenkins_seqware_inventory
+     # run the playbook
+     ansible-playbook -i jenkins_seqware_inventory site.yml
+
+#### Step 3 - Verify all the dependencies are installed on your bindle slave
+Next, we need you to ssh into the bindle slave you created and make sure all the dependencies are installed correctly. We need to verfiy that all vagrant is installed properly and is the correct version used by Bindle(1.6.3). Then, we need to make sure all the vagrant cloud plugins used by Bindle Tester are installed properly(vagrant-aws and vagrant-openstack-plugin). We also need to make sure all the dependencies for Bindle and Bindle Tester are installed.
+
+     # verify all the vagrant components are installed
+     vagrant -v
+     # should have vagrant-aws and vagrant-openstack-plugin in this list
+     vagrant plugin list
+     # verify all the bindle dependencies are installed correctly
+     git clone https://github.com/ICGC-TCGA-PanCancer/pancancer-info.git
+     cd Bindle
+     # this command should execute without any errors
+     perl -c bin/launcher/launch_cluster.pl
+     # verify all the Bindle Tester dependencies are installed correctly
+     perl -c tester/bin/bindle_test_framework.pl
+     cd ..
+     rm -rf Bindle
+
+If something isn't installed, please do install the required component. You can take a look at Bindle and Bindle Tester readme to figure out how to install vagrant/vagrant plugins and the required perl modules. Then, verify the compenents again before moving on to the next step.
+
+#### Step 4 - Configuring the project with jenkins
+
