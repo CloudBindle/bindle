@@ -96,6 +96,44 @@ Once everything has been configured properly, we are ready to execute the follow
 The "--use-config-paths" parameter is required and we need to specify the paths of all the config templates we want to launch (ex. if you only want to launch aws, then only include "~/.bindle/test_framework_configs/aws.cfg"). The list you can include is comma delimmited. The "--destroy-clusters" parameter simply destroys all the clusters that were launched and tested using this tool.  
 
 ### Adding Tests 
+This section describes how to add more tests to the test framework. For this, you can navigate to tester/lib/ from the Bindle directory. Next, you can edit tests/pm.
+
+		vim tests.pm
+		
+Within this file, you have two main methods which are "test_cluster_as_ubuntu" and "test_single_nodes_as_ubuntu". The first one is strictly to test multi-node clusters while the second one is to test a single-node cluster. Also, you already have the ssh object which will ssh into the master node of the cluster. So, all you need to do is create a sub routine where you execute a specific test and return a text output back which contains the test result (either a pass or fail). 
+
+An example subroutine I will display here is "check_seqware_sanity" which is there to make sure that seqware is functioning properly by running the seqware sanity check tool:
+
+	sub check_seqware_sanity{
+    my ($ssh,$working_dir) = @_;
+    my $findings = "";
+
+    # get the seqware sanity check tool
+    my $sanity_tool = $ssh->capture("sudo su - seqware -c 'cd jars;wget -q https://seqwaremaven.oicr.on.ca/artifactory/seqware-release/com/github/seqware/seqware-sanity-check/1.0.15/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'");
+    $ssh->error and return "FAIL: Unable to get the seqware sanity check tool: ".$ssh->error;
+    system("echo '$sanity_tool' >> $working_dir/cluster.log");
+
+    if ($ssh->test("sudo su - seqware -c 'java -jar jars/seqware-sanity-check-1.0.15-jar-with-dependencies.jar'")){
+        $findings .= "PASS: Seqware sanity check tool ran successfully!\n";
+    }
+    else{
+        $findings .= "FAIL: Seqware Sanity check tool was unsuccessful!\n";
+    }
+    $ssh->error and return "FAIL: Unable to run the seqware sanity check tool: ".$ssh->error;
+    say "Tested seqware sanity check for $working_dir. The results are: \n\t$findings";
+
+    return $findings;
+
+	}
+
+As you can see, a command can be executed on the remote machines by invoking $ssh->cpature("<cmd>") and this will capture the output to the variable. Another way to execute a command is by invoking $ssh->system("<cmd>"). However, this one doesn't store the output in a variale; it simply outputs it to the console. For more information on how to execute particular commands through ssh, please refer to Net::OpenSSH's documentation [here](http://search.cpan.org/~salva/Net-OpenSSH-0.62/lib/Net/OpenSSH.pm).
+
+To add it to the two main methods, all we need to do is add the following line to the methods:
+
+		# run the seqware sanity check tool to see if seqware is working properly
+    $result .= check_seqware_sanity($ssh,$working_dir);
+
+Now, you should be able to see the output of the test you added in results.html once you execute the test framework provided that there are no errors in your newly created test method.
 
 ### Adding Cloud Environments
 
