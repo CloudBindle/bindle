@@ -9,6 +9,7 @@
 * [Running Bindle Tester](#running-bindle-tester)
 * [Adding Tests](#adding-tests)
 * [Adding Cloud Environments](#adding-cloud-environments)
+* [Monitoring Build Results with Jenkins](#monitoring-build-results-with-jenkins)
 * [Commit ids from the latest build that was successful](#commit-ids-from-the-latest-build-that-was-successful)
 * [TODOs](#todos)
 
@@ -145,6 +146,9 @@ It would be much simpler to integrate a cloud environment where you can launch c
 	 perl tester/bin/bindle_test_framework.pl --use-config-paths ~/.bindle/test_framework_configs/aws.cfg,~/.bindle/test_framework_configs/openstack-toronto-new.cfg --destroy-clusters
 	 
 If your configuration file is set up properly, the bindle tester should be functioning with the new cloud environment as well. 
+
+### Monitoring Build Results with Jenkins
+Jenkins has been configured to currently monitor code changes on develop and release branches. It also monitors and runs a build once a pull request has been made. In order to monitor the builds once the code has been changed, please login to jenkins and co to the corresponding projects. That is, you would navigate to "bindle-develop" if you want to take a look at the test results from the most recent build, "bindle-release" for release branches, and "bindle-pullrequest" for pull requests. Then, if the most recent build is flashing, it means that it is still in progress but you can view the console output of the build if you's like but right clicking and selected "Console Output". If the build is red, it means that something went wrong with build and you can take a look at the test results by click on "Bindle Test Results" section for that build page. This will take you to another page with the test results from that build. If the build is blue, it means it passed and of course, you can view a more detailed report by clicking "Bindle Test results"
 
 ### Commit ids from the latest build that was successful
 * Seqware-bag: 00d4ae6eb8333616ca1cdad26f27a57c5babde90
