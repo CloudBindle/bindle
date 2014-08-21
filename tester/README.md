@@ -9,6 +9,7 @@
 * [Running Bindle Tester](#running-bindle-tester)
 * [Adding Tests](#adding-tests)
 * [Adding Cloud Environments](#adding-cloud-environments)
+* [Upgrading Bindle Tester to Bindle 2.0](#upgrading-bindle-tester-to-bindle-2.0)
 * [Monitoring Build Results with Jenkins](#monitoring-build-results-with-jenkins)
 * [Commit ids from the latest build that was successful](#commit-ids-from-the-latest-build-that-was-successful)
 * [TODOs](#todos)
@@ -151,6 +152,13 @@ If your configuration file is set up properly, the bindle tester should be funct
 Jenkins has been configured to currently monitor code changes on develop and release branches. It also monitors and runs a build once a pull request has been made. In order to monitor the builds once the code has been changed, please login to jenkins and co to the corresponding projects. That is, you would navigate to "bindle-develop" if you want to take a look at the test results from the most recent build, "bindle-release" for release branches, and "bindle-pullrequest" for pull requests. Then, if the most recent build is flashing, it means that it is still in progress but you can view the console output of the build if you's like but right clicking and selected "Console Output". If the build is red, it means that something went wrong with build and you can take a look at the test results by click on "Bindle Test Results" section for that build page. This will take you to another page with the test results from that build. If the build is blue, it means it passed and of course, you can view a more detailed report by clicking "Bindle Test results". 
 
 If the build failed, what do you do from there? You can take a look at the logs for that particular cluster which you can find in the archives on jenkins. That should have the required information to determine exactly what caused the failure. 
+
+### Upgrading Bindle Tester to Bindle 2.0
+Bindle 2.0 has already been tested with Bindle Tester and at that time it was functioning correctly. For your information, I used the 2.0alpha.0 tag to test it. Here is the link: https://github.com/CloudBindle/Bindle/tree/2.0-alpha.0. 
+
+The only change that needs to be done to Bindle Tester is changing the configuration profile's path location in all the configuration files. That is, change json_file_template_path for the files located at tester/config_templates and the files located at ~/.bindle/test_framework_configs. This is because the configuration profiles are now located in their own repositorties - [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag) and [seqware-bag](https://github.com/SeqWare/seqware-bag). Please note that you need both of these directories in your workspace directory where Bindle is actually located for Bindle 2.0 to work. After doing this, you can simply run Bindle Tester as you have been doing normally. 
+
+NOTE: Don't forget to change the configuration for bindle_jenkins_slave node as well when you upgrade to Bindle 2.0
 
 ### Commit ids from the latest build that was successful
 * Seqware-bag: 00d4ae6eb8333616ca1cdad26f27a57c5babde90
