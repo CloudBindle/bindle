@@ -130,13 +130,21 @@ As you can see, a command can be executed on the remote machines by invoking $ss
 
 To add it to the two main methods, all we need to do is add the following line to the methods:
 
-		# run the seqware sanity check tool to see if seqware is working properly
+	# run the seqware sanity check tool to see if seqware is working properly
     $result .= check_seqware_sanity($ssh,$working_dir);
 
 Now, you should be able to see the output of the test you added in results.html once you execute the test framework provided that there are no errors in your newly created test method.
 
 ### Adding Cloud Environments
+The cloud environments can be distinguished in to two different sections. One is when you need to get access to a cluster equivalent to chickenwire and from there, you can launch clusters through Bindle. Other one is when you can launch clusters through Bindle from any launcher host. One example of the first one is vCloud. Examples of the second type are AWS and openstack at OICR which we currently have integrated with the test framework. 
 
+In future, if you are given the task to include vCloud in this framework, it will be difficult since you will need to figure out how to login to a cluster similar to chickenwire, then launch a lucher host on that cluster. After that, you will have to launch and provision clusters on that launcher host via Bindle. Finally, you can test the cluster that were provisioned by Bindle and pass back the test results. As you can imagine, this is a tough task and due to time constraints, I wasn't able to get to it. However, there is a resource available to create a launcher host on a cloud environment. It is located in the "nexus" folder. This was designed by Adam and is primarily meant to create a launcher host on a cloud environment. From there, you can go onto launching,provisioning, and testing the clusters through Bindle Tester. 
+
+It would be much simpler to integrate a cloud environment where you can launch clusters from any launcher host. For this, all you need to do is create a new configuration file under tester/config_templates. This configuration file should have all the required information to get access to and launch clusters on it. You can take a look at existing configuration files to look at what kind of parameters are needed. Once you have done that, you can mention the config path of the file in "--use-config-paths" argument while executing the Bindle Tester:
+
+	 perl tester/bin/bindle_test_framework.pl --use-config-paths ~/.bindle/test_framework_configs/aws.cfg,~/.bindle/test_framework_configs/openstack-toronto-new.cfg --destroy-clusters
+	 
+If your configuration file is set up properly, the bindle tester should be functioning with the new cloud environment as well. 
 
 ### Commit ids from the latest build that was successful
 * Seqware-bag: 00d4ae6eb8333616ca1cdad26f27a57c5babde90
