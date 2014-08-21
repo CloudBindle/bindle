@@ -148,11 +148,13 @@ It would be much simpler to integrate a cloud environment where you can launch c
 If your configuration file is set up properly, the bindle tester should be functioning with the new cloud environment as well. 
 
 ### Monitoring Build Results with Jenkins
-Jenkins has been configured to currently monitor code changes on develop and release branches. It also monitors and runs a build once a pull request has been made. In order to monitor the builds once the code has been changed, please login to jenkins and co to the corresponding projects. That is, you would navigate to "bindle-develop" if you want to take a look at the test results from the most recent build, "bindle-release" for release branches, and "bindle-pullrequest" for pull requests. Then, if the most recent build is flashing, it means that it is still in progress but you can view the console output of the build if you's like but right clicking and selected "Console Output". If the build is red, it means that something went wrong with build and you can take a look at the test results by click on "Bindle Test Results" section for that build page. This will take you to another page with the test results from that build. If the build is blue, it means it passed and of course, you can view a more detailed report by clicking "Bindle Test results"
+Jenkins has been configured to currently monitor code changes on develop and release branches. It also monitors and runs a build once a pull request has been made. In order to monitor the builds once the code has been changed, please login to jenkins and co to the corresponding projects. That is, you would navigate to "bindle-develop" if you want to take a look at the test results from the most recent build, "bindle-release" for release branches, and "bindle-pullrequest" for pull requests. Then, if the most recent build is flashing, it means that it is still in progress but you can view the console output of the build if you's like but right clicking and selected "Console Output". If the build is red, it means that something went wrong with build and you can take a look at the test results by click on "Bindle Test Results" section for that build page. This will take you to another page with the test results from that build. If the build is blue, it means it passed and of course, you can view a more detailed report by clicking "Bindle Test results". 
+
+If the build failed, what do you do from there? You can take a look at the logs for that particular cluster which you can find in the archives on jenkins. That should have the required information to determine exactly what caused the failure. 
 
 ### Commit ids from the latest build that was successful
 * Seqware-bag: 00d4ae6eb8333616ca1cdad26f27a57c5babde90
-* Bindle: fca12b40e7e500cec4ea6d1b8f0fb115358131a6
+* Bindle: c6f36e26108d41f3f247f8a0b2a5d925bb472fc3
 * Pancancer-bag: b0c9fbe949fc3c2a8ed1e2269a900f852a186ab9
 * Seqware version: 1.0.15
 * BWA version: 2.6.0
@@ -165,3 +167,4 @@ Jenkins has been configured to currently monitor code changes on develop and rel
 * Add vCloud to the test framework (need to figure out how to login to EBI's equivalent of chickenwire)
 * Distinguish between heavy test and light test. For now, all the tests are heavy but we would probably want to re-examine something like running a bwa workflow which takes 30 minutes in the future when vCloud also gets integrated into the framework.
 * Need to make the multi-threading process more dynamic - currently, it is concurrent for launching multiple clusters within an environment, but the environments themselves are ran sequentially. Instead of this, we can make it parallel if we expand to other cloud environments such as vCloud.
+
