@@ -33,7 +33,7 @@ Let's go through the steps described above in detail by going through what we ha
 You can get a launcher host for jenkins by launching an instance from OICR openstack's web console (https://sweng.os.oicr.on.ca/horizon/). Please make sure you use a key pair that can be shared with others so that others can get access to the jenkins node as well. The recommended instance type for this launcher would be "m1.xlarge" since the server needs to be pretty powerful so that it has the ability launch and provision multiple clusters concurrently. Also, give a descriptive name to the node (ex. bindle_jenkins_slave_1) so that it is recognizable by others as well. This will be the node that will be used by jenkins to launch and provision clusters using Bindle and testing them using the Bindle Tester.
 
 #### Step 2 - Provision the slave node via seqware-sandbox
-Next, we need to provision the launcher host by using an existing ansible playbook that creates jenkins slave nodes and also installs the required dependencies to it. Before we dive into the usage of ansible playbook, please ssh into the launcher host you created and copy the contents of your pub key located at "~/.ssh/id_rsa.pub". Once you have that done, follow this:
+Next, we need to provision the launcher host by using an existing ansible playbook that creates jenkins slave nodes and also installs the required dependencies to it. Before we dive into the usage of ansible playbook, please copy the contents of jenkins pub key. Once you have that done, follow this:
 
      # clone seqware-sandbox on your computer
      git clone https://github.com/SeqWare/seqware-sandbox.git
@@ -41,7 +41,7 @@ Next, we need to provision the launcher host by using an existing ansible playbo
      cd seqware-sandbox/ansible_jenkins_slaves
      # Add your public keys to files/public_keys and edit the listed keys
      mkdir files/public_keys
-     # Add the public key of your launcher host here and save it
+     # Add the kjenkins public key 
      vim files/public_keys/jenkins
      # Delete the "Copy maven configuration" task from site.yml if it hasn't been done already
      vim site.yml
