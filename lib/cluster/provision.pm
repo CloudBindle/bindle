@@ -157,7 +157,7 @@ sub run_ansible_command{
   print WRAPSCRIPT "export ANSIBLE_HOST_KEY_CHECKING=False\n";
   print WRAPSCRIPT "ansible-playbook -v -i $work_dir/inventory $configs->{ANSIBLE_PLAYBOOK} --extra-vars \"\@$work_dir/variables.$time.json\" \n";
   close (WRAPSCRIPT);
-  print "Ansible command: script -c $work_dir/wrapscript.$time.sh $work_dir/ansible_run.$time.log\n";
+  print "Ansible command: bash $work_dir/wrapscript.$time.sh 2>&1 | tee $work_dir/ansible_run.$time.log\n";
   system("chmod a+x $work_dir/wrapscript.$time.sh");
   return system("bash $work_dir/wrapscript.$time.sh 2>&1 | tee $work_dir/ansible_run.$time.log");
 }
