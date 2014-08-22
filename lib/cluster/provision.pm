@@ -149,6 +149,7 @@ sub run_ansible_command{
 
   # preserve colour for easy readability in head and tail
   # also save a copy without buffering (unlike tee) by using script -c
+  # unfortunately, jenkins appears allergic to script -c (kills the script randomly while running), so switch back to tee
   open WRAPSCRIPT, ">$work_dir/wrapscript.$time.sh" or die $!;
   print WRAPSCRIPT "#!/usr/bin/env bash\n";
   print WRAPSCRIPT "set -o errexit\n";
@@ -158,7 +159,7 @@ sub run_ansible_command{
   close (WRAPSCRIPT);
   print "Ansible command: script -c $work_dir/wrapscript.$time.sh $work_dir/ansible_run.$time.log\n";
   system("chmod a+x $work_dir/wrapscript.$time.sh");
-  return system("script -c $work_dir/wrapscript.$time.sh $work_dir/ansible_run.$time.log");
+  return system("bash $work_dir/wrapscript.$time.sh 2>&1 | tee $work_dir/ansible_run.$time.log");
 }
 
 sub run {
