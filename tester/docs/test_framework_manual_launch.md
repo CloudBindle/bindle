@@ -14,21 +14,21 @@ To check to see if you have these, you can do:
 
     perl -c tester/bin/bindle_test_framework.pl
     
-It should exit without any error messages. If not, download the perl modules that it is complaining avout and please include it in the documentation.
+It should exit without any error messages. If not, download the perl modules that it is complaining about and please include it in the documentation.
 
 ### Step 2 - Setting up the Configuration Files
-Bindle Tester currently supports AWS and OICR Openstack environments. So, you will find two configuration files located at tester/config_templates. Please note that you shouldn't be modifying these templates unless you want to add an extra parameter to it. Don't put any passwords or sensitive information in this file because we don't want anyone to be accidently pushing that to GitHub. Assuming this is your first time using Bindle Tester, you should run the perl script which will copy all the config files over to ~/.bindle/test_framework_configs:
+Bindle Tester currently supports AWS and OICR Openstack environments. So, you will find two configuration files located at tester/config_templates. Please note that you shouldn't be modifying these templates unless you want to add an extra parameter to it. Don't put any passwords or sensitive information in this file because we don't want anyone to be accidentally pushing that to GitHub. Assuming this is your first time using Bindle Tester, you should run the perl script which will copy all the config files over to ~/.bindle/test_framework_configs:
 
         perl tester/bin/bindle_test_framework.pl
         
-You can now modify the config files at ~/.bindle/test_framework_configs since that is on your local machine and this way, it won't be accidently pushed on github. You can fill in the configuration files by the following:
+You can now modify the config files at ~/.bindle/test_framework_configs since that is on your local machine and this way, it won't be accidentally pushed on github. You can fill in the configuration files by the following:
 
         # fill in the information for both the cloud environments 
         # there will be a config for vcloud once the test framework supports that as well
         vim ~/.bindle/test_framework_configs/aws.cfg
         vim ~/.bindle/test_framework_configs/openstack-toronto-new.cfg
 
-Please note that if you add a parameter to test_framework_configs to the "plarform" block, make sure to include the parameter in Bindle's config/ folder as well because it will throw an error stating that the parameters don't match! So, if you add a parameter in the tester config files, please change the other config files to include it as well. This feature is there to make sure that all the different configuration files for the same cloud environment have the same parameters to avoid confusion!
+Please note that if you add a parameter to test_framework_configs to the "platform" block, make sure to include the parameter in Bindle's config/ folder as well because it will throw an error stating that the parameters don't match! So, if you add a parameter in the tester config files, please change the other config files to include it as well. This feature is there to make sure that all the different configuration files for the same cloud environment have the same parameters to avoid confusion!
 
 ### Step 3 - Filling in the Configuration Files
 For this tutorial, we want to launch clusters on aws. So, let's look at aws's configuration file:
@@ -48,7 +48,7 @@ To fill in the configuration files, most of the information needed to be filled 
         # where the json_template_file_path parameter in that block is pointing to a "node" profile and not a "cluster" profile    
         number_of_single_node_clusters = 1
 
-Also, when you are making cluster blocks, one thing to keep in minds is to always name your blocks by appending a number starting from 1 to "cluster" and "singlenode". For example, If you want to launch 4 clusters(2 multi-node and 2 single-node) in a cloud environment, then your cluster blocks should have the following headings: [cluster1], [cluster2], [singlenode1], and [singlenode2]. In this example, we want to launch one two-node cluster and one single-node cluster. This can be acheived by the adding the following blocks to the configuration file:
+Also, when you are making cluster blocks, one thing to keep in minds is to always name your blocks by appending a number starting from 1 to "cluster" and "singlenode". For example, If you want to launch 4 clusters(2 multi-node and 2 single-node) in a cloud environment, then your cluster blocks should have the following headings: [cluster1], [cluster2], [singlenode1], and [singlenode2]. In this example, we want to launch one two-node cluster and one single-node cluster. This can be achieved by the adding the following blocks to the configuration file:
 
         [cluster1]
         number_of_nodes = 2
@@ -63,7 +63,7 @@ Also, when you are making cluster blocks, one thing to keep in minds is to alway
 Now, save this configuration file and we are ready to move on to the next step where we will be running the Bindle Tester!
 
 ### Step 4 - Running Bindle Tester
-There are two parameter that you can use with tester/bindle_test_framework.pl script. The "--use-config-paths" parameter is required and we need to specify the paths of all the config templates we want to launch (ex. in our case it will be "~/.bindle/test_framework_configs/aws.cfg"). You can include more than one configuration file if you want to launch clusters on multiple cloud environments(both aws and OICR openstack) by adding a comma delimmited list as an argument. The "--destroy-clusters" parameter simply destroys all the clusters that were launched and tested using this tool. Let's run the test framework which launches and tests clusters on aws only:
+There are two parameter that you can use with tester/bindle_test_framework.pl script. The "--use-config-paths" parameter is required and we need to specify the paths of all the config templates we want to launch (ex. in our case it will be "~/.bindle/test_framework_configs/aws.cfg"). You can include more than one configuration file if you want to launch clusters on multiple cloud environments(both aws and OICR openstack) by adding a comma delimited list as an argument. The "--destroy-clusters" parameter simply destroys all the clusters that were launched and tested using this tool. Let's run the test framework which launches and tests clusters on aws only:
 
         # launch the test framework
         perl tester/bin/bindle_test_framework.pl --use-config-paths ~/.bindle/test_framework_configs/aws.cfg --destroy-clusters
