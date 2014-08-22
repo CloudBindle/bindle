@@ -178,8 +178,10 @@ sub launch_one_cluster{
         system("perl bin/launcher/launch_cluster.pl --use-$platform --use-default-config --launch-cluster $cluster_name >> $working_dir/cluster.log");
         
         # archiving the log files (cluster.log,master.log, and worker.log)
-        system("mkdir tmp$working_dir") unless (-e "tmp$working_dir");
-        system("cp $working_dir/*.log tmp$working_dir/");  
+        if ($destroy_clusters){
+            system("mkdir tmp$working_dir") unless (-e "tmp$working_dir");
+            system("cp $working_dir/*.log tmp$working_dir/");  
+        }
 
         # ssh into the master node and test if bindle was provisioned properly
         my $float_ip = parser->get_float_ip($cfg_file->param("$cluster_name.target_directory"),"master");
