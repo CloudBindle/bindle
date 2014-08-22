@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bindle 1.2 Test Results</title>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        .wrapper{
+            margin: 20px;
+        }
+        .glyphicon-thumbs-up{
+            color: green;
+        }
+        .glyphicon-thumbs-down{
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="heading">
+    <div class="jumbotron">
+        <h1 style="text-align:center">Bindle 1.2 Test Results</h1>
+    </div>
+</div>
+
+<div class="content">
+    <div class="table-responsive wrapper">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Configuration Name</th>
+                    <th>AWS</th>
+                    <th>OICR OpenStack</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr class="active">
+
+                    <th>vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template</th>
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template-aws">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_cluster.json.template-openstack-toronto-new">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+                </tr>
+
+                <tr class="active">
+
+                    <th>vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template</th>
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template-aws">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.bwa_workflow.seqware.install.sge_node.json.template-openstack-toronto-new">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+                </tr>
+
+                <tr class="active">
+
+                    <th>vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template</th>
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template-aws">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+                    
+                    <td class='active' id='vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template-openstack-toronto-new'><span class="glyphicon glyphicon-repeat"> - DNR</span></td>
+
+                </tr>
+
+                <tr class="active">
+
+                    <th>vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template</th>
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template-aws">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+                    <td class="active" id="vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template-openstack-toronto-new">
+                        <span class="glyphicon glyphicon-repeat"> - DNR</span>
+                    </td>
+
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="panel-group wrapper" id="accordion">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+              AWS
+            </a>
+          </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in">
+          <div class="panel-body">
+             <pre id="aws-results">Nothing was ran in this environment. </pre>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+              OICR OpenStack - New
+            </a>
+          </h4>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse">
+          <div class="panel-body">
+            <pre id="openstack-toronto-new-results">Nothing was ran in this environment. </pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+              Other Useful Information
+            </a>
+          </h4>
+        </div>
+        <div id="collapseFour" class="panel-collapse collapse">
+          <div class="panel-body">
+            <pre id="other-info"><b>Latest commits</b><br>Bindle: </pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+
+
