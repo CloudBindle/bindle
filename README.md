@@ -93,6 +93,8 @@ Install bindle dependencies:
     sudo apt-add-repository ppa:ansible/ansible
     sudo apt-get update
     sudo apt-get install ansible libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
+    
+Note: Ansible is a pretty fast moving project and we tested against 1.6.10. You may want to use that [specific version](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb) to avoid complications. 
 
 Install Vagrant using the package from their
 [site](http://downloads.vagrantup.com/) that is correct for your platform.  For
@@ -148,7 +150,7 @@ Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 * Vagrant plugins:
     * vagrant-aws (0.5.0)
     * vagrant-openstack-plugin (0.7.0)
-* Ansible 1.6.8
+* Ansible 1.6.10
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
