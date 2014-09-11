@@ -11,27 +11,12 @@
     * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
 * [Running the Cluster Launcher](#running-the-cluster-launcher)
 * [Destroying the Clusters](#destroying-the-clusters)
-* [SeqWare Examples](#seqware-examples)
-    * [SeqWare - Single Node](#seqware---single-node)
-        * [Oozie Hadoop](#oozie-hadoop)
-        * [Oozie SGE](#oozie-sge)
-    * [SeqWare - Cluster](#seqware---cluster)
-        * [Oozie Hadoop](#oozie-hadoop-1)
-        * [Oozie SGE](#oozie-sge-1)
-    * [SeqWare - Install Only](#seqware---install-only)
-    * [SeqWare - CentOS](#seqware---centos)
-    * [SeqWare Query Engine - Single node](#seqware-query-engine---single-node)
-* [TCGA/ICGC PanCancer Examples](#tcgaicgc-pancancer-examples)
+* [SeqWare Examples](#seqware-bag)
 * [Persistance of Ephemeral Disks - AWS](#persistance-of-ephemeral-disks---aws)
 * [Launching a single node instance from an AMI Image](#launching-a-single-node-instance-from-an-ami-image)
-* [OICR Examples](#oicr-examples)
-    * [General OICR Settings](#general-oicr-settings)
-    * [ICGC DCC Portal - Small Cluster](#icgc-dcc-portal---small-cluster)
-    * [ICGC DCC Portal - Large Cluster](#icgc-dcc-portal---large-cluster)
 * [Logging](#logging)
 * [Controlling the VM](#controlling-the-vm)
-    * [CentOS Information](#centos-information)
-        * [Veewee Installation and Usage Instructions (Mac)](#veewee-installation-and-usage-instructions-mac)
+* [CentOS Information](#centos-information)
 * [Debugging](#debugging)
 * [TODO](#todo)
 
@@ -40,22 +25,19 @@
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
 provides the ability to launch either a single node or a cluster of compute
-nodes configured with one or more Bash shell scripts (in the future we are
-moving to [Ansible](http://www.ansible.com/) as a more robust provisioning
-mechanism). This lets you build Linux virtual machines from scratch, ensuring
+nodes configured with an [Ansible](http://www.ansible.com/) playbook.
+This lets you build Linux virtual machines from scratch, ensuring
 you development/testing/production VMs are clean and your configuration process
 is fully reproducible.  The big difference between building a cluster with this
 script vs. Vagrant directly is Vagrant provides a single pass at running
 provisioning script which actually makes it quite difficult to pass runtime
 information like the domain names/IP addresses of cluster nodes and to setup
 software where order matters like HDFS before HBase.  This tool, however,
-launches one or more instances, runs a base Bash configuration script on each,
-then queries Vagrant to identify the external and internal IP address of each
-of the launched instances. This script then runs one or more "secondary"
-provisioning scripts that can include variables substituted, for example, the
-IP addreses and domain names of the other hosts in the cluster.  This
-functionality makes it possible to build clusters of nodes that know about each
-other without knowing the IP addreses ahead of time.
+launches one or more instances then queries Vagrant to identify the external 
+and internal IP address of each of the launched instances. 
+
+This script then builds an Ansible inventory and invokes the playbook 
+while passing along some variables and logging the results.  
 
 What we have found this useful for is building clusters (both Hadoop and
 GridEngine-based) on a variety of cloud environments without having to retool
@@ -68,26 +50,22 @@ Bindle to create automated test environments, others use it to create
 workflow development environments, data processing environments, or even
 production system installs.
 
-Together with this Vagrant-wrapping  script, we provide secondary provisioning
-shell scripts that setup a single-node or multi-node SeqWare cluster configured
+In separate repositories, we provide secondary provisioning
+Ansible scripts that setup a single-node or multi-node SeqWare cluster configured
 to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic
 the same process can be adapted to build other cluster types to serve other
-projects.  Basically, anything that needs a Hadoop and/or GridEngine cluster of
-machines created on a variety of cloud platforms. We include sample JSON
-configs (see templates/sample_configs/) that show you how to build
+projects.  
+
+You can also base anything that needs a Hadoop and/or GridEngine cluster of
+machines created on a variety of cloud platformsn on our Ansible playbooks.
+
+We include sample JSON
+configs in our sister repositories that show you how to build
 nodes/clusters for the following projects:
 
-* SeqWare Pipeline (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
-* SeqWare Query Engine
-* the TCGA/ICGC PancCancer Project
-
-In the latest version of the script you can specify multiple nodes with their
-own set of provisioning bash shell scripts making it easy to configure a single
-node or cluster with a simple to author config file. In the near future the
-mechanism of using shell scripts to configure nodes will be re-implemented (or
-supplemented) with Ansible support which should make it easier to maintain
-different clusters and node types.  We will also improve the seperation between
-SeqWare and the generic functionality of this cluster builder.
+* [SeqWare Pipeline](https://github.com/SeqWare/seqware-bag) 
+** (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
+* the [TCGA/ICGC PancCancer Project](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag)
 
 ## Build & Source Control
 
@@ -110,9 +88,11 @@ Install dependencies:
 
 Install bindle dependencies:
 
-      sudo apt-get update
-      sudo apt-get install libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
-
+    sudo apt-get update
+    sudo apt-get install software-properties-common
+    sudo apt-add-repository ppa:ansible/ansible
+    sudo apt-get update
+    sudo apt-get install ansible libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
 
 Install Vagrant using the package from their
 [site](http://downloads.vagrantup.com/) that is correct for your platform.  For
@@ -129,13 +109,11 @@ as the user that will run Vagrant and the SeqWare Vagrant wrapper.
     vagrant plugin install vagrant-openstack-plugin 
     vagrant plugin install vagrant-vcloud
 
-
 The current version of the vagrant-vcloud plugin needs to be running with 
 Vagrant 1.5. If using version 1.4 one variable name will need to be modified.
 I forget exactly where the variable is but there will be an error thrown and
 based on the error you will need to remove the string 'URL' from the end of the
 variable.
-
 The bin/launcher/launch_cluster.pl Perl script requires Perl (of course) and also a
 few modules.  They should already be installed if you went through install bindle dependencies 
 but if not, you can install these using [CPAN](http://www.cpan.org/) or via
@@ -170,6 +148,7 @@ Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
 * Vagrant plugins:
     * vagrant-aws (0.5.0)
     * vagrant-openstack-plugin (0.7.0)
+* Ansible 1.6.8
 
 On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
 
@@ -195,7 +174,7 @@ http://www.vagrantbox.es/
 
 For example, to download the base Ubuntu 12.04 box you do the following:
 
-  vagrant box add Ubuntu_12.04 http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box
+    vagrant box add Ubuntu_12.04 http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box
 
 Keep in mind this is primarily aimed at developers making a new profile config.
 For the existing ones we provide they already link to the box that will be
@@ -210,7 +189,8 @@ Since this Vagrant wrapper can be used for many different projects based on the
 Bash shell scripts used to configure the hosts, we included several example
 configuration templates in:
 
-    templates/sample_configs/
+* [seqware-bag](https://github.com/SeqWare/seqware-bag/tree/develop/sample_configs)
+* [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag/tree/master/sample_configs)
 
 Please remember to copy the file path of desired template(for example
 templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
@@ -313,7 +293,7 @@ are running the launch_cluster perl script.
 Please note for VirtualBox, you will need to use the old configuration technique:
     
     # copy the json template over
-    cp templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
+    cp templates/sample_configs/vagrant\_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
     # make any required changes to the json template
     vim vagrant_cluster_launch.json
     
@@ -365,7 +345,7 @@ Examples of launching in different environments include:
 Please note that you can still use the old way to set up configurations in the json template file itself for any environment. 
 That is, copying the template file over like this (you must use this way if you are launching a cluster using virtualbox):
 
-    # for Virutalbox
+    # for Virtualbox
     cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
     # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
     vim vagrant_cluster_launch.json
@@ -384,150 +364,36 @@ The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). 
 the cluster from the appropriate environment but it is advised to check the web interface to make sure
 that the nodes are deleted.
 
-## SeqWare Examples
+## seqware-bag
 
-These sections show specific examples taken from our templates. These cover
-single-node SeqWare, SeqWare clusters, and other OICR projects as well.  The
-config JSON templates and provisioning Bash shell scripts should provide ample
-examples of how to use launch_cluster.pl with other tools. Using these
+Using these
 examples, you will need to modify the configuration template and copy them to
 vagrant_cluster_launch.json (or another file, using the --config-file option).
 
-The following templates exist for SeqWare, they will be described in more
-detail in the sections below:
-
-* templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template
-* templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template
-* templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template
-* templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template
-* templates/sample_configs/vagrant_cluster_launch.seqware.install.sge_node.json.template
-* templates/sample_configs/vagrant_cluster_launch.seqware.install.sge_cluster.json.template
-* templates/sample_configs/vagrant_cluster_launch.seqware.centos.single.json.template
-
-### SeqWare - Single Node
-
-This will launch a single node that's a self-contained SeqWare box. This is
-suitable for snapshoting for redistribution as a machine image (e.g. AMI on
-Amazon's cloud, VirtualBox snapshot, etc).
-
-#### Oozie Hadoop
-
-This is the default engine which is a pure Hadoop solution. You may choose
-Oozie-SGE below if you want better debugging information and you want to have a
-GridEngine cluster too:
-
-    # use this json template path: templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-
-#### Oozie SGE
-
-We support a workflow engine that talks to SGE via an Oozie plugin and this
-configruation will let you spin up an SGE cluster configured to work with
-SeqWare:
-
-    # use this json template path: templates/sample_configs/vagrant_cluster_launch.seqware.sge_node.json.template 
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-    
-
-### SeqWare - Cluster
-
-This will launch a 4 node cluster with 3 workers and one master node. You can
-reduce or increase the number of worker nodes depending on your requirements.
-Keep in mind the nodes are provisioned sequentially so adding nodes will increase
-the runtime.
-
-#### Oozie Hadoop
-
-This is the default engine which is a pure Hadoop solution. You may choose
-Oozie-SGE below if you want better debugging information and you want to have a
-GridEngine cluster too:
-
-    # use this template: vim templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template 
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-
-#### Oozie SGE
-
-We support a workflow engine that talks to SGE via an Oozie plugin and this
-configruation will let you spin up an SGE cluster configured to work with
-SeqWare:
-
-    # use this template: vim templates/sample_configs/vagrant_cluster_launch.seqware.sge_cluster.json.template
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-
-### SeqWare - Install Only
-
-The profiles previously mentioned install SeqWare from source, build it, and
-then run complete integration tests.  This is a very time consuming process, we
-created the *.seqware.* install profiles so you could create a new SeqWare node
-or cluster from pre-compiled SeqWare release files and avoid the lengthy build
-and integration test time. These profiles are, therefore, useful when
-installing SeqWare rather than testing it.
-
-### SeqWare - CentOS
-
-A user-contributed profile for setting us SeqWare on a CentOS VM.
-
-### SeqWare Query Engine - Single Node
-
-This will launch a single node that's a self-contained SeqWare Query Engine box. This is
-suitable for snapshoting for redistribution as a machine image (e.g. AMI on
-Amazon's cloud, VirtualBox snapshot, etc).
-
-    # use this template: vim templates/sample_configs/vagrant_cluster_launch.queryengine.single.json.template
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
+The following templates exist for SeqWare-bag, they will be described in more
+detail in that repo's [README](https://github.com/SeqWare/seqware-bag):
 
 
-## TCGA/ICGC PanCancer Examples
+In brief, in order to use these projects together
 
-The TCGA/ICGC PanCancer project is using Bindle to create analytical
-nodes/clusters for use with a BWA Workflow and downstream variant calling
-workflows. This project is using a variety of cloud technologies including
-VirtualBox, OpenStack, and vCloud.  For each environment we use Bindle
-to create SeqWare environments that utilize Oozie-SGE.  This allows researchers
-to write workflows using SeqWare but also analytical pipelines that simply use
-SGE and "qsub" to process data.
+	mkdir working_dir
+	cd working_dir
+	git clone git@github.com:CloudBindle/Bindle.git
+	cd Bindle && git checkout 2.0-alpha.0
+	cd ..
+	git clone https://github.com/SeqWare/seqware-bag
+	cd seqware-bag && git checkout 1.0-alpha.0 
+	cd ../Bindle
+	cp ../seqware-bag/sample_configs/vagrant_cluster_launch.seqware.install.sge_cluster.json.template vagrant_cluster_launch.seqware.install.sge_cluster.json 
+        vim vagrant_cluster_launch.seqware.install.sge_cluster.json
+        perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target --config-file vagrant_cluster_launch.seqware.install.sge_node.json
+        
+In order to re-run Ansible when doing development:
 
-We provide two profiles for this project:
+        perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target --config-file vagrant_cluster_launch.seqware.install.sge_node.json --run-ansible
 
-* templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template: A single stand-alone node for use with OpenStack, vCloud, or VirtualBox
-* templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template: A cluster of 4-12 machines used for OpenStack or vCloud
+In order to run with pan-cancer modifications as well, please checkout and use the contents of [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag) as well. 
 
-Here are some examples, you will want to customize the
-templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template 
-to include the settings for the particular cloud
-environment you are working in (EBI, BioNimbus, DKFZ, Korea, etc).  Each cloud
-will provide you the specifics such as account name, API keys, and which cloud
-technology to use.
-
-    # use this template path for clusters of 4 node:             
-    # templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template 
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-
-
-    # use this template for a single node: templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template 
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
-
-Please see the [PanCancer Wiki](https://wiki.oicr.on.ca/display/PANCANCER) for
-more information about this project.
 
 ## Persistance of Ephemeral Disks - AWS
 
@@ -597,7 +463,7 @@ You should now have a functioning AMI. The next step would be to launching an in
 
 You now have a workflow development environment and a place where you can run workflows!
 
-
+<!---
 ## OICR Examples
 
 SeqWare isn't the only project using this Vagrant wrapper.  We're using the
@@ -631,9 +497,9 @@ name embedded and will need to change if the index is updated.
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster-name
 
-Once this finishes launching you can browse the DCC Portal at http://<master_node_IP>:8998/.
+Once this finishes launching you can browse the DCC Portal at http://master_node_IP:8998/.
 
 ### ICGC DCC Portal - Large Cluster
 
@@ -647,7 +513,9 @@ and explore HA options.
     # Don't forget to place the path of the template file in your connfig file!
     vim config/os.cfg
     # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
+    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster-name
+
+--->
 
 ## Logging
 
@@ -657,6 +525,26 @@ specified in the --working-dir option.  There you should see a .log file for
 each server being launched (for a cluster) or just master.log if you launched a
 node.  You can use "tail -f <logname>" to watch the progress of building your
 VMs.
+
+### Re-running Ansible
+
+Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issues. You can re-run ansible-enabled deployments via the following command to the launcher script which provides a working-dir and a config-file. 
+
+    perl bin/launcher/launch_cluster.pl --working-dir target-os-cluster --config-file vagrant_cluster_launch.json  --run-ansible
+
+## AWS - Regions and Availability Zones
+
+In order to specify regions and zones, JSON templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
+
+    "AWS_REGION": "us-east-1",
+    "AWS_ZONE": "a",
+
+## AWS - Additional EBS Space
+
+In order to add extra EBS volumes across the board, use the following syntax in order to provision a 400 and 500 GB volume attached to each node:
+
+     perl bin/launcher/launch_cluster.pl --use-aws --aws-ebs 400 500
+
 
 ## Controlling the VM
 
@@ -691,16 +579,10 @@ Here's a quick overview:
 
 *Do not forget to shut down your instances!*
 
-### CentOS Information
 
-This is for development of features relating to CentOS support. It includes the following updates and fixes:
+## Veewee Installation and Usage Instructions (Mac)
 
-* A CentOS 6.2 64-bit base box.
-* Compatibility with Vagrant v1.4.0
-* Minimal, Master and SeqWare Master install scripts for CentOS.
-* A veewee definition to create a CentOS base box, for use with [veewee](https://github.com/jedi4ever/veewee).
-
-#### Veewee Installation and Usage Instructions (Mac)
+VeeWee can be used to create CentOS base boxes 
 
 1. Get veewee from here, as follows:
     `git clone https://github.com/jedi4ever/veewee.git`
@@ -756,11 +638,5 @@ https://github.com/jeremyharris/vagrant-aws/commit/1473c3a45570fdebed2f2b2858524
 The list of TODO items, some of which are out-of-date.  See the
 launch_cluster.pl script for more TODO items too.
 
-* need to edit the landing page to remove mention of Pegasus
-* need to add code that will add all local drives to HDFS to maximize available storage (e.g. ephemerial drives)
-* ecryptfs
-* should I add glusterfs in parallel since it's POSIX compliant and will play better with SeqWare or should I just use NFS?
-* add teardown for cluster to this script
-* better integration with our Maven build process, perhaps automatically calling this to setup integration test environment -- done
-* message of the day on login over ssh
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
+* need to find way of displaying colour on stdout during Ansible play but suppress colour while saving to log
