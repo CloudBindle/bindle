@@ -17,6 +17,11 @@ sub read_default_configs {
   my ($class, $cluster_name, $launch_vcloud, $launch_aws, $launch_os, $launch_vb) = @_;
   my $default_configs = new Config::Simple();
   my $abs_path = "";
+  
+  my $base_config_abs_path = `readlink -f ~/.bindle/base.cfg`;
+  $base_config_abs_path = (split(/\n/,$base_config_abs_path))[0];
+  my $base_config_rel_path =  File::Spec->abs2rel($base_config_abs_path,'.');
+
   # gets the absolute path (ex. /home/ubuntu/.bindle/<platform>.cfg)
   if ($launch_aws){
       $abs_path = `readlink -f ~/.bindle/aws.cfg`;
@@ -25,25 +30,28 @@ sub read_default_configs {
       $abs_path = `readlink -f ~/.bindle/os.cfg`;
   }
   elsif ($launch_vcloud){
-      $abs_path = `readlink -f ~/.bindle/os.cfg`;
+      $abs_path = `readlink -f ~/.bindle/vcloud.cfg`;
   }
   elsif ($launch_vb) {
     $abs_path = `readlink -f ~/.bindle/vb.cfg`;
   }
   $abs_path = (split(/\n/,$abs_path))[0];
   my $rel_path = File::Spec->abs2rel($abs_path,'.');  
-  
-  # upgrade or copy the configs over to ~/.bindle/ if it doesn't exist
+ 
+ # upgrade or copy the configs over to ~/.bindle/ if it doesn't exist
   if (-e $abs_path and not upgrade_outdated_configs($abs_path,$rel_path)){
     $default_configs->read($rel_path) or die $default_configs->error();
   }else{
     copy_over_config_templates();
   }
   
+  my $base_default_configs = new Config::Simple();
+  $base_default_configs->read($base_config_rel_path) or die $default_configs->error(); 
   my $config_file = $default_configs->param("$cluster_name.json_template_file_path");
   my $work_dir = make_target_directory($cluster_name,$default_configs);
   my $temp_configs = read_json_config($config_file);
   my $general_config = extract_general_config($temp_configs->{general},$default_configs,$launch_vcloud);
+  $general_config = extract_base_config($general_config, $base_default_configs);
   my ($temp_cluster_configs, $cluster_configs) = {};
   
   if ($launch_aws || $launch_os || $launch_vcloud){
@@ -67,7 +75,6 @@ sub read_default_configs {
       $cluster_configs->{$names[$_]} = $node_config_copy;
     }
   }
-  
   return($general_config, $cluster_configs, $work_dir,$config_file);
 }
 
@@ -116,6 +123,16 @@ sub extract_node_config {
   return $temp_cluster_configs;
 }
 
+sub extract_base_config {
+  my ($general_config, $default_configs) = @_;
+
+  foreach my $key (sort keys $default_configs->param(-block=>'base')) {
+      $general_config->{uc $key} = $default_configs->param('base.'.$key);
+  }
+
+  return $general_config;
+}
+
 #extracts all the platform related information from the config file
 sub extract_general_config {
   my ($general_config, $default_configs,$launch_vcloud) = @_;
@@ -133,6 +150,8 @@ sub extract_general_config {
       $general_config->{$selected_platform.'_'.(uc $key)} = $default_configs->param('platform.'.$key);
     }
   }
+
+
   
   my $pem_file = $default_configs->param('platform.ssh_key_name');
   if ($launch_vcloud){

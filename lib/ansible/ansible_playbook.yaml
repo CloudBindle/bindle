@@ -1,0 +1,26 @@
+---
+- hosts: all-masters
+  gather_facts: no
+  sudo: yes
+  sudo_user: seqware
+  tasks:
+#  - name: Ensure Hadoop is running
+#    service: name=hadoop-hdfs-namenode state=started  
+#  - name: Seqware Workflow Report
+#    command: /home/seqware/bin/seqware workflow report --accession 2
+#    register: report_result
+#    tags: seqware
+#  - debug: var=report_result.stdout_lines
+#    tags: seqware
+  - name: Seware Webservice Report
+    uri: user=admin@admin.com
+         password=admin
+         url=http://localhost:8080/SeqWareWebService/reports/workflows/2 
+         return_content=yes
+    register: wf_report
+    tags: seqware
+  - debug: var="{{ wf_report.json }}"
+    tags: seqware
+#  - set_fact:
+#      wf_fact: "{{ wf_report.content|from_json}}"
+#  - debug: var=wf_fact

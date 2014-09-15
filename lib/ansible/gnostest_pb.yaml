@@ -1,0 +1,19 @@
+---
+# Put gnostest in the BWA install
+- hosts: all-masters
+  gather_facts: no
+  sudo: yes
+  #sudo_user: seqware
+  vars:
+    path_to_gnostest: /home/seqware/provisioned-bundles/Workflow_Bundle_BWA_2.6.0_SeqWare_1.0.15/Workflow_Bundle_BWA/2.6.0/scripts/
+    cluster_name: "{{cluster_name_param}}"
+  tasks:
+  - name: Copy gnostest.pem to remote master
+    copy: src=/home/vagrant/gnostest.pem
+          dest={{path_to_gnostest}}
+  - name: Set permissions for gnostest.pem
+    file: path={{path_to_gnostest}}gnostest.pem
+          owner=seqware
+          group=seqware
+          mode=600
+

@@ -9,16 +9,17 @@ $Config{useithreads} or die('Recompile Perl with threads to run this program.');
 use threads;
 use Storable 'dclone';
 use Carp::Always;
+use cluster::inventory;
 
-my ($configs, $cluster_configs, $work_dir);
+my ($cluster_name, $configs, $cluster_configs, $work_dir);
 
 
 sub provision_instances {
-    my ($class, $cfgs, $cluster_cfgs,$target_dir, $launch_vcloud,$use_rsync) = @_;
-    ($configs, $cluster_configs, $work_dir)=($cfgs, $cluster_cfgs,$target_dir);
+    my ($class, $cluster_name, $cfgs, $cluster_cfgs,$target_dir, $launch_vcloud,$use_rsync) = @_;
+    ($cluster_name, $configs, $cluster_configs, $work_dir)=($cluster_name, $cfgs, $cluster_cfgs,$target_dir);
     # first, find all the hosts and get their info
-    my $hosts = find_cluster_info($cluster_configs,$work_dir);
-
+    my $hosts = find_cluster_info($configs, $cluster_name, $cluster_configs,$work_dir);
+    print "My cluster name is $cluster_name\n";
     # FIXME: this should be better organized and it's own subroutine 
     # general info
     # this is putting in a variable for the /etc/hosts file
@@ -47,13 +48,21 @@ sub provision_instances {
 }
 
 sub find_cluster_info {
-    my ($cluster_config,$work_dir) = @_;
+    my ($configs, $cluster_name, $cluster_config,$work_dir) = @_;
 
+    cluster::inventory->write_inventory_header($configs, $cluster_name);
+ 
     my (%cluster_info, @node_status, $vagrant_status);
     foreach my $node (sort keys %{$cluster_config}) {
         $vagrant_status = `cd $work_dir/$node && vagrant status`.'\n';
         chomp $vagrant_status;
         find_node_info(\%cluster_info, $vagrant_status);
+        my $node_ip = %cluster_info->{$node}{ip};
+        cluster::inventory->add_node_to_inventory($configs, $node, $node_ip);
+
+	if($node == "master"){
+            cluster::inventory->add_master_ip_to_master_list($configs, $cluster_name, $node, $node_ip);
+        }
     }
 
     return \%cluster_info;
