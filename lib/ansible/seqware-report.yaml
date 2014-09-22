@@ -17,7 +17,7 @@
     tags: seqware
   - name: Download Reports
     fetch: src=/home/seqware/bwa_run_report_{{ inventory_hostname }}.out
-           dest=/home/jiao/sergei/Bindle/reports/
+           dest=~/git/feature/Bindle/reports/
            flat=yes
     tags: seqware
     
