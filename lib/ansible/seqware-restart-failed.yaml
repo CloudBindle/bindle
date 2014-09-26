@@ -1,0 +1,20 @@
+---
+- hosts: all-masters
+  gather_facts: no
+  sudo: yes
+  sudo_user: seqware
+  tasks:
+  - name: Copy perl script to host
+    get_url: url=https://raw.githubusercontent.com/SeqWare/seqware-sandbox/develop/seqware-oozie-restart/seqware-oozie-retry.pl dest=/tmp/seqware-oozie-retry.pl
+    tags: seqware
+  - name: Generate restart script commands
+    shell: /home/seqware/bin/seqware workflow report --accession 2 | grep -A 4 -B 1 failed | perl -e 'my $swid; my $dir; my $id; while(<>) { if (/Workflow Run SWID\s+\| (\d+)/) { $swid=$1 } if (/Workflow Run Working Dir\s+\| (\S+)/) { $dir=$1 } if (/Workflow Run Engine ID\s+\| (\S+)/) { $id=$1; print "perl /tmp/seqware-oozie-retry.pl $dir $id $swid\n"; } }'
+    register: scripts_commands
+    tags: seqware
+  - name: Run the retry commands
+    command: "{{item}}"
+    with_items: scripts_commands.stdout_lines
+    tags: seqware
+  - name: Delete the retry perl script
+    file: path=/tmp/seqware-oozie-retry.pl state=absent
+    tags: seqware

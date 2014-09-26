@@ -1,0 +1,11 @@
+---
+# Put gnostest in the BWA install
+- hosts: all
+  gather_facts: no
+  tasks:
+  - name: Find out instance ID
+    command: curl http://169.254.169.254/latest/meta-data/instance-id
+    register: instance_id
+  - debug: msg="{{instance_id}}"
+  - name: Store instance ID in local file
+    local_action: shell echo {{ inventory_hostname }}  {{instance_id.stdout}} >> ./ec2_instance_ids.txt
