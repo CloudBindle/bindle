@@ -16,10 +16,10 @@ sub write_inventory_header{
 }
 
 sub add_node_to_inventory{
-    my ($class, $configs, $node_name, $node_ip) = @_;
+    my ($class, $configs, $cluster_name, $node_name, $node_ip) = @_;
     my $filename = $configs->{$inventory_file_config_key};
     open(my $fh, '>>', $filename) or die "Could not open file $filename $!";
-    say $fh "$node_name ansible_ssh_host=$node_ip";
+    say $fh "$cluster_name-$node_name ansible_ssh_host=$node_ip";
     close $fh;
 }
 

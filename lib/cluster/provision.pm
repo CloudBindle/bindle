@@ -58,9 +58,9 @@ sub find_cluster_info {
         chomp $vagrant_status;
         find_node_info(\%cluster_info, $vagrant_status);
         my $node_ip = %cluster_info->{$node}{ip};
-        cluster::inventory->add_node_to_inventory($configs, $node, $node_ip);
+        cluster::inventory->add_node_to_inventory($configs, $cluster_name, $node, $node_ip);
 
-	if($node == "master"){
+	if($node eq "master"){
             cluster::inventory->add_master_ip_to_master_list($configs, $cluster_name, $node, $node_ip);
         }
     }
