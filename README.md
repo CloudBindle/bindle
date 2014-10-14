@@ -401,62 +401,27 @@ In order to run with pan-cancer modifications as well, please checkout and use t
 
 Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on an EBS volume instead. Follow the steps below to get an AMI image up and running with a single node instance!
 
-### Step 1 - Creating and Formatting an EBS volume
+### Starting with an EBS volume
 
-1. Log onto the Amazon Web Console and navigate to EC2 -> Elastic Block Store -> Volumes. 
-2. Click on "Create Volume"
-   * The size for the EBS volume should be large enough to fit everything from the ephemeral drive. It is recommended to use 1000 GB. 
-   * Choose "Magnetic" as the Volume type
-   * IMPORTANT: Make sure the availability zone of the volume is the same as that of the single node instance!
-3. Click Create!
-4. Now, Right click on the volume we just created and attach it to the single node instance you want to create an image out of and choose /dev/sdf as the device
+First, you will want to start by requesting an instance with disabled ephemeral drives and everything mounted on a single EBS volume. 
+To do this, you will want to add the following line into your Vagrantfile\_part.template
 
-Log onto the single node instance via SSH and follow these steps to format the EBS volume:
 
-    # login as root user
-    sudo su -
-    # format the device /dev/xvdf
-    mkfs.ext4 /dev/xvdf
+    aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]
 
-    
-### Step 2 - Mounting the EBS Volume at Ephemeral Storage's mountpoint
 
-This step assumes you have logged into the single node instance and logged in as the root user
+This creates a root drive with 1000GB of space and disables the single ephemeral drive that would otherwise would have been auto-mounted by Amazon at /dev/sdb that would handle the /mnt directories. Run Bindle normally otherwise. 
 
-    # Create a back up of the contents in /mnt
-    mkdir /temp_mnt
-    # Copy the contents of /mnt to your temporary location. Preserve timestamps and permissions 
-    cp -R -p /mnt/* /temp_mnt
-    # Unmount the /mnt
-    umount -l /mnt
-    # Mount /mnt on the EBS volume
-    mount /dev/xvdf /mnt
-    # Copy the contents of /temp_mnt to /mnt. Preserve timestamps and permissions
-    cp -R -p /mnt/* /temp_mnt
-    # update /etc/fstab. Add the following line to it: 
-    # /dev/xvdf       /mnt    auto    defaults,nobootwait,comment=cloudconfig 0       2
-    # Also get rid of the /dev/xvdb line
-    vim /etc/fstab
-
-After this step, please reboot the instance from the AWS console and then run the helloworld workflow to make sure
-that the mounting process did not break anything.
-
-### Step 3 - Creating a Snapshot of the EBS Volume
-
-1. Log onto the Amazon Web Console and navigate to EC2 -> Elastic Block Store -> Volumes. 
-2. Right click the EBS volume you are working with and select "Create Snapshot"
-3. Give it an appropriate name(Ex. Seqware_1.0.13_Bindle_1.2) and hit create
-
-### Step 4 - Creating the AMI image if the single node instance
+### Creating the AMI image
 
 1. Log onto the Amazon Web Console and navigate to EC2 -> Instances -> Instances
 2. Right click on the single node instance and select "Create Image"
-3. Give it an appropriate Image name(Ex. Seqware_1.0.13_Bindle_1.2) and choose the snapshot we just created for the EBS volume. 
+3. Give it an appropriate Image name(Ex. Seqware\_1.0.13\_Bindle\_1.2) and choose the snapshot we just created for the EBS volume. 
 4. Click Create Image! 
 
 You should now have a functioning AMI. The next step would be to launching an instance from the AMI image and running the HelloWorld Workflow to make sure it works. The guide to creating an instance from an AMI image is located below.
 
-## Launching a single node instance from an AMI image
+### Launching a single node instance from an AMI image
 
 1. Log onto the Amazon Web Console and navigate to EC2 -> Images -> AMI
 2. Choose the appropriate AMI and select Launch
