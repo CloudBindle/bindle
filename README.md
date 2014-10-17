@@ -93,8 +93,12 @@ Install bindle dependencies:
     sudo apt-add-repository ppa:ansible/ansible
     sudo apt-get update
     sudo apt-get install ansible libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
+    
+    # alternative for package below
     # Denis, might need the following if just installing from the deb below:
-    sudo apt-get install python-crypto python-jinja2 python-markupsafe sshpass python-crypto-dbg python-crypto-doc python-jinja2-doc python-jinja2 python-markupsafe sshpass python-crypto
+    sudo apt-get install python-crypto python-jinja2 python-markupsafe sshpass python-crypto-dbg python-crypto-doc python-jinja2-doc python-jinja2 python-markupsafe sshpass python-crypto python-setuptools
+    wget https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb
+    sudo dpkg --install ansible-1.6.10-precise.deb
     
 Note: Ansible is a pretty fast moving project and we tested against 1.6.10. You may want to use that [specific version](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb) to avoid complications. 
 
