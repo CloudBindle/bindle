@@ -1,3 +1,16 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+ # config.ssh.timeout = 60
+ # config.ssh.max_tries = 10
+  # Every Vagrant virtual environment requires a box to build off of.
+  #config.vm.box = "%{BOX}"
+
+  # The url from where the 'config.vm.box' box will be fetched if it
+  # doesn't already exist on the user's system.
+  config.vm.box_url = "%{BOX_URL}"
+  config.vm.box_download_insecure = true
   config.vm.define :%{custom_hostname} do |%{custom_hostname}|
     
     # name it
@@ -91,3 +104,5 @@
     %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
   end
+
+end
