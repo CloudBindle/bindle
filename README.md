@@ -131,6 +131,7 @@ recommend using PerlBrew to simplify working with Perl dependencies if you
 do not use your native package manager as shown below for Ubuntu:
 
 * Getopt::Long: should be installed by default with Perl
+* GetOpt::Euclid: eg "sudo apt-get install libgetopt-euclid-perl"
 * Data::Dumper: should be installed by default with Perl
 * JSON: eg "sudo apt-get install libjson-perl" on Ubuntu 12.04
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
