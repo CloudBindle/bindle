@@ -162,6 +162,64 @@ sub vagrantfile_template_map {
         else {
             die 'Specify the parameter key (AWS_KEY) in the platform block of the config file';
         }
+        if (my $aws_secret_key = $config->param('platform.secret_key') ) {
+            $vagrantfile_map{AWS_SECRET_KEY} = $aws_secret_key;
+        }
+        else {
+            die 'Specify the parameter aws_secret_key in the platform block of the config file';
+        }
+        if (my $aws_ssh_key_name = $config->param('platform.ssh_key_name') ) {
+            $vagrantfile_map{AWS_SSH_KEY_NAME} = $aws_ssh_key_name;
+        }
+        else {
+            die 'Specify the parameter aws_key_name in the platform block of the config file';
+        }
+        if (my $aws_region = $config->param('platform.region') ) {
+            $vagrantfile_map{AWS_REGION} = $aws_region;
+        }
+        else {
+            die 'Specify the parameter aws_region in the platform block of the config file';
+        }
+        if (my $aws_image = $config->param('platform.image') ) {
+            $vagrantfile_map{AWS_IMAGE} = $aws_image;
+        }
+        else {
+            die 'Specify the parameter aws_image in the platform block of the config file';
+        }
+        if (my $aws_instance_type = $config->param('platform.instance_type') ) {
+            $vagrantfile_map{AWS_INSTANCE_TYPE} = $aws_instance_type;
+        }
+        else {
+            die 'Specify the parameter aws_instance_type in the platform block of the config file';
+        }
+        if (my $aws_zone = $config->param('platform.zone') ) {
+            $vagrantfile_map{AWS_ZONE} = $aws_zone;
+        }
+        else {
+            die 'Specify the parameter aws_zone in the platform block of the config file';
+        }
+        if (my $aws_username = $config->param('platform.ssh_username') ) {
+            $vagrantfile_map{AWS_SSH_USERNAME} = $aws_username;
+        }
+        else {
+            die 'Specify the parameter ssh_username in the platform block of the config file';
+        }
+
+        if (my $aws_pem_file = $config->param('platform.ssh_pem_file') ) {
+            $vagrantfile_map{AWS_SSH_PEM_FILE} = $aws_pem_file;
+        }
+        else {
+            die 'Specify the parameter ssh_pem_file in the platform block of the config file';
+        }
+        if (my $aws_ebs_vols = $config->param('platform.ebs_vols') ) {
+            $vagrantfile_map{AWS_EBS_VOLS} = $aws_ebs_vols;
+        }
+        else {
+            $vagrantfile_map{AWS_EBS_VOLS} = "";
+        }
+
+
+
     }
 
 =head
