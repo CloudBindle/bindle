@@ -44,6 +44,8 @@ sub add_vagrantfile {
 
     my $vagrantfile_template_map = vagrantfile_template_map($platform, $node, $config);
 
+
+
     my $vagrantfile = "$work_dir/$node/Vagrantfile";
     say $vagrantfile;
     autoreplace('templates/Vagrantfile.template', $vagrantfile, $vagrantfile_template_map);
@@ -67,167 +69,32 @@ sub vagrantfile_template_map {
     my ($platform, $node, $config) = @_;
 
     my %vagrantfile_map = (
-       'BOX_URL' => $config->param('platform.box_url'),
-       'BOX'     => $config->param('platform.box'),
        'custom_hostname' => $node,
     );
 
-    if ($platform eq 'virtualbox') {
-        if ($config->param('platform.vb_ram') ) {
-           $vagrantfile_map{VB_RAM} = $config->param('plaform.vb_ram');
-        }
-        else {
-            die 'Specify the parameter vb_ram in the platform block of the config file';
-        }
-        if ($config->param('platform.hostname') ) {
-            $vagrantfile_map{VB_CORES} = $config->param('plaform.vb_cores');
-        }
-        else {
-            die 'Specify the parameter vb_cores in the platform block of the config file';
-        }
+    my $vagrantfile_map = $config->param(-block=>'platform');
+    $vagrantfile_map->{custom_hostname} = $node;
 
-        my @ebs_vols = $config->param('plaform_vols');
+    if ($platform eq 'virtualbox') {
+       my @ebs_vols = $config->param('platform.ebs_vols');
         if (scalar @ebs_vols > 0) {
-                $vagrantfile_map{AWS_EBS_VOLS} .= "aws.block_device_mapping = [";
+                $vagrantfile_map->{aws_ebs_vols} .= "aws.block_device_mapping = [";
                 # starts at "f=102"
                 my $count = 102;
                 foreach my $size (@ebs_vols){
                     my $current_name = chr $count;
-    	            $vagrantfile_map{AWS_EBS_VOLS} .= "{'DeviceName' => \"/dev/sd$current_name\", 'VirtualName' => \"block_storage\", 'Ebs.VolumeSize' => $size, 'Ebs.DeleteOnTermination' => true},";
+    	            $vagrantfile_map->{aws_ebs_vols} .= "{'DeviceName' => \"/dev/sd$current_name\", 'VirtualName' => \"block_storage\", 'Ebs.VolumeSize' => $size, 'Ebs.DeleteOnTermination' => true},";
     	        $count++;
     	    }
-            chop $vagrantfile_map{AWS_EBS_VOLS};
-    	    $vagrantfile_map{AWS_EBS_VOLS} .= "]";
+            chop $vagrantfile_map->{aws_ebs_vols};
+    	    $vagrantfile_map->{aws_ebs_vols} .= "]";
         }
         else {
             die 'Specify the parameter ebs_vols in the platform block of the config file';
         }
     }
-    elsif ($platform eq 'vcloud') {
-        if (my $hostname = $config->param('platform.hostname') ) {
-            $vagrantfile_map{VCLOUD_HOSTNAME} = $hostname;
-        }
-        else {
-            die 'Specify the parameter hostname in the platform block of the config file';
-        }
-        if (my $username = $config->param('platform.username') ) {
-            $vagrantfile_map{VCLOUD_USERNAME} = $username;
-        }
-        else { 
-            die 'Specify the parameter username in the platform block of the config file';
-        }
-        if (my $password = $config->param('platform.password')) {
-           $vagrantfile_map{VCLOUD_PASSWORD} = $password;
-        }
-        else {
-            die 'Specify the parameter password in the platform block of the config file';
-        }
-        if (my $org_name = $config->param('platform.org_name') ) {
-           $vagrantfile_map{VCLOUD_ORG_NAME} = $org_name;
-        }
-        else {
-            die 'Specify the parameter org_name in the platform block of the config file';
-        }
-        if (my $vdc_name = $config->param('platform.vdc_name') ) {
-           $vagrantfile_map{VCLOUD_VDC_NAME} = $vdc_name;
-        }
-        else {
-            die 'Specify the parameter vdc_name in the platform block of the config file';
-        }
-       if (my $catalog_name = $config->param('platform.catalog_name') ) {
-           $vagrantfile_map{VCLOUD_CATALOG_NAME} = $catalog_name;
-        }
-        else {
-            die 'Specify the parameter catalog in the platform block of the config file';
-        }
-        if (my $vdc_network_name = $config->param('platform.vdc_network_name') ) {
-        $vagrantfile_map{VCLOUD_VDC_NETWORK_NAME} = $vdc_network_name;
-        }
-        else {
-            die 'Specify the parameter vdc_network_name in the platform block of the config file';
-        }
-        if (my $ssh_key_name = $config->param('platform.ssh_key_name') ) {
-            $vagrantfile_map{VCLOUD_SSH_PEM_FILE} = "~/.ssh/$ssh_key_name.pem";
-        }
-        else {
-            die 'Specify the parameter ssh_key_name in the platform block of the config file';
-        }
 
-        
-    }
-    elsif( $platform eq 'aws') {
-        if (my $key = $config->param('platform.key') ) {
-            $vagrantfile_map{AWS_KEY} = $key;
-        }
-        else {
-            die 'Specify the parameter key (AWS_KEY) in the platform block of the config file';
-        }
-        if (my $aws_secret_key = $config->param('platform.secret_key') ) {
-            $vagrantfile_map{AWS_SECRET_KEY} = $aws_secret_key;
-        }
-        else {
-            die 'Specify the parameter aws_secret_key in the platform block of the config file';
-        }
-        if (my $aws_ssh_key_name = $config->param('platform.ssh_key_name') ) {
-            $vagrantfile_map{AWS_SSH_KEY_NAME} = $aws_ssh_key_name;
-        }
-        else {
-            die 'Specify the parameter aws_key_name in the platform block of the config file';
-        }
-        if (my $aws_region = $config->param('platform.region') ) {
-            $vagrantfile_map{AWS_REGION} = $aws_region;
-        }
-        else {
-            die 'Specify the parameter aws_region in the platform block of the config file';
-        }
-        if (my $aws_image = $config->param('platform.image') ) {
-            $vagrantfile_map{AWS_IMAGE} = $aws_image;
-        }
-        else {
-            die 'Specify the parameter aws_image in the platform block of the config file';
-        }
-        if (my $aws_instance_type = $config->param('platform.instance_type') ) {
-            $vagrantfile_map{AWS_INSTANCE_TYPE} = $aws_instance_type;
-        }
-        else {
-            die 'Specify the parameter aws_instance_type in the platform block of the config file';
-        }
-        if (my $aws_zone = $config->param('platform.zone') ) {
-            $vagrantfile_map{AWS_ZONE} = $aws_zone;
-        }
-        else {
-            die 'Specify the parameter aws_zone in the platform block of the config file';
-        }
-        if (my $aws_username = $config->param('platform.ssh_username') ) {
-            $vagrantfile_map{AWS_SSH_USERNAME} = $aws_username;
-        }
-        else {
-            die 'Specify the parameter ssh_username in the platform block of the config file';
-        }
-
-        if (my $aws_pem_file = $config->param('platform.ssh_pem_file') ) {
-            $vagrantfile_map{AWS_SSH_PEM_FILE} = $aws_pem_file;
-        }
-        else {
-            die 'Specify the parameter ssh_pem_file in the platform block of the config file';
-        }
-        if (my $aws_ebs_vols = $config->param('platform.ebs_vols') ) {
-            $vagrantfile_map{AWS_EBS_VOLS} = $aws_ebs_vols;
-        }
-        else {
-            $vagrantfile_map{AWS_EBS_VOLS} = "";
-        }
-
-
-
-    }
-
-=head
-        $configs->{OS_FLOATING_IP} = $cluster_configs->{$node}{floatip};
-
-=cut
- 
-    return \%vagrantfile_map;
+    return $vagrantfile_map;
 }
 
 sub autoreplace {
