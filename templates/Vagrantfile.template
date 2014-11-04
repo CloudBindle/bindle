@@ -48,9 +48,9 @@ Vagrant.configure("2") do |config|
       aws.keypair_name = "%{aws_ssh_key_name}"
       aws.user_data = File.read("user_data.txt")
       aws.region = "%{aws_region}"
-      aws.availability_zone = %{AWS_ZONE}
+      aws.availability_zone = %{aws_zone}
       aws.ami = "%{aws_image}"
-      aws.instance_type = "%{aws_insstance_type}"
+      aws.instance_type = "%{aws_instance_type}"
       aws.instance_ready_timeout = 6000
       %{aws_ebs_vols}
       override.ssh.username = "%{aws_ssh_username}"
