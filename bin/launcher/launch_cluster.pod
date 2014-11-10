@@ -1,0 +1,40 @@
+=head1 VERSION
+
+Version 0.0.1
+
+=head1 AUTHOR(S)
+
+Brian O'Connor, Adam Wright, Denis Yuen and Amish Patel
+
+=over
+
+=item --usage
+
+=item --help
+
+=item --man
+
+Print the usual program information
+
+=back
+
+=head1 DESCRIPTION
+
+A tool for launching both single and multi node clusters of seqware. 
+
+=head1 NAME
+
+Cloud Bindle - SeqWare
+
+=head1 REQUIRED
+
+=item --platform[=][ ]<platform>
+
+Specify the platform that Bindle will be launching instances on. 
+
+=for Euclid:
+    platform.type: /aws|openstack|vcloud|virtualbox/
+
+=item --cluster[=][ ]<cluster>
+
+specify the name of the cluster, found in your ~/.bindle/<platform>.cfg file, that has been previously specified. 

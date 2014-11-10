@@ -1,7 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+ # config.ssh.timeout = 60
+ # config.ssh.max_tries = 10
+  # Every Vagrant virtual environment requires a box to build off of.
+  #config.vm.box = "%{BOX}"
+
+  # The url from where the 'config.vm.box' box will be fetched if it
+  # doesn't already exist on the user's system.
+  config.vm.box_url = "%{box_url}"
+  config.vm.box_download_insecure = true
   config.vm.define :%{custom_hostname} do |%{custom_hostname}|
     
     # name it
-    %{custom_hostname}.vm.box = "%{BOX}"
+    %{custom_hostname}.vm.box = "%{box}"
 
     %{custom_hostname}.vm.provider "vmware_fusion" do |v|
       v.box = "precise64"
@@ -17,7 +30,7 @@
       vb.gui = true
    
       # Use VBoxManage to customize the VM. For example to change memory:
-      vb.customize ["modifyvm", :id, "--memory", "%{VB_RAM}", "--cpus", "%{VB_CORES}", "--nictype1", "Am79C970A", "--vram", "32", "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--memory", "%{vb_ram}", "--cpus", "%{bv_cores}", "--nictype1", "Am79C970A", "--vram", "32", "--natdnshostresolver1", "on"]
   
     end
  
@@ -27,58 +40,54 @@
       aws.tags = {
         'Name' => "%{custom_hostname}" 
       }
-      aws.access_key_id = "%{AWS_KEY}"
-      aws.secret_access_key = "%{AWS_SECRET_KEY}"
+      aws.access_key_id = "%{aws_key}"
+      aws.secret_access_key = "%{aws_secret_key}"
       # requires patching for AWS spot instances
       #aws.spot_instance = true
       #aws.spot_max_price = 0.681
-      aws.keypair_name = "%{AWS_SSH_KEY_NAME}"
+      aws.keypair_name = "%{aws_ssh_key_name}"
       aws.user_data = File.read("user_data.txt")
-      aws.region = "%{AWS_REGION}"
-      aws.availability_zone = %{AWS_ZONE}
-      aws.ami = "%{AWS_IMAGE}"
-      aws.instance_type = "%{AWS_INSTANCE_TYPE}"
+      aws.region = "%{aws_region}"
+      aws.availability_zone = %{aws_zone}
+      aws.ami = "%{aws_image}"
+      aws.instance_type = "%{aws_instance_type}"
       aws.instance_ready_timeout = 6000
-      %{AWS_EBS_VOLS}
-      override.ssh.username = "%{AWS_SSH_USERNAME}"
-      override.ssh.private_key_path = "%{AWS_SSH_PEM_FILE}"
+      %{aws_ebs_vols}
+      override.ssh.username = "%{aws_ssh_username}"
+      override.ssh.private_key_path = "%{aws_ssh_pem_file}"
     end
 
     %{custom_hostname}.vm.provider :openstack do |os, override| # e.g. BioNimbus' Sullivan cluster
-      os.username = "%{OS_USER}"
-      os.api_key  = "%{OS_API_KEY}"
-      os.flavor   = "%{OS_INSTANCE_TYPE}"
-      os.image    = "%{OS_IMAGE}"
-      os.endpoint = "%{OS_ENDPOINT}"
-      os.keypair_name = "%{OS_SSH_KEY_NAME}"
-      os.ssh_username = "%{OS_SSH_USERNAME}"
-      os.tenant = "%{OS_TENANT}"
+      os.username = "%{os_user}"
+      os.api_key  = "%{os_api_key}"
+      os.flavor   = "%{os_instance_type}"
+      os.image    = "%{os_image}"
+      os.endpoint = "%{os_endpoint}"
+      os.keypair_name = "%{os_ssh_key_name}"
+      os.ssh_username = "%{os_ssh_username}"
+      os.tenant = "%{os_tenant}"
       # TODO: this is hardcoded!
-      override.ssh.username = "%{OS_SSH_USERNAME}"
-      override.ssh.private_key_path = "%{OS_SSH_PEM_FILE}"
-      os.network = "%{OS_NETWORK}"
-      os.networks = [ "%{OS_NETWORK}" ]   
-      os.floating_ip = "%{OS_FLOATING_IP}"
+      override.ssh.username = "%{os_ssh_username}"
+      override.ssh.private_key_path = "%{os_ssh_pem_file}"
+      os.network = "%{os_network}"
+      os.networks = [ "%{os_network}" ]   
+      os.floating_ip = "%{os_floating_ip}"
       os.server_name = "%{custom_hostname}"
       os.user_data = "#cloud-config\nmanage_etc_hosts: True"
     end
     
     %{custom_hostname}.vm.provider :vcloud do |vcloud, override|
-      vcloud.hostname = "%{VCLOUD_HOSTNAME}"
-      vcloud.username = "%{VCLOUD_USERNAME}"
-      vcloud.password = "%{VCLOUD_PASSWORD}"
+      vcloud.hostname = "%{vcloud_hostname}"
+      vcloud.username = "%{vcloud_username}"
+      vcloud.password = "%{vcloud_password}"
 
-      vcloud.org_name = "%{VCLOUD_ORG_NAME}"
-      vcloud.vdc_name = "%{VCLOUD_VDC_NAME}"
+      vcloud.org_name = "%{vcloud_org_name}"
+      vcloud.vdc_name = "%{vcloud_vdc_name}"
 
-      vcloud.catalog_name = "%{VCLOUD_CATALOG_NAME}"
-      #vcloud.ip_subnet = "%{VCLOUD_IP_SUBNET}"
-      vcloud.vdc_network_name = "%{VCLOUD_VDC_NETWORK_NAME}"
-
-#      vcloud.vdc_edge_gateway = "%{VCLOUD_VDC_EDGE_GATEWAY}"
-#      vcloud.vdc_edge_gateway_ip = "%{VCLOUD_VDC_EDGE_GATEWAY_IP}"
+      vcloud.catalog_name = "%{vcloud_catalog_name}"
+      vcloud.vdc_network_name = "%{vcloud_vdc_network_name}"
        vcloud.network_bridge=true
-       override.ssh.private_key_path = "%{VCLOUD_SSH_PEM_FILE}"
+       override.ssh.private_key_path = "%{vcloud_ssh_pem_file}"
     end
 
     %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
@@ -91,3 +100,5 @@
     %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
     %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
   end
+
+end

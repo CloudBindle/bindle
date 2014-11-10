@@ -122,7 +122,7 @@ Vagrant 1.5. If using version 1.4 one variable name will need to be modified.
 I forget exactly where the variable is but there will be an error thrown and
 based on the error you will need to remove the string 'URL' from the end of the
 variable.
-The bin/launcher/launch_cluster.pl Perl script requires Perl (of course) and also a
+The bin/launcher/launch\_cluster.pl Perl script requires Perl (of course) and also a
 few modules.  They should already be installed if you went through install bindle dependencies 
 but if not, you can install these using [CPAN](http://www.cpan.org/) or via
 your distribution's package management system. Google "cpan perl install" for
@@ -131,6 +131,7 @@ recommend using PerlBrew to simplify working with Perl dependencies if you
 do not use your native package manager as shown below for Ubuntu:
 
 * Getopt::Long: should be installed by default with Perl
+* GetOpt::Euclid: eg "sudo apt-get install libgetopt-euclid-perl"
 * Data::Dumper: should be installed by default with Perl
 * JSON: eg "sudo apt-get install libjson-perl" on Ubuntu 12.04
 * Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
@@ -201,15 +202,15 @@ configuration templates in:
 * [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag/tree/master/sample_configs)
 
 Please remember to copy the file path of desired template(for example
-templates/sample_configs/vagrant_cluster_launch.seqware.single.json.template)
+templates/sample\_configs/vagrant\_cluster\_launch.seqware.single.json.template)
 and place it in the appropriate config file described below.
 
 
 Fill in your various platform settings depending on what cloud provider you use
 (Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/os.cfg)). 
-If ~/.bindle doesn't exist, please run the launch_cluster script:
+If ~/.bindle doesn't exist, please run the launch\_cluster script:
 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster1
+    perl bin/launcher/launch_cluster.pl --platform openstack --cluster cluster1
     
 Now, you can navigate to ~/.bindle/ and fill the required information in the appropriate config file:
    
@@ -218,7 +219,7 @@ Now, you can navigate to ~/.bindle/ and fill the required information in the app
 Please refer to the section below if you require help filling all the information in the config file.
 Once you have finished filling everything up, you can simply execute the following commad again to launch the cluster:
 
-    perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
+    perl bin/launcher/launch_cluster.pl --platform aws --cluster <cluster-name> 
     
     
 ### Filling in the config file
@@ -303,7 +304,7 @@ Please note for VirtualBox, you will need to use the old configuration technique
     # copy the json template over
     cp templates/sample_configs/vagrant\_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
     # make any required changes to the json template
-    vim vagrant_cluster_launch.json
+    vim vagrant_cluster\_launch.json
     
 You can fill in the required information and move on to the next step.
 
@@ -311,7 +312,7 @@ If you use the template recommended above you will have a 1 node Hadoop cluster
 (with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
 software stack installed.  This environment should be ready for use with out
 Getting Started Guides for this project. You can also choose another template,
-such as "templates/sample_configs/vagrant_cluster_launch.seqware.cluster.json.template",
+such as "templates/sample\_configs/vagrant\_cluster\_launch.seqware.cluster.json.template",
 that will give you a 4 node cluster.
 
 ## RAM and CPU Core Requirements
@@ -334,7 +335,7 @@ choose not by the --vb-ram and --vb-cores options.
 ## Running the Cluster Launcher
 
 The wrapper script that controls the system described above is called
-"bin/launcher/launch_cluster.pl". 
+"bin/launcher/launch\_cluster.pl". 
 
 Please note that a detailed explanation of the cluster launching process
 for virtual box is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/workflow_dev_node_with_bindle.md)
@@ -363,7 +364,7 @@ That is, copying the template file over like this (you must use this way if you 
 ## Destroying the Clusters
 
 The script that takes care of the process required to terminate a cluster is located at 
-"bin/launcher/destroy_cluster.pl". To destroy a cluster, simply run the following command:
+"bin/launcher/destroy\_cluster.pl". To destroy a cluster, simply run the following command:
 
      # assumes you are in the Bindle directory
      perl bin/launcher/destroy_cluster.pl --cluster-name <target-dir>
@@ -410,11 +411,9 @@ Amazon instances provisioned using Bindle store information such as file inputs 
 ### Starting with an EBS volume
 
 First, you will want to start by requesting an instance with disabled ephemeral drives and everything mounted on a single EBS volume. 
-To do this, you will want to add the following line into your Vagrantfile\_part.template
+To do this, you will want to add the following line into your aws.cfg
 
-
-    aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]
-
+        ebs_vols = "aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]"
 
 This creates a root drive with 1000GB of space and disables the single ephemeral drive that would otherwise would have been auto-mounted by Amazon at /dev/sdb that would handle the /mnt directories. Run Bindle normally otherwise. 
 
