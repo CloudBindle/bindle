@@ -3,9 +3,8 @@
 use common::sense;
 
 use FindBin qw($Bin);
-use lib "$Bin/../../lib";
+use lib "$Bin/../lib";
 
-use Data::Dumper;
 use Config::Simple;
 use IPC::System::Simple;
 use autodie qw(:all);
@@ -19,9 +18,9 @@ use threads;
 use Storable 'dclone';
 use Carp::Always;
 
-use cluster::config;
-use cluster::provision;
-use cluster::setup;
+use cfg;
+use provision;
+use setup;
 # VARS
 
 # Notes:
@@ -36,10 +35,10 @@ use cluster::setup;
 # * add very clear delimiters to each provision step saying what machine is being launched, add DONE to the end
 
 # skips all unit and integration tests
-my $platform = $ARGV{'--platform'};
+my $config_name = $ARGV{'--config'};
 my $cluster = $ARGV{'--cluster'};
 
-my $config = cluster::config->read_config($platform, $cluster);
+my $config = cfg->read_config($config_name, $cluster);
 
 my $cluster_info = $config->param(-block=>$cluster);
 
@@ -50,7 +49,7 @@ my $work_dir = $cluster_info->{target_directory};
 die "target-directory was not specified for $cluster in the configuration file" unless($work_dir);
 
 my $number_of_nodes = $cluster_info->{number_of_nodes};
-die "Please specify the number of nodes for the cluster $cluster in teh configuration file" unless ($number_of_nodes);
+die "Please specify the number of nodes for the cluster $cluster in the configuration file" unless ($number_of_nodes);
 
 my @nodes = ('master');
 foreach my $i (1..($number_of_nodes-1)) {
@@ -58,8 +57,9 @@ foreach my $i (1..($number_of_nodes-1)) {
 }
 
 unless (-d $work_dir) {
+    my $platform = $config->param('platform.type');
     my $launch_command = "vagrant up";
-    $launch_command .= " --provider=$platform" unless($platform eq 'virtualbox');
+    $launch_command .= " --provider $platform" unless($config_name eq 'virtualbox');
 
     run("mkdir -p $work_dir");
     
@@ -68,12 +68,12 @@ unless (-d $work_dir) {
         run("mkdir $work_dir/$node");
     }
   
-    cluster::setup->prepare_files($platform, \@nodes, $config, $work_dir);
+    setup->prepare_files($config_name, \@nodes, $config, $work_dir);
   
     launch_instances($work_dir, $launch_command, \@nodes);
 }
 
-cluster::provision->provision_instances(\@nodes, $work_dir, $config);
+provision->provision_instances(\@nodes, $work_dir, $config);
 
 say "FINISHED";
 

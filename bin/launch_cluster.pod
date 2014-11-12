@@ -28,12 +28,9 @@ Cloud Bindle - SeqWare
 
 =head1 REQUIRED
 
-=item --platform[=][ ]<platform>
+=item --config[=][ ]<cluster>
 
-Specify the platform that Bindle will be launching instances on. 
-
-=for Euclid:
-    platform.type: /aws|openstack|vcloud|virtualbox/
+Specify the configuration file that Bindle will use to launch instances. 
 
 =item --cluster[=][ ]<cluster>
 
