@@ -24,29 +24,16 @@
 ## About Bindle
 
 This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
-provides the ability to launch either a single node or a cluster of compute
-nodes configured with an [Ansible](http://www.ansible.com/) playbook.
-This lets you build Linux virtual machines from scratch, ensuring
-you development/testing/production VMs are clean and your configuration process
-is fully reproducible.
+ [Ansible](http://www.ansible.com/) for launching single node and clustered 
+VMs on VirtualBox, Vcloud, AWS, and OpenStack.
 
-VMs are launched by Vagrant. Bindle then queries Vagrant to identify the external 
-and internal IP address of each of the launched instances. From the list of IPs
-an Ansible inventory is generated.
+Vagrant itself is used to launch the VMs while Ansible is used to provision them.
 
 Variables are passed from bindles configuration files ( located: ~/.bindle) to Ansible  
 through a JSON file for each VM.  
 
-What we have found this useful for is building clusters (both Hadoop and
-GridEngine-based) on a variety of cloud environments without having to retool
-our process for each cloud.  We can focus on the specifics of each project,
-what software needs to be installed, the configuration, and environment changes
-all without having to code anything that is cloud-specific.  Because the
-process is so generic we can use it to support a wide variety of in-house
-software projects and use cases.  For example, some projects use
-Bindle to create automated test environments, others use it to create
-workflow development environments, data processing environments, or even
-production system installs.
+Bindle can be used for is building both Hadoop and GridEngine-based clusters 
+ on a variety of cloud environments. 
 
 In separate repositories, we provide secondary provisioning
 Ansible scripts that setup a single-node or multi-node SeqWare cluster configured
