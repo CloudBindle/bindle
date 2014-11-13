@@ -1,10 +1,13 @@
-package cluster::provision;
+package provision;
 
 use common::sense;
+
 use IPC::System::Simple;
+
 use autodie qw(:all);
+
 use Getopt::Long;
-use Data::Dumper;
+
 use Config;
 $Config{useithreads} or die('Recompile Perl with threads to run this program.');
 use threads;
@@ -12,7 +15,6 @@ use Storable 'dclone';
 use Carp::Always;
 
 my ($configs, $cluster_configs, $work_dir);
-
 
 sub provision_instances {
     my ($class, $nodes, $work_dir, $config) = @_;
@@ -46,7 +48,7 @@ sub find_node_info {
 sub get_host_id_from_vagrant_status {
     my ($status) = @_;
 
-    if ($status =~ /Current machine states:\s+(\S+)\s+(active|running)/) { # openstack and vcloud ar running, aws is running
+    if ($status =~ /Current machine states:\s+(\S+)\s+(active|running)/) { 
         return $1;
     } 
     die 'Was unable to get node infomation';
@@ -102,7 +104,7 @@ sub run_ansible_playbook {
         $type_set{$type} = 1;
     }
  
-    open (INVENTORY, '>', "$work_dir/inventory") or die "Could not open inventory file for writing";
+    open (INVENTORY, '>', "$work_dir/inventory");
 
     foreach my $type (keys %type_set){
         say INVENTORY "[$type]";
@@ -123,6 +125,7 @@ sub run_ansible_playbook {
 
     # I'm sure this "cluster" parameter is not how one should do it in Perl, but this seems to work with the call from the launcher which inserts the package
     # as the first parameter
+
     return run_ansible_command("cluster", $work_dir, $config) if ($playbook);
 }
 
@@ -161,43 +164,6 @@ sub run_ansible_command{
     system("chmod a+x $work_dir/wrapscript.$time.sh");
 
     return system($command);
-}
-
-sub run {
-    my ($cmd, $hostname, $retries) = @_;
-
-    if (!defined($retries) || $retries < 0) {
-      $retries = 0;
-    }
-
-    my $outputfile = "";
-    # by default pipe to /dev/null if no hostname is specified, this 
-    # will prevent a default.log file from being a mixture of different thread's output
-    my $final_cmd = "bash -c '$cmd' > /dev/null 2> /dev/null";
-    # only output to host-specific log if defined
-    if (defined($hostname)){
-        $outputfile = "$work_dir/$hostname.log";
-        $final_cmd = "bash -c '$cmd' >> $outputfile 2>&1";
-    } 
-
-    say "RUNNING: $final_cmd";
-    if ($final_cmd =~ /vagrant up/) {
-        no autodie qw(system);
-        while($retries >= 0) { 
-          if (!system($final_cmd)) { last; }
-          $retries--;
-          sleep 10;
-        }
-        say 'launched machine!';
-    }
-    else {
-        while($retries >=0) {
-          
-        if (!system($final_cmd)) { last; }
-          $retries--;
-          sleep 10;
-        }
-    }
 }
 
 1;
