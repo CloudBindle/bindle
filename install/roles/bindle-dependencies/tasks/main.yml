@@ -3,21 +3,18 @@
 - name: Install Bindle dependencies
   apt: name= {{ item }} state=latest update_cache=yes
   with_items:
-	- git 
-	- gcc
-	- make
-	- python-crypto 
-	- python-jinja2 
-	- python-markupsafe 
-	- sshpass 
-	- python-crypto-dbg 
-	- python-crypto-doc 
-	- python-jinja2-doc 
-	- python-jinja2 
-	- python-markupsafe 
-	- sshpass 
-	- python-crypto 
-	- python-setuptools
+    - git 
+    - gcc
+    - make
+    - python-crypto 
+    - python-jinja2 
+    - python-markupsafe 
+    - sshpass 
+    - python-crypto-dbg 
+    - python-crypto-doc 
+    - python-jinja2-doc 
+    - python-markupsafe 
+    - python-setuptools
 
 - name: Download Ansible 1.6 deb package
   get_url: 

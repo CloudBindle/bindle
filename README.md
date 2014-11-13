@@ -81,9 +81,12 @@ you launch a local node or cluster of virtual machine nodes on your desktop or
 local server. If you will *only* launch a node or cluster of nodes on Amazon
 or an OpenStack cloud you can skip this step.
 
-Install dependencies:
+Install dependencies (our install script is in ansible):
 
-    run 'bash install'
+    sudo apt-get install git ansible
+    git clone https://github.com/CloudBindle/Bindle.git
+    cd Bindle 
+    ansible-playbook -i install/inventory install/site.yml 
    
 Note: Ansible is a pretty fast moving project and we tested against 1.6.10. You may want to use that [specific version](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb) to avoid complications. 
 
