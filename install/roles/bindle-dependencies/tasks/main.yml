@@ -2,6 +2,7 @@
 
 - name: Install Bindle dependencies
   apt: name= {{ item }} state=latest update_cache=yes
+  sudo: True
   with_items:
     - git 
     - gcc
@@ -23,6 +24,7 @@
     mode=755
 
 - name: Install Ansible 1.6
+  sudo: True
   apt: deb=/tmp/ansible-1.6.10-precise.deb
 
 - name: Download Vagrant deb package
@@ -32,6 +34,7 @@
     mode=755
   
 - name: Install Vagrant deb package
+  sudo: True
   apt: deb=/tmp/vagrant_1.6.3_x86_64.deb
 
 - name: Install Vagrant providers
@@ -41,6 +44,7 @@
 # vagrant plugin install vagrant-vcloud --plugin-version 0.4.3
 
 - name: Install Perl dependencies
+  sudo: True
   apt: name= {{ item }} state=latest update_cache=yes
   with_items:
     - libgetopt-euclid-perl
@@ -52,7 +56,3 @@
 
 - name: Create .bindle directory
   file: path=~/.bindle state=directory
-
-- name: Copy the template config from Github into the ~/.bindle directory
-  copy: src=/root/architecture2/Bindle/template/config/{{ item }}  dest=~/.bindle/
-  with_items: {{ bindle_config }}

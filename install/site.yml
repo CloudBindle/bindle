@@ -1,6 +1,5 @@
 ---
 # setup Bindle
 - hosts: bindle
-  sudo: True
   roles: 
     - { role: bindle-dependencies }
