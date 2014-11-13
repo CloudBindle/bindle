@@ -3,8 +3,6 @@
 use common::sense;
 use autodie;
 
-use Data::Dumper;
-
 use Getopt::Long;
 use Capture::Tiny ':all';
 use FindBin qw($Bin);

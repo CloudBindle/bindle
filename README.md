@@ -28,16 +28,14 @@ provides the ability to launch either a single node or a cluster of compute
 nodes configured with an [Ansible](http://www.ansible.com/) playbook.
 This lets you build Linux virtual machines from scratch, ensuring
 you development/testing/production VMs are clean and your configuration process
-is fully reproducible.  The big difference between building a cluster with this
-script vs. Vagrant directly is Vagrant provides a single pass at running
-provisioning script which actually makes it quite difficult to pass runtime
-information like the domain names/IP addresses of cluster nodes and to setup
-software where order matters like HDFS before HBase.  This tool, however,
-launches one or more instances then queries Vagrant to identify the external 
-and internal IP address of each of the launched instances. 
+is fully reproducible.
 
-This script then builds an Ansible inventory and invokes the playbook 
-while passing along some variables and logging the results.  
+VMs are launched by Vagrant. Bindle then queries Vagrant to identify the external 
+and internal IP address of each of the launched instances. From the list of IPs
+an Ansible inventory is generated.
+
+Variables are passed from bindles configuration files ( located: ~/.bindle) to Ansible  
+through a JSON file for each VM.  
 
 What we have found this useful for is building clusters (both Hadoop and
 GridEngine-based) on a variety of cloud environments without having to retool
@@ -59,7 +57,9 @@ projects.
 You can also base anything that needs a Hadoop and/or GridEngine cluster of
 machines created on a variety of cloud platformsn on our Ansible playbooks.
 
-We include sample JSON
+We include sample bindle configuration files which will be move from the template
+folder to the ~/.bindle folder the first time a bindle is run.
+
 configs in our sister repositories that show you how to build
 nodes/clusters for the following projects:
 
@@ -84,64 +84,11 @@ or an OpenStack cloud you can skip this step.
 
 Install dependencies:
 
-    sudo apt-get install gcc make
-
-Install bindle dependencies:
-
-    sudo apt-get update
-    sudo apt-get install software-properties-common
-    sudo apt-add-repository ppa:ansible/ansible
-    sudo apt-get update
-    sudo apt-get install ansible libjson-perl libtemplate-perl libconfig-simple-perl libcarp-always-perl libipc-system-simple-perl make gcc
-    
-    # alternative for package below
-    # Denis, might need the following if just installing from the deb below:
-    sudo apt-get install python-crypto python-jinja2 python-markupsafe sshpass python-crypto-dbg python-crypto-doc python-jinja2-doc python-jinja2 python-markupsafe sshpass python-crypto python-setuptools
-    wget https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb
-    sudo dpkg --install ansible-1.6.10-precise.deb
-    
+    run 'bash install'
+   
 Note: Ansible is a pretty fast moving project and we tested against 1.6.10. You may want to use that [specific version](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb) to avoid complications. 
 
-Install Vagrant using the package from their
-[site](http://downloads.vagrantup.com/) that is correct for your platform.  For
-example, I used the following Ubuntu 12.04 64-bit:
-
-    wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.deb 
-    sudo dpkg -i vagrant_1.6.3_x86_64.deb
-
-You then need to install plugins to handle AWS, vCloud, and/or OpenStack. The
-Virtualbox provider is available out of the box with Vagrant. You do this step
-as the user that will run Vagrant and the SeqWare Vagrant wrapper.
-
-    vagrant plugin install vagrant-aws
-    vagrant plugin install vagrant-openstack-plugin 
-    vagrant plugin install vagrant-vcloud
-
-The current version of the vagrant-vcloud plugin needs to be running with 
-Vagrant 1.5. If using version 1.4 one variable name will need to be modified.
-I forget exactly where the variable is but there will be an error thrown and
-based on the error you will need to remove the string 'URL' from the end of the
-variable.
-The bin/launcher/launch\_cluster.pl Perl script requires Perl (of course) and also a
-few modules.  They should already be installed if you went through install bindle dependencies 
-but if not, you can install these using [CPAN](http://www.cpan.org/) or via
-your distribution's package management system. Google "cpan perl install" for
-more information if you're unfamiliar with installing Perl packages. I highly
-recommend using PerlBrew to simplify working with Perl dependencies if you
-do not use your native package manager as shown below for Ubuntu:
-
-* Getopt::Long: should be installed by default with Perl
-* GetOpt::Euclid: eg "sudo apt-get install libgetopt-euclid-perl"
-* Data::Dumper: should be installed by default with Perl
-* JSON: eg "sudo apt-get install libjson-perl" on Ubuntu 12.04
-* Template: eg "sudo apt-get install libtemplate-perl" on Ubuntu 12.04
-* Config::Simple: eg "sudo apt-get install libconfig-simple-perl" on Ubuntu 12.04
-* Carp::Always: eg "sudo apt-get install libcarp-always-perl"
-* IPC::System::Simple: eg "sudo apt-get install libipc-system-simple-perl"
-
-To check to see if you have these you do:
-
-    perl -c bin/launcher/launch_cluster.pl
+run 'perl -c bin/launch_cluster' to make sure all perl modules are installed in your environment
 
 It should exit without an error message. 
 For detailed explanation on setting up a launcher and launching clusters from that, please refer to
@@ -198,28 +145,24 @@ Since this Vagrant wrapper can be used for many different projects based on the
 Bash shell scripts used to configure the hosts, we included several example
 configuration templates in:
 
-* [seqware-bag](https://github.com/SeqWare/seqware-bag/tree/develop/sample_configs)
-* [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag/tree/master/sample_configs)
-
-Please remember to copy the file path of desired template(for example
-templates/sample\_configs/vagrant\_cluster\_launch.seqware.single.json.template)
-and place it in the appropriate config file described below.
-
+./templates/config
 
 Fill in your various platform settings depending on what cloud provider you use
-(Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/os.cfg)). 
-If ~/.bindle doesn't exist, please run the launch\_cluster script:
+(Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/openstack.cfg)). 
 
-    perl bin/launcher/launch_cluster.pl --platform openstack --cluster cluster1
+
+    perl bin/launch_cluster.pl --config=openstack --cluster=cluster1
     
 Now, you can navigate to ~/.bindle/ and fill the required information in the appropriate config file:
    
-    vim ~/.bindle/<aws/os/vcloud>.cfg
+    vim ~/.bindle/<aws/openstack/vcloud>.cfg
+
+or use these configureations files to create another custom setup
 
 Please refer to the section below if you require help filling all the information in the config file.
 Once you have finished filling everything up, you can simply execute the following commad again to launch the cluster:
 
-    perl bin/launcher/launch_cluster.pl --platform aws --cluster <cluster-name> 
+    perl bin/launch_cluster.pl --config=configuration-file-name --cluster <cluster-name> 
     
     
 ### Filling in the config file
@@ -239,8 +182,8 @@ through the most obvious parameters (ie. user, apikey, etc):
 
     [platform]
     # can be either openstack(os) or aws or vcloud
-    type=os/aws/vcloud
-    
+    type=openstack/aws/vcloud
+     
     # asks for the name of your pem file. Please make sure you have the pem file under ~/.ssh on your launcher host
     ssh_key_name=ap-oicr-2
     
@@ -291,9 +234,6 @@ An example cluster block will look something like this:
     # this specifies the output directory where everything will get installed on the launcher
     target_directory = target-os-2
    
-    #this contains the path to the json template file this cluster needs
-    json_template_file_path = templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_cluster.json.template
- 
 To use a specific cluster block, you need to use the section name of that block as a parameter to --launch-cluster when you
 are running the launch_cluster perl script.
 
@@ -301,19 +241,14 @@ are running the launch_cluster perl script.
 
 Please note for VirtualBox, you will need to use the old configuration technique:
     
-    # copy the json template over
-    cp templates/sample_configs/vagrant\_cluster_launch.seqware.single.json.template vagrant_cluster_launch.json
-    # make any required changes to the json template
-    vim vagrant_cluster\_launch.json
-    
+   fill in the apropriat fields in ~/.bindle/virtualbox.cfg    
+
 You can fill in the required information and move on to the next step.
 
 If you use the template recommended above you will have a 1 node Hadoop cluster
 (with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
 software stack installed.  This environment should be ready for use with out
-Getting Started Guides for this project. You can also choose another template,
-such as "templates/sample\_configs/vagrant\_cluster\_launch.seqware.cluster.json.template",
-that will give you a 4 node cluster.
+Getting Started Guides for this project.
 
 ## RAM and CPU Core Requirements
 
@@ -345,29 +280,19 @@ is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/pr
 Examples of launching in different environments include:
 
     # for AWS
-    perl bin/launcher/launch_cluster.pl --use-aws --use-default-config --launch-cluster <cluster-name> 
+    perl bin/launch_cluster.pl --config=aws --cluster <cluster-name> 
     # for OpenStack
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster <cluster-name>
+    perl bin/launch_cluster.pl --config=openstack --cluster <cluster-name>
 
 "clustername" represents the cluster block you want to run from the config file (Ex: cluster1).
 
-Please note that you can still use the old way to set up configurations in the json template file itself for any environment. 
-That is, copying the template file over like this (you must use this way if you are launching a cluster using virtualbox):
-
-    # for Virtualbox
-    cp templates/sample_configs/vagrant_cluster_launch.pancancer.seqware.install.sge_node.json.template vagrant_cluster_launch.json
-    # modify the .json template to include your settings, for AWS you need to make sure you fill in the "AWS_*" settings
-    vim vagrant_cluster_launch.json
-    # now to launch the node
-    perl vagrant_cluster_launch.pl --use-aws --working-dir target-aws-1 --config-file vagrant_cluster_launch.json
-    
 ## Destroying the Clusters
 
 The script that takes care of the process required to terminate a cluster is located at 
-"bin/launcher/destroy\_cluster.pl". To destroy a cluster, simply run the following command:
+"bin/destroy_cluster.pl". To destroy a cluster, simply run the following command:
 
      # assumes you are in the Bindle directory
-     perl bin/launcher/destroy_cluster.pl --cluster-name <target-dir>
+     perl bin/destroy_cluster.pl --cluster-name <target-dir>
      
 The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). This will remove
 the cluster from the appropriate environment but it is advised to check the web interface to make sure
@@ -500,22 +425,22 @@ VMs.
 
 ### Re-running Ansible
 
-Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issues. You can re-run ansible-enabled deployments via the following command to the launcher script which provides a working-dir and a config-file. 
+Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issue. For this purpose Bindle has also been made to run idempotently. Bindle first checks to see if the folders have been created. If they exist it assumes Vagrant has already created the VMs. If this is true Bindle skips ahead to re-provisioning whith the modified Ansible playbook
 
-    perl bin/launcher/launch_cluster.pl --working-dir target-os-cluster --config-file vagrant_cluster_launch.json  --run-ansible
+    perl bin/launch_cluster.pl --config=<config-name>  --cluster=<cluster-block-name>
 
 ## AWS - Regions and Availability Zones
 
 In order to specify regions and zones, JSON templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
 
-    "AWS_REGION": "us-east-1",
-    "AWS_ZONE": "a",
+    aws_region=us-east-1
+    aws_zone=a,
 
 ## AWS - Additional EBS Space
 
 In order to add extra EBS volumes across the board, use the following syntax in order to provision a 400 and 500 GB volume attached to each node:
 
-     perl bin/launcher/launch_cluster.pl --use-aws --aws-ebs 400 500
+    aws-ebs=400,500
 
 
 ## Controlling the VM
@@ -594,7 +519,7 @@ VeeWee can be used to create CentOS base boxes
 
 If you need to debug a problem set the VAGRANT_LOG variable e.g.:
 
-    VAGRANT_LOG=DEBUG perl bin/launcher/launch_cluster.pl --use-aws
+    VAGRANT_LOG=DEBUG perl bin/launch_cluster.pl --config=aws --cluster=cluster1
 
 Also you can use the "--skip-launch" option to just create the various launch
 files not actually trigger a VM.

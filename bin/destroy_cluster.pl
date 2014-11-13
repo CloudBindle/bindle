@@ -5,8 +5,6 @@ use autodie;
 
 use Getopt::Long;
 
-use File::Basename qw();
-
 my $cluster_name;
 GetOptions ( "cluster-name=s" => \$cluster_name, );
 

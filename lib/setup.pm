@@ -1,16 +1,20 @@
-package cluster::setup;
+package setup;
+
+use common::sense;
+
+use autodie qw(:all);
+use Carp::Always;
 
 use IPC::System::Simple;
-use common::sense;
-use autodie qw(:all);
-use Data::Dumper;
 use Getopt::Long;
+
 use Config;
 $Config{useithreads} or die('Recompile Perl with threads to run this program.');
 use threads;
 use Storable 'dclone';
-use Carp::Always;
+
 use Config::Simple;
+
 my $configs;
 my $work_dir;
 
