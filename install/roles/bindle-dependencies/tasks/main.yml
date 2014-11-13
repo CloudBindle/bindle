@@ -16,6 +16,8 @@
     - python-jinja2-doc 
     - python-markupsafe 
     - python-setuptools
+    - python-support
+    - python-paramiko
 
 - name: Download Ansible 1.6 deb package
   get_url: 
