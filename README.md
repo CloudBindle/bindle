@@ -1,3 +1,4 @@
+# Bindle README
 ## Table of Contents
 
 * [About Bindle](#about-bindle)
@@ -21,39 +22,30 @@
 * [TODO](#todo)
 
 
-## About Bindle
+## About
 
-This project is a wrapper around [Vagrant](http://www.vagrantup.com/) and
- [Ansible](http://www.ansible.com/) for launching single node and clustered 
-VMs on VirtualBox, Vcloud, AWS, and OpenStack.
+Bindle is a wrapper around [Vagrant](http://www.vagrantup.com/) and [Ansible](http://www.ansible.com/) for launching single node and clustered VMs on VirtualBox, Vcloud, AWS, and OpenStack.
 
 Vagrant itself is used to launch the VMs while Ansible is used to provision them.
 
-Variables are passed from bindles configuration files ( located: ~/.bindle) to Ansible  
-through a JSON file for each VM.  
+Variables are passed from bindles configuration files ( located: ~/.bindle) to Ansible through a JSON file for each VM.  
 
-Bindle can be used for is building both Hadoop and GridEngine-based clusters 
- on a variety of cloud environments. 
+Bindle can be used for is building both Hadoop and GridEngine-based clusters on a variety of cloud environments. 
 
-In separate repositories, we provide secondary provisioning
-Ansible scripts that setup a single-node or multi-node SeqWare cluster configured
-to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic
-the same process can be adapted to build other cluster types to serve other
-projects.  
+In separate repositories, secondary provisioning Ansible scripts are provided that setup a single-node or multi-node SeqWare cluster configured to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic the same process can be adapted to build other cluster types to serve other projects.  
 
-You can also base anything that needs a Hadoop and/or GridEngine cluster of
-machines created on a variety of cloud platforms on our Ansible playbooks.
+You can also base anything that needs a Hadoop and/or GridEngine cluster of machines created on a variety of cloud platforms on our Ansible playbooks. Ansible playbooks are included by specifying the the path to the playbook with the parameter 'ansible_playbook' in the  bindle configuration files.
 
-We include sample bindle configuration files which will be move from the template
-folder to the ~/.bindle folder the first time a bindle is run.
-
+### sister repositories
 configs in our sister repositories that show you how to build
 nodes/clusters for the following projects:
 
 * [SeqWare Pipeline](https://github.com/SeqWare/seqware-bag)  (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
 * the [TCGA/ICGC PanCancer Project](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag)
 
-## Build & Source Control
+
+## Development
+### Build & Source Control
 
 Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
 working branch is "develop".  If you need to make changes work on a feature
@@ -61,69 +53,24 @@ branch and make a pull request to another developer when ready to merge with
 develop.  See the HubFlow docs above for a detailed description of this
 process.
 
-## Installing
+## Installing with Virtual Box
 
 Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let
 you launch a local node or cluster of virtual machine nodes on your desktop or
-local server. If you will *only* launch a node or cluster of nodes on Amazon
-or an OpenStack cloud you can skip this step.
+local server.
 
 Install dependencies:
 
-    run 'bash install'
+    run 'bash install' to install ansible
+    run install playbook to install all dependencies
    
 Note: Ansible is a pretty fast moving project and we tested against 1.6.10. You may want to use that [specific version](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb) to avoid complications. 
 
-run 'perl -c bin/launch_cluster' to make sure all perl modules are installed in your environment
+run 'perl -c bin/launch_cluster.pl' to make sure all perl modules are installed in your environment
 
 It should exit without an error message. 
 For detailed explanation on setting up a launcher and launching clusters from that, please refer to
 the [Pancancer Cluster Launch ReadMe](https://github.com/SeqWare/vagrant/blob/develop/PANCAN_CLUSTER_LAUNCH_README.md)
-
-### Note About Versions
-
-There have been some reports of problems with the latest version of Vagrant
-and Vagrant plugins for OpenStack and/or AWS.  Here is what we currently use on
-Ubuntu 12.0.4 LTS which we use to launch nodes/clusters on OpenStack or AWS:
-
-* Vagrant: 1.6.3
-* Vagrant plugins:
-    * vagrant-aws (0.5.0)
-    * vagrant-openstack-plugin (0.7.0)
-* Ansible 1.6.10
-
-On the Mac we use the following to launch VMs on VirtualBox, vCloud (VMWare), or AWS:
-
-* Vagrant: 1.6.3
-* Vagrant plugins:
-    * vagrant-aws (0.5.0)
-    * vagrant-vcloud (0.1.1)
-* VirtualBox: 4.2.18 r88780
-
-These work correctly, if you use a different version and run into problems
-please try one of these versions.
-
-## Getting "Boxes"
-
-This is still needed but it should happen automatically the first time you
-use Bindle on VirtualBox.
-
-If you are running using VirtualBox you can pre-download boxes which are
-images of computers ready to use.  The easiest way to do this is to find the
-URL of the base box you want to use here:
-
-http://www.vagrantbox.es/
-
-For example, to download the base Ubuntu 12.04 box you do the following:
-
-    vagrant box add Ubuntu_12.04 http://cloud-images.ubuntu.com/precise/current/precise-server-cloudimg-vagrant-amd64-disk1.box
-
-Keep in mind this is primarily aimed at developers making a new profile config.
-For the existing ones we provide they already link to the box that will be
-pulled in on first launch.  This may take a while on a slow connection.
-
-For Amazon or an OpenStack cloud a "dummy" box will be used and is already
-configured in the code.
 
 ## Configuration Profiles
 
@@ -131,25 +78,20 @@ Since this Vagrant wrapper can be used for many different projects based on the
 Bash shell scripts used to configure the hosts, we included several example
 configuration templates in:
 
-./templates/config
+    ./templates/config
 
 Fill in your various platform settings depending on what cloud provider you use
 (Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/openstack.cfg)). 
 
-
     perl bin/launch_cluster.pl --config=openstack --cluster=cluster1
     
-Now, you can navigate to ~/.bindle/ and fill the required information in the appropriate config file:
+Navigate to ~/.bindle/ and fill in the configuration file. Use these configureation files as templates to create your own custom configuration. 
    
     vim ~/.bindle/<aws/openstack/vcloud>.cfg
 
-or use these configureations files to create another custom setup
-
-Please refer to the section below if you require help filling all the information in the config file.
-Once you have finished filling everything up, you can simply execute the following commad again to launch the cluster:
+To launch a cluster:
 
     perl bin/launch_cluster.pl --config=configuration-file-name --cluster <cluster-name> 
-    
     
 ### Filling in the config file
 
@@ -160,8 +102,7 @@ Also, please refer to "Configuration for Virtualbox" if you want to provision cl
 #### Platform Specific Information
 
 This section of the config file contains all the information that is required to set up the platform.
-You need to fill in the parameters for the specific platform you want to launch clusters in by modifying either 
-os.cfg for OpenStack, aws.cfg for AWs, or vcloud.cfg for VCloud
+
 
 Let us go through the parameters that might confuse you when you are filling the config file. I will not be going 
 through the most obvious parameters (ie. user, apikey, etc):
