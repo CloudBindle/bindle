@@ -1,8 +1,8 @@
 ---
 
 - name: Install Bindle dependencies
-  apt: name= {{ item }} state=latest update_cache=yes
   sudo: True
+  apt: name={{ item }} state=latest update_cache=yes
   with_items:
     - git 
     - gcc
@@ -45,7 +45,7 @@
 
 - name: Install Perl dependencies
   sudo: True
-  apt: name= {{ item }} state=latest update_cache=yes
+  apt: name={{ item }} state=latest update_cache=yes
   with_items:
     - libgetopt-euclid-perl
     - libjson-perl
