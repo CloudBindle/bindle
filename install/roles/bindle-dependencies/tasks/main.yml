@@ -43,12 +43,12 @@
 - name: Install Perl dependencies
   apt: name= {{ item }} state=latest update_cache=yes
   with_items:
-	- libgetopt-euclid-perl
-	- libjson-perl
-	- libtemplate-perl
-	- libconfig-simple-perl
-	- libcarp-always-perl
-	- libipc-system-simple-perl
+    - libgetopt-euclid-perl
+    - libjson-perl
+    - libtemplate-perl
+    - libconfig-simple-perl
+    - libcarp-always-perl
+    - libipc-system-simple-perl
 
 - name: Create .bindle directory
   file: path=~/.bindle state=directory
