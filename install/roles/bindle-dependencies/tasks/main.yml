@@ -23,9 +23,9 @@
     url=https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb
     mode=755
 
-- name: Install Ansible 1.6
+- name: Install Ansible 1.6 (using default Ansible 1.5.4) 
   sudo: True
-  apt: deb=/tmp/ansible-1.6.10-precise.deb
+  shell: dpkg -i /tmp/ansible-1.6.10-precise.deb
 
 - name: Download Vagrant deb package
   get_url: 
@@ -33,9 +33,9 @@
     url=https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.deb
     mode=755
   
-- name: Install Vagrant deb package
+- name: Install Vagrant deb package (using default Ansible)
   sudo: True
-  apt: deb=/tmp/vagrant_1.6.3_x86_64.deb
+  shell: dpkg -i /tmp/vagrant_1.6.3_x86_64.deb
 
 - name: Install Vagrant providers
   command: vagrant plugin install {{ vagrant_plugin }} --plugin-version {{ vagrant_plugin_version }}
