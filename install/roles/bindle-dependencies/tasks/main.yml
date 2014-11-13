@@ -60,9 +60,4 @@
   file: path=~/.bindle state=directory
 
 - name: Template over default config files
-  template: src={{ item }} dest=~/.bindle
-  with_items:
-    - aws.cfg
-    - openstack.cfg
-    - vcloud.cfg
-    - virtualbox.cfg
+  template: src={{ bindle_config }} dest=~/.bindle
