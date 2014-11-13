@@ -18,6 +18,7 @@
     - python-setuptools
     - python-support
     - python-paramiko
+    - python-httplib2
 
 - name: Download Ansible 1.6 deb package
   get_url: 
