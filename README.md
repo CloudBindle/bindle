@@ -55,7 +55,7 @@ the same process can be adapted to build other cluster types to serve other
 projects.  
 
 You can also base anything that needs a Hadoop and/or GridEngine cluster of
-machines created on a variety of cloud platformsn on our Ansible playbooks.
+machines created on a variety of cloud platforms on our Ansible playbooks.
 
 We include sample bindle configuration files which will be move from the template
 folder to the ~/.bindle folder the first time a bindle is run.
@@ -63,9 +63,8 @@ folder to the ~/.bindle folder the first time a bindle is run.
 configs in our sister repositories that show you how to build
 nodes/clusters for the following projects:
 
-* [SeqWare Pipeline](https://github.com/SeqWare/seqware-bag) 
-** (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
-* the [TCGA/ICGC PancCancer Project](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag)
+* [SeqWare Pipeline](https://github.com/SeqWare/seqware-bag)  (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
+* the [TCGA/ICGC PanCancer Project](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag)
 
 ## Build & Source Control
 
@@ -331,7 +330,7 @@ In order to run with pan-cancer modifications as well, please checkout and use t
 
 ## Persistance of Ephemeral Disks - AWS
 
-Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on an EBS volume instead. Follow the steps below to get an AMI image up and running with a single node instance!
+Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on an EBS volume instead. Follow the steps below to get an AMI image up and running with a single node instance.
 
 ### Starting with an EBS volume
 
@@ -346,8 +345,16 @@ This creates a root drive with 1000GB of space and disables the single ephemeral
 
 1. Log onto the Amazon Web Console and navigate to EC2 -> Instances -> Instances
 2. Right click on the single node instance and select "Create Image"
-3. Give it an appropriate Image name(Ex. Seqware\_1.0.13\_Bindle\_1.2) and choose the snapshot we just created for the EBS volume. 
-4. Click Create Image! 
+3. Give it an appropriate Image name(Ex. Seqware\_1.1.0-alpha.5\_Bindle\_1.2) 
+4. If you are using [youxia](https://github.com/CloudBindle/youxia)'s deployer, you should record ephemeral disks as needed in the image configuration. While Amazon treats this information as a suggestion (see below), youxia will re-specify this information at launch time to ensure that the desired number of ephemeral disks is available. It is safe to over-specify (i.e. specify four ephemeral disks even if only two are required).    
+5. Click Create Image! 
+
+For more information on Amazon block mapping, see [this](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html). The specific sections that can be problematic is:
+
+    Depending on instance store capacity at launch time, M3 instances may ignore AMI instance store block device    
+    mappings at launch unless they are specified at launch. You should specify instance store block device mappings 
+    at launch time, even if the AMI you are launching has the instance store volumes mapped in the AMI, to ensure 
+    that the instance store volumes are available when the instance launches. 
 
 You should now have a functioning AMI. The next step would be to launching an instance from the AMI image and running the HelloWorld Workflow to make sure it works. The guide to creating an instance from an AMI image is located below.
 
@@ -359,60 +366,6 @@ You should now have a functioning AMI. The next step would be to launching an in
 4. Click Review and Launch and you are done!
 
 You now have a workflow development environment and a place where you can run workflows!
-
-<!---
-## OICR Examples
-
-SeqWare isn't the only project using this Vagrant wrapper.  We're using the
-same infrastructure for running the ICGC DCC data portal on OpenStack and
-Amazon. In the future we will add additional ICGC DCC software project
-profiles. These are not ready for outside users at this time but we expect
-other users in the future to launch DCC Portals and Validation systems using
-something similar to the below.
-
-### General OICR Settings
-
-The templates below do not include our OpenStack settings but you can see Brian for OICR-specific
-settings which are also described in more detail here:
-https://wiki.oicr.on.ca/display/SEQWARE/Cluster+or+Node+Launching+with+Vagrant
-
-### ICGC DCC Portal - Small Cluster
-
-This will spin up a standard, 2 node SeqWare cluster (using Oozie-Hadoop), will
-setup elasticsearch, will download a dump of the (small) elasticsearch DCC
-index, load the dump into elasticsearch, and launch the DCC Portal web app on
-port 8998.
-
-Keep in mind you should edit the json below before you launch to make sure your
-floating IP addresses and other settings are correct.  Also, the specific index
-dump file and DCC Portal jar file are hard coded in the provision scripts
-referenced inside the JSON so you will want to change these if there's an
-update.  Also, take a look at templates/DCC/settings.yml which has the index
-name embedded and will need to change if the index is updated.
-
-    # use this template: templates/sample_configs/vagrant_cluster_launch.dcc_small_portal.cluster.json.template
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster-name
-
-Once this finishes launching you can browse the DCC Portal at http://master_node_IP:8998/.
-
-### ICGC DCC Portal - Large Cluster
-
-This is the same as the previous example but defaults to an 8 node cluster (one
-master, 7 workers). It also calls scripts that reference the large
-Elasticsearch DCC Portal index dumps. In the future we will increase this
-number, optimize the configuration to better take advantage of the node number,
-and explore HA options.
-
-    # use this template: templates/sample_configs/vagrant_cluster_launch.dcc_large_portal.cluster.json.template 
-    # Don't forget to place the path of the template file in your connfig file!
-    vim config/os.cfg
-    # launch, use the correct command line args for you 
-    perl bin/launcher/launch_cluster.pl --use-openstack --use-default-config --launch-cluster cluster-name
-
---->
 
 ## Logging
 
