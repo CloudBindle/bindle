@@ -17,11 +17,11 @@ use Carp::Always;
 my ($configs, $cluster_configs, $work_dir);
 
 sub provision_instances {
-    my ($class, $nodes, $work_dir, $config) = @_;
+    my ($class, $nodes, $work_dir, $config, %nodeHash) = @_;
 
     my $hosts = find_cluster_info($nodes, $work_dir);
 
-    return run_ansible_playbook($work_dir, $hosts, $config);
+    return run_ansible_playbook($work_dir, $hosts, $config, %nodeHash);
 }
 
 sub find_cluster_info {
@@ -51,7 +51,7 @@ sub get_host_id_from_vagrant_status {
     if ($status =~ /Current machine states:\s+(\S+)\s+(active|running)/) { 
         return $1;
     } 
-    die 'Was unable to get node infomation';
+    die 'Was unable to get node information';
 }
 
 sub host_information {
@@ -95,33 +95,24 @@ sub get_pip_id {
 
 # this generates an ansible inventory and runs ansible
 sub run_ansible_playbook {
-    my ($work_dir, $hosts, $config) = @_;
+    my ($work_dir, $hosts, $config, %nodeHash) = @_;
 
-    # this could use a specific set module
-    my %type_set = ();
-    foreach my $host (sort keys %{$hosts}) {
-        my $type = ($host)? 'master' : 'worker';
-        $type_set{$type} = 1;
-    }
- 
     open (INVENTORY, '>', "$work_dir/inventory");
 
-    foreach my $type (keys %type_set){
+    foreach my $type (keys %nodeHash){
         say INVENTORY "[$type]";
-        foreach my $host_name (sort keys %{$hosts}) {
+        foreach my $host_name (@{$nodeHash{$type}}) {
             my $host = $hosts->{$host_name};
-            next if (($type eq 'master' and $host_name ne 'master') 
-                     or ($type ne 'master' and $host_name eq 'master'));
             say INVENTORY "$host_name\tansible_ssh_host=$host->{ip}\tansible_ssh_user=$host->{user}\tansible_ssh_private_key_file=$host->{key}";
         } 
     }
     say INVENTORY "[all_groups:children]";
-    foreach my $type (keys %type_set) {
+    foreach my $type (keys %nodeHash) {
        say INVENTORY "$type";
     }
     close (INVENTORY); 
    
-    my $playbook =  $config->param('platform.ansible_playbook');
+    my $playbook =  $config->param('defaults.ansible_playbook');
 
     # I'm sure this "cluster" parameter is not how one should do it in Perl, but this seems to work with the call from the launcher which inserts the package
     # as the first parameter
@@ -135,18 +126,18 @@ sub run_ansible_command{
     my $time = `date +%s.%N`;
     chomp $time;
 
-    my $platform = $config->param(-block=>'platform');
+    my $parameters = $config->param(-block=>'defaults');
 
     # create JSON file to pass all defined variables
     # note that ansible variables are lower case by convention while for backwards compatibility, our variables are upper case
     # thus lc while exporting
     open ANSIBLE_VARIABLES, '>', "$work_dir/variables.$time.json";
     my $json = JSON->new->allow_nonref;
-    print ANSIBLE_VARIABLES $json->encode( $platform );
+    print ANSIBLE_VARIABLES $json->encode( $parameters );
     close ANSIBLE_VARIABLES;
   
 
-    my $playbook = $config->param('platform.ansible_playbook');
+    my $playbook = $config->param('defaults.ansible_playbook');
     # preserve colour for easy readability in head and tail
     # also save a copy without buffering (unlike tee) by using script -c
     # unfortunately, jenkins appears allergic to script -c (kills the script randomly while running), so switch back to tee

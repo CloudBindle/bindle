@@ -23,8 +23,16 @@ You can also base anything that needs a Hadoop and/or GridEngine cluster of mach
 
 ## Installation
 
-*  Install Ansible: bash install-ansible
-*  Install Dependencies: run playbook
+Install dependencies (our install script is in ansible):
+
+    sudo apt-get install git
+    sudo apt-get install python-software-properties
+    sudo add-apt-repository ppa:rquillo/ansible
+    sudo apt-get update
+    sudo apt-get install ansible
+    git clone https://github.com/CloudBindle/Bindle.git
+    cd Bindle 
+    ansible-playbook -i install/inventory install/site.yml 
    
 Note: Ansible is a very actice project and we have experienced compatibility issues between playbooks and versions of Ansible. Our playbooks are made to work with Ansible [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
 
@@ -62,7 +70,7 @@ with at least 12G of RAM.  For VirtualBox, you should do the same.
 
 The wrapper script that controls the system is the launcher script:
 
-    perl bin/launch_cluster.pl --config=aws --block <block-name> 
+    perl bin/launch_cluster.pl --config=aws ----custom-params=<block-name> 
 
 "block-name" is optional and indicates the block or blocks that you would like to use to overwrite the default settings.
 
@@ -117,12 +125,7 @@ You now have a workflow development environment and a place where you can run wo
 
 ## Logging
 
-Every node launched by launch_cluster.pl has it's own log file that you
-can view (or watch during cluster building).  Take a look inside the directory
-specified in the --working-dir option.  There you should see a .log file for
-each server being launched (for a cluster) or just master.log if you launched a
-node.  You can use "tail -f <logname>" to watch the progress of building your
-VMs.
+Every node launched by launch_cluster.pl has it's own log file that you can view (or watch during cluster building).  Take a look inside the directory specified in the --working-dir option.  There you should see a .log file for each server being launched (for a cluster) or just master.log if you launched a node.  You can use "tail -f <logname>" to watch the progress of building your VMs.
 
 ### Re-provisioning VMs
 
