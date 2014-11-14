@@ -83,7 +83,11 @@ or an OpenStack cloud you can skip this step.
 
 Install dependencies (our install script is in ansible):
 
-    sudo apt-get install git ansible
+    sudo apt-get install git
+    sudo apt-get install python-software-properties
+    sudo add-apt-repository ppa:rquillo/ansible
+    sudo apt-get update
+    sudo apt-get install ansible
     git clone https://github.com/CloudBindle/Bindle.git
     cd Bindle 
     ansible-playbook -i install/inventory install/site.yml 
