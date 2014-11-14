@@ -21,6 +21,7 @@ use Carp::Always;
 use cfg;
 use provision;
 use setup;
+use Data::Dumper;
 # VARS
 
 # Notes:
@@ -51,9 +52,50 @@ die "target-directory was not specified for $cluster in the configuration file" 
 my $number_of_nodes = $cluster_info->{number_of_nodes};
 die "Please specify the number of nodes for the cluster $cluster in the configuration file" unless ($number_of_nodes);
 
-my @nodes = ('master');
-foreach my $i (1..($number_of_nodes-1)) {
-   push @nodes, "workler$i";
+my $types =  $cluster_info->{types};
+
+# hash of arrays, mapping from types to arrays of hostnames  
+my %nodeHash = ();
+# for existing code, a list of hostnames
+my @nodes;
+
+if (defined $types){
+    # splitting with '::', using commas seems to fail horribly and I can't locate the docs for cfg to figure out why
+    my @typeArray = split("::", $types);
+    if (scalar @typeArray != $number_of_nodes){
+        die "Number of node types does not match number of nodes";
+    }
+    foreach my $type (@typeArray){
+        if (exists $nodeHash{$type}){
+	    my @existingArray = @{$nodeHash{$type}};
+	    my $count = scalar @existingArray + 1;
+	    push @existingArray, "$type$count";
+            $nodeHash{$type} = \@existingArray;
+        } else {
+	    my @arrayStart = ($type);
+	    $nodeHash{$type} = \@arrayStart;
+	}
+    }
+}
+else{
+    print "No node types defined, assuming one master and n-1 worker nodes\n";
+    my @masterNodes = ("master");
+    $nodeHash{ 'master' } = \@masterNodes;
+    my @workerNodes;
+    if ($number_of_nodes > 1){
+        foreach my $i (1..($number_of_nodes-1)) {
+            push @workerNodes, "worker$i";
+        }
+        $nodeHash{ "worker" } = \@workerNodes;
+    }
+}
+
+# populate existing array for backwards compatibility
+for my $type ( keys %nodeHash ) {
+    my @names = @{$nodeHash{$type}};
+    for my $name (@names){
+        push @nodes, $name;
+    }
 }
 
 unless (-d $work_dir) {
@@ -73,7 +115,7 @@ unless (-d $work_dir) {
     launch_instances($work_dir, $launch_command, \@nodes);
 }
 
-provision->provision_instances(\@nodes, $work_dir, $config);
+provision->provision_instances(\@nodes, $work_dir, $config, %nodeHash);
 
 say "FINISHED";
 
