@@ -128,10 +128,6 @@ VMs.
 
 Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issue. For this purpose Bindle has also been made to run idempotently. Bindle first checks to see if the folders have been created. If they exist it assumes Vagrant has already created the VMs. If this is true Bindle skips ahead to re-provisioning whith the modified Ansible playbook
 
-    perl bin/launch_cluster.pl --config=<config-name>  --cluster=<cluster-block-name>
-    
-After running the launcher script Ansible commands are generated and stored in the target directories. At this point, it is possible to run these ansbible command directly. 
-
 ## AWS - Regions and Availability Zones
 
 In order to specify regions and zones, c templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
@@ -151,30 +147,22 @@ Once the launch_cluster.pl script finishes running you will have one or more VM 
 
 Here's a quick overview:
 
-    # first, cd to your target directory, in this case target-sge
-    cd target/sge
-    # you will see directories for each VM, such as master
-    cd master
-    # once in these directories you can issue Vagrant commands
-    # check the status of the VM
-    vagrant status
-    # suspend
-    vagrant suspend
-    # resume
-    vagrant resume
-    # shutdown the VM
-    vagrant halt
-    # restart the VM
-    vagrant up
-    # ssh to the machine
-    vagrant ssh
-    # for ssh information
-    vagrant ssh-config
-    # terminate and remove the VM
-    vagrant destroy
+1. cd to your target directory, in this case sge
+   * cd target/sge
+2. You will see directories for each VM, such as master
+   * cd master
+3.once in these directories you can issue Vagrant commands
+   * check the status of the VM
+       * vagrant status
+       * vagrant suspend
+       * vagrant resume
+       * vagrant halt
+       * vagrant up (start /restart VM)
+       * vagrant ssh (shell into machine)
+       * vagrant ssh-config (get VM network information)
+       * vagrant destroy
 
-*Do not forget to shut down your instances!*
-
+*Do not forget to shut down your instances before removing the directory!*
 
 ## Veewee Installation and Usage Instructions (Mac)
 
