@@ -1,0 +1,5 @@
+---
+# setup Bindle
+- hosts: bindle
+  roles: 
+    - { role: bindle-dependencies }

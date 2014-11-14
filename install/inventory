@@ -1,0 +1,2 @@
+[bindle]
+localhost              ansible_connection=local
