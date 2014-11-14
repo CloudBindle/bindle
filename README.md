@@ -21,10 +21,10 @@ You can also base anything that needs a Hadoop and/or GridEngine cluster of mach
 
 * [Architecture Setup](https://github.com/ICGC-TCGA-PanCancer/architecture-setup) scripts have been created to install Bindle, [seqware_bag](https://github.com/SeqWare/seqware-bag) and [pancancer_bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag).
 
-## Installation:
+## Installation
 
-    run 'bash install-ansible' 
-    run install playbook to install all dependencies
+*  Install Ansible: bash install-ansible
+*  Install Dependencies: run playbook
    
 Note: Ansible is a pretty fast moving project and we tested against [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
 
@@ -34,10 +34,7 @@ It should exit without an error message.
 For detailed explanation on setting up a launcher and launching clusters from that, please refer to
 the [Pancancer Cluster Launch ReadMe](https://github.com/SeqWare/vagrant/blob/develop/PANCAN_CLUSTER_LAUNCH_README.md)
 
-
-
-
-## Installing with Virtual Box
+### Installing with Virtual Box
 
 Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let you launch a local node or cluster of virtual machine nodes on your desktop or local server.
 
@@ -49,28 +46,12 @@ configuration templates in:
 
     ./templates/config
 
-Fill in your various platform settings depending on what cloud provider you use
-(Vcloud(~/.bindle/vcloud.cfg), Amazon(~/.bindle/aws.cfg), or OpenStack(~/.bindle/openstack.cfg)). 
+A configuration file will be moved to ~/.bindle upon installation.
 
-    perl bin/launch_cluster.pl --config=openstack --cluster=cluster1
-    
-Navigate to ~/.bindle/ and fill in the configuration file. Use these configureation files as templates to create your own custom configuration. 
-   
-    vim ~/.bindle/<aws/openstack/vcloud>.cfg
+### Configureation Parameters
 
-To launch a cluster:
-
-    perl bin/launch_cluster.pl --config=configuration-file-name --cluster <cluster-name> 
-    
-### Filling in the config file
-
-One thing you must keep in mind before filling in the config files is not to delete any of the default
-parameters you are not going to be needing. Simply, leave them blank if that is the case. 
-Also, please refer to "Configuration for Virtualbox" if you want to provision clusters on Virtualbox
-
-#### Platform Specific Information
-
-This section of the config file contains all the information that is required to set up the platform.
+#### Platform Block
+The platform section is used for sepcifying platform specfic information. 
 
 
 Let us go through the parameters that might confuse you when you are filling the config file. I will not be going 
