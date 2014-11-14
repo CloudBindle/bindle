@@ -1,28 +1,4 @@
-# Bindle README
-## Table of Contents
-
-* [About Bindle](#about-bindle)
-* [Build and Source Control](#build-source-control)
-* [Installing Bindle](#installing)
-    * [Note about Versions](#note-about-versions)
-    * [Getting "Boxes"](#getting-boxes)
-    * [Configuration Profiles](#configuration-profiles)
-      * [Filling in the config file](#filling-in-the-config-file)
-      * [Configuration for VirtualBox](#configuration-for-virtualbox)
-    * [RAM and CPU Core Requirements](#ram-and-cpu-core-requirements)
-* [Running the Cluster Launcher](#running-the-cluster-launcher)
-* [Destroying the Clusters](#destroying-the-clusters)
-* [SeqWare Examples](#seqware-bag)
-* [Persistance of Ephemeral Disks - AWS](#persistance-of-ephemeral-disks---aws)
-* [Launching a single node instance from an AMI Image](#launching-a-single-node-instance-from-an-ami-image)
-* [Logging](#logging)
-* [Controlling the VM](#controlling-the-vm)
-* [CentOS Information](#centos-information)
-* [Debugging](#debugging)
-* [TODO](#todo)
-
-
-## About
+## About Bindle
 
 Bindle is a wrapper around [Vagrant](http://www.vagrantup.com/) and [Ansible](http://www.ansible.com/) for launching single node and clustered VMs on VirtualBox, Vcloud, AWS, and OpenStack.
 
@@ -36,41 +12,34 @@ In separate repositories, secondary provisioning Ansible scripts are provided th
 
 You can also base anything that needs a Hadoop and/or GridEngine cluster of machines created on a variety of cloud platforms on our Ansible playbooks. Ansible playbooks are included by specifying the the path to the playbook with the parameter 'ansible_playbook' in the  bindle configuration files.
 
-### sister repositories
-configs in our sister repositories that show you how to build
-nodes/clusters for the following projects:
+## Sister Repositories
 
-* [SeqWare Pipeline](https://github.com/SeqWare/seqware-bag)  (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
-* the [TCGA/ICGC PanCancer Project](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag)
+* [SeqWare - seqware_bag](https://github.com/SeqWare/seqware-bag) (with Oozie-Hadoop and/or Oozie-SGE backends) and associated SeqWare projects (WebService, MetaDB, etc)
+* [TCGA/ICGC PanCancer Project -pancancer_bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag) for PanCancer specific provisioning
 
+### PanCancer Architecure Installatiion 
 
-## Development
-### Build & Source Control
+* [Architecture Setup](https://github.com/ICGC-TCGA-PanCancer/architecture-setup) scripts have been created to install Bindle, [seqware_bag](https://github.com/SeqWare/seqware-bag) and [pancancer_bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag).
 
-Please use [HubFlow](http://datasift.github.io/gitflow/) for development. The
-working branch is "develop".  If you need to make changes work on a feature
-branch and make a pull request to another developer when ready to merge with
-develop.  See the HubFlow docs above for a detailed description of this
-process.
+## Installation:
 
-## Installing with Virtual Box
-
-Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let
-you launch a local node or cluster of virtual machine nodes on your desktop or
-local server.
-
-Install dependencies:
-
-    run 'bash install' to install ansible
+    run 'bash install-ansible' 
     run install playbook to install all dependencies
    
-Note: Ansible is a pretty fast moving project and we tested against 1.6.10. You may want to use that [specific version](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb) to avoid complications. 
+Note: Ansible is a pretty fast moving project and we tested against [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
 
 run 'perl -c bin/launch_cluster.pl' to make sure all perl modules are installed in your environment
 
 It should exit without an error message. 
 For detailed explanation on setting up a launcher and launching clusters from that, please refer to
 the [Pancancer Cluster Launch ReadMe](https://github.com/SeqWare/vagrant/blob/develop/PANCAN_CLUSTER_LAUNCH_README.md)
+
+
+
+
+## Installing with Virtual Box
+
+Install VirtualBox from [Oracle](https://www.virtualbox.org/) which will let you launch a local node or cluster of virtual machine nodes on your desktop or local server.
 
 ## Configuration Profiles
 
@@ -225,37 +194,6 @@ The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). 
 the cluster from the appropriate environment but it is advised to check the web interface to make sure
 that the nodes are deleted.
 
-## seqware-bag
-
-Using these
-examples, you will need to modify the configuration template and copy them to
-vagrant_cluster_launch.json (or another file, using the --config-file option).
-
-The following templates exist for SeqWare-bag, they will be described in more
-detail in that repo's [README](https://github.com/SeqWare/seqware-bag):
-
-
-In brief, in order to use these projects together
-
-	mkdir working_dir
-	cd working_dir
-	git clone git@github.com:CloudBindle/Bindle.git
-	cd Bindle && git checkout 2.0-alpha.0
-	cd ..
-	git clone https://github.com/SeqWare/seqware-bag
-	cd seqware-bag && git checkout 1.0-alpha.0 
-	cd ../Bindle
-	cp ../seqware-bag/sample_configs/vagrant_cluster_launch.seqware.install.sge_cluster.json.template vagrant_cluster_launch.seqware.install.sge_cluster.json 
-        vim vagrant_cluster_launch.seqware.install.sge_cluster.json
-        perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target --config-file vagrant_cluster_launch.seqware.install.sge_node.json
-        
-In order to re-run Ansible when doing development:
-
-        perl bin/launcher/launch_cluster.pl --use-openstack --working-dir target --config-file vagrant_cluster_launch.seqware.install.sge_node.json --run-ansible
-
-In order to run with pan-cancer modifications as well, please checkout and use the contents of [pancancer-bag](https://github.com/ICGC-TCGA-PanCancer/pancancer-bag) as well. 
-
-
 ## Persistance of Ephemeral Disks - AWS
 
 Amazon instances provisioned using Bindle store information such as file inputs and outputs, the /home directory, and the Oozie working directory in /mnt which is normally backed by ephemeral drives. If you wish them to persist (when rebooting instances or distributing images) you will need to mount them on an EBS volume instead. Follow the steps below to get an AMI image up and running with a single node instance.
@@ -309,10 +247,12 @@ VMs.
 Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issue. For this purpose Bindle has also been made to run idempotently. Bindle first checks to see if the folders have been created. If they exist it assumes Vagrant has already created the VMs. If this is true Bindle skips ahead to re-provisioning whith the modified Ansible playbook
 
     perl bin/launch_cluster.pl --config=<config-name>  --cluster=<cluster-block-name>
+    
+After running the launcher script Ansible commands are generated and stored in the target directories. At this point, it is possible to run these ansbible command directly. 
 
 ## AWS - Regions and Availability Zones
 
-In order to specify regions and zones, JSON templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
+In order to specify regions and zones, c templates support two variables AWS\_REGION and AWS\_ZONE. By default, we provision in us-east-1 and randomly across zones. You can specify one or the other. For example, to provision in us-east-1 in zone a: 
 
     aws_region=us-east-1
     aws_zone=a,
@@ -324,18 +264,13 @@ In order to add extra EBS volumes across the board, use the following syntax in 
     aws-ebs=400,500
 
 
-## Controlling the VM
+## Interacting with the VM(s)
 
-Once the launch_cluster.pl script finishes running you will have one or
-more VM instances running on a given cloud or local VM environment.
-Unfortunately, Bindle does not provide the full range of VM lifecycle
-management e.g. suspend, shutdown, ssh connection automation, etc.  Vagrant
-does provide these functions and you can find more information at
-[Vagrant](http://vagrantup.com).
+Once the launch_cluster.pl script finishes running you will have one or more VM instances running on a given cloud or local VM environment. [Vagrant](http://vagrantup.com) provides functions for interacting with the generated VMs. Information used to lanch the VM's can ve found in target deirecrtories' "Vagranfile"(s).
 
 Here's a quick overview:
 
-    # first, cd to your --working-dir, in this case target-sge
+    # first, cd to your target directory, in this case target-sge
     cd target-sge
     # you will see directories for each VM, such as master
     cd master
@@ -352,6 +287,8 @@ Here's a quick overview:
     vagrant up
     # ssh to the machine
     vagrant ssh
+    # for ssh information
+    vagrant ssh-config
     # terminate and remove the VM
     vagrant destroy
 
@@ -398,23 +335,19 @@ VeeWee can be used to create CentOS base boxes
 
 ## Debugging
 
-If you need to debug a problem set the VAGRANT_LOG variable e.g.:
+If you need to debug the spinning up of VM's a problem set the VAGRANT_LOG variable e.g.:
 
     VAGRANT_LOG=DEBUG perl bin/launch_cluster.pl --config=aws --cluster=cluster1
 
-Also you can use the "--skip-launch" option to just create the various launch
-files not actually trigger a VM.
+## Development
 
-Vagrant will often report an error (when using AWS of OpenStack) of the form
-""Expected(200) <=> Actual(400 Bad Request)"." with no details.  See the
-following patch for a fix to get more information:
+We are under active development. Feel free to contribute to the code base.
 
-https://github.com/jeremyharris/vagrant-aws/commit/1473c3a45570fdebed2f2b28585244e53345eb1d
+The project follows [HubFlow](http://datasift.github.io/gitflow/) pragma for development. The working branch is "develop".  If you need to make changes work on a feature branch and make a pull request to another developer when ready to merge with develop.  See the HubFlow docs above for a detailed description of this process.
 
 ## TODO
 
-The list of TODO items, some of which are out-of-date.  See the
-launch_cluster.pl script for more TODO items too.
+The list of TODO items (some of which are out-of-date):
 
 * need to script the following for releasing AMIs: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html
 * need to find way of displaying colour on stdout during Ansible play but suppress colour while saving to log
