@@ -2,7 +2,7 @@
 
 Bindle is a wrapper around [Vagrant](http://www.vagrantup.com/) and [Ansible](http://www.ansible.com/) for launching single node and clustered VMs on VirtualBox, Vcloud, AWS, and OpenStack.
 
-Vagrant itself is used to launch the VMs while Ansible is used to provision them.
+Vagrant itself is used to launch the VMs while Ansible is used to provision them. Although Ansible is able to spin up VM's as well, it is not able to spin up machines on all platfroms. In particular Vagrant is able to work with vCloud where Ansible is not. 
 
 Variables are passed from bindles configuration files ( located: ~/.bindle) to Ansible through a JSON file for each VM.  
 
@@ -26,13 +26,7 @@ You can also base anything that needs a Hadoop and/or GridEngine cluster of mach
 *  Install Ansible: bash install-ansible
 *  Install Dependencies: run playbook
    
-Note: Ansible is a pretty fast moving project and we tested against [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
-
-run 'perl -c bin/launch_cluster.pl' to make sure all perl modules are installed in your environment
-
-It should exit without an error message. 
-For detailed explanation on setting up a launcher and launching clusters from that, please refer to
-the [Pancancer Cluster Launch ReadMe](https://github.com/SeqWare/vagrant/blob/develop/PANCAN_CLUSTER_LAUNCH_README.md)
+Note: Ansible is a very actice project and we have experienced compatibility issues between playbooks and versions of Ansible. Our playbooks are made to work with Ansible [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
 
 ### Installing with Virtual Box
 
@@ -44,90 +38,15 @@ Since this Vagrant wrapper can be used for many different projects based on the
 Bash shell scripts used to configure the hosts, we included several example
 configuration templates in:
 
-    ./templates/config
+    templates/config
 
-A configuration file will be moved to ~/.bindle upon installation.
+A configuration file will be moved to ~/.bindle upon installation. Parameters are explained in each config. 
 
-### Configureation Parameters
+There are two types of sections. there is the default section, where you will put most of the configuration settings. And then there are custom blocks. Upon launching a cluster parameters in the custom block will overwrite the default configurations. 
 
-#### Platform Block
-The platform section is used for sepcifying platform specfic information. 
+## Base Box requirements
 
-
-Let us go through the parameters that might confuse you when you are filling the config file. I will not be going 
-through the most obvious parameters (ie. user, apikey, etc):
-
-    [platform]
-    # can be either openstack(os) or aws or vcloud
-    type=openstack/aws/vcloud
-     
-    # asks for the name of your pem file. Please make sure you have the pem file under ~/.ssh on your launcher host
-    ssh_key_name=ap-oicr-2
-    
-    # asks for the type of node you want to launch (m1.small, m1.medium, m1.xlarge, etc)
-    instance_type=m1.xlarge
-    
-    # This list is to indicate the devices you want to use to setup gluster file system on.
-    # To find out the list of devices you can use, execute “df | grep /dev/” on an instance currently running on the same platform. 
-    # DO NOT use any device that ends with "a" or "a" and a number following it(sda or sda1) because these are used for root partition
-    # Also, if you don't want to use any devices to set up gluster, please keep the value empty (gluster_device_whitelist=''). You need to do that when you are dealing with a single node cluster or when you have no devices to work with
-    # For AWS, when you create an EBS volume by using --aws-ebs parameter, it creates an "sdf" device, so specify "f" in your list gluster_devices
-    # Now, if you want to use "sdb/xvdb" and "sdf/xvdf" then your list should look like the following:
-    gluster_device_whitelist='--whitelist b,f'
-
-    # this parameter indicates the path you want to use to set up gluster IF you don't have any devices to work with
-    # If you don't want to use directories, simply leave this parameter empty (gluster_directory_path=''). This should be the case for single node clusters
-    # If you don't have devices, include the path and folder name that can be used instead to set up the volumes for a multi-node cluster: 
-    gluster_directory_path='--directorypath /mnt/volumes/gluster'
-    
-The other platform specific parameters are self explanatory. In the config file, there is a "fillmein" value which indicates that you
-defintely have to fill those in to have bindle working properly. The others are deafult values that you may use unless otherwise stated.
-
-#### Cluster Specific Information
-
-This information exists in small blocks name cluster1, cluster2, etc. These blocks contain essential information such as number of nodes,
-target_directory, the json_template file path, and floating ips which is specific to OpenStack only since the other 
-environments have the ability to generate the floating ips on their own.
-    
-Please note that you can create a new cluster by copy-pasting the existing cluster1
-block and modifying the configs for it or you can simply modify cluster1 configs and use that.
-Feel free to change the number of nodes (min 1, max recommended 11). Please note that 
-if the number of nodes is 1, it means that there will be 1 master and 0 worker nodes. 
-Also, you need the same number of floating ips as the number of nodes if you are working with openstack.
-In addition, the list is separated by a comma and there is no need to put this list in quotations.
-An example cluster block will look something like this:
-
-    # Clusters are named cluster1, 2, 3 etc.
-    # When launching a cluster using launch_cluster.pl
-    # use the section name(cluster1 in this case) as a parameter to --launch-cluster
-    [cluster1]
-   
-    # this includes one master and four workers
-    number_of_nodes=4
-   
-    # specific to Openstack only; must have 4 floating ips since we need 4 nodes
-    floating_ips= 10.0.20.123,10.0.20.157,10.0.20.135,10.0.20.136
-   
-    # this specifies the output directory where everything will get installed on the launcher
-    target_directory = target-os-2
-   
-To use a specific cluster block, you need to use the section name of that block as a parameter to --launch-cluster when you
-are running the launch_cluster perl script.
-
-### Configuration for VirtualBox
-
-Please note for VirtualBox, you will need to use the old configuration technique:
-    
-   fill in the apropriat fields in ~/.bindle/virtualbox.cfg    
-
-You can fill in the required information and move on to the next step.
-
-If you use the template recommended above you will have a 1 node Hadoop cluster
-(with Mapred, HDFS, HBase, Oozie, Hue, etc installed) along with the SeqWare
-software stack installed.  This environment should be ready for use with out
-Getting Started Guides for this project.
-
-## RAM and CPU Core Requirements
+### RAM and CPU Core Requirements
 
 The short answer is make sure your machine (local VM, Amazon instance type,
 etc) has at least 2 cores and 12G of RAM. You can certainly use less but our
@@ -137,38 +56,20 @@ requirements are set by you.
 
 The SeqWare "HelloWorld" example workflow will schedule using 8G of RAM.  So
 please make sure you launch on a machine instance type (AWS, Google Cloud, etc)
-with at least 12G of RAM.  For VirtualBox, you should do the same.  Our default
-profile for VirtualBox requests 12G of RAM and 2 cores.  If you need to change
-this setting please see the --vb-ram and --vb-cores options that let you
-override the memory/core requirements in VirtualBox ONLY.  Keep in mind for AWS
-and other clouds the RAM and Cores are determinted by the instance type you
-choose not by the --vb-ram and --vb-cores options.
+with at least 12G of RAM.  For VirtualBox, you should do the same. 
 
-## Running the Cluster Launcher
+## Launching a Cluster
 
-The wrapper script that controls the system described above is called
-"bin/launcher/launch\_cluster.pl". 
+The wrapper script that controls the system is the launcher script:
 
-Please note that a detailed explanation of the cluster launching process
-for virtual box is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/workflow_dev_node_with_bindle.md)
-A detailed explanation of the cluster launching process for other environments 
-is located [here](https://github.com/SeqWare/pancancer-info/blob/develop/docs/prod_cluster_with_bindle.md)
+    perl bin/launch_cluster.pl --config=aws --block <block-name> 
 
-Examples of launching in different environments include:
+"block-name" is optional and indicates the block or blocks that you would like to use to overwrite the default settings.
 
-    # for AWS
-    perl bin/launch_cluster.pl --config=aws --cluster <cluster-name> 
-    # for OpenStack
-    perl bin/launch_cluster.pl --config=openstack --cluster <cluster-name>
+## Terminating a Cluster
 
-"clustername" represents the cluster block you want to run from the config file (Ex: cluster1).
+To destroy a cluster, simply run the following command:
 
-## Destroying the Clusters
-
-The script that takes care of the process required to terminate a cluster is located at 
-"bin/destroy_cluster.pl". To destroy a cluster, simply run the following command:
-
-     # assumes you are in the Bindle directory
      perl bin/destroy_cluster.pl --cluster-name <target-dir>
      
 The target-dir is the directory path of your cluster folder(Ex. target-aws-1/). This will remove
@@ -223,7 +124,7 @@ each server being launched (for a cluster) or just master.log if you launched a
 node.  You can use "tail -f <logname>" to watch the progress of building your
 VMs.
 
-### Re-running Ansible
+### Re-provisioning VMs
 
 Note that Ansible playbooks should be designed to run idempotently (and Ansible provides many tools to aid in this). Therefore, it should be possible to re-run the Ansible steps for development purposes or to test an environment for any major issue. For this purpose Bindle has also been made to run idempotently. Bindle first checks to see if the folders have been created. If they exist it assumes Vagrant has already created the VMs. If this is true Bindle skips ahead to re-provisioning whith the modified Ansible playbook
 
@@ -242,8 +143,7 @@ In order to specify regions and zones, c templates support two variables AWS\_RE
 
 In order to add extra EBS volumes across the board, use the following syntax in order to provision a 400 and 500 GB volume attached to each node:
 
-    aws-ebs=400,500
-
+    aws_ebs=400,500
 
 ## Interacting with the VM(s)
 
@@ -252,7 +152,7 @@ Once the launch_cluster.pl script finishes running you will have one or more VM 
 Here's a quick overview:
 
     # first, cd to your target directory, in this case target-sge
-    cd target-sge
+    cd target/sge
     # you will see directories for each VM, such as master
     cd master
     # once in these directories you can issue Vagrant commands
@@ -318,7 +218,7 @@ VeeWee can be used to create CentOS base boxes
 
 If you need to debug the spinning up of VM's a problem set the VAGRANT_LOG variable e.g.:
 
-    VAGRANT_LOG=DEBUG perl bin/launch_cluster.pl --config=aws --cluster=cluster1
+    VAGRANT_LOG=DEBUG
 
 ## Development
 
