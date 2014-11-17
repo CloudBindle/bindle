@@ -15,7 +15,7 @@ sub read_config {
     my $config = new Config::Simple();
 
     unless (-d ($ENV{"HOME"}."/.bindle")) {
-        `cp $Bin/../../templates/config/ $ENV{"HOME"}/.bindle/`;
+        `cp -R $Bin/../templates/config/ $ENV{"HOME"}/.bindle/`;
         die "~/.bindle has been created with sample configuration files. Parameterize the desired configuration file and then re-run script"
     }
 

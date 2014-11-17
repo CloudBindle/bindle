@@ -32,6 +32,8 @@ Cloud Bindle - SeqWare
 
 Specify the configuration file that Bindle will use to launch instances. 
 
-=item --cluster[=][ ]<cluster>
 
-specify the name of the cluster, found in your ~/.bindle/<platform>.cfg file, that has been previously specified. 
+
+=item --custom-params[=][ ]<config_block>
+
+Specify the name of the block, found in your ~/.bindle/<your-config>.cfg file, that you would like to overwrite the defaults

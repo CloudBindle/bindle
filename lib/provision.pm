@@ -112,7 +112,7 @@ sub run_ansible_playbook {
     }
     close (INVENTORY); 
    
-    my $playbook =  $config->param('platform.ansible_playbook');
+    my $playbook =  $config->param('defaults.ansible_playbook');
 
     # I'm sure this "cluster" parameter is not how one should do it in Perl, but this seems to work with the call from the launcher which inserts the package
     # as the first parameter
@@ -126,18 +126,18 @@ sub run_ansible_command{
     my $time = `date +%s.%N`;
     chomp $time;
 
-    my $platform = $config->param(-block=>'platform');
+    my $parameters = $config->param(-block=>'defaults');
 
     # create JSON file to pass all defined variables
     # note that ansible variables are lower case by convention while for backwards compatibility, our variables are upper case
     # thus lc while exporting
     open ANSIBLE_VARIABLES, '>', "$work_dir/variables.$time.json";
     my $json = JSON->new->allow_nonref;
-    print ANSIBLE_VARIABLES $json->encode( $platform );
+    print ANSIBLE_VARIABLES $json->encode( $parameters );
     close ANSIBLE_VARIABLES;
   
 
-    my $playbook = $config->param('platform.ansible_playbook');
+    my $playbook = $config->param('defaults.ansible_playbook');
     # preserve colour for easy readability in head and tail
     # also save a copy without buffering (unlike tee) by using script -c
     # unfortunately, jenkins appears allergic to script -c (kills the script randomly while running), so switch back to tee
