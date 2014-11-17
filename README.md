@@ -70,7 +70,7 @@ with at least 12G of RAM.  For VirtualBox, you should do the same.
 
 The wrapper script that controls the system is the launcher script:
 
-    perl bin/launch_cluster.pl --config=aws ----custom-params=<block-name> 
+    perl bin/launch_cluster.pl --config=aws --custom-params=<block-name> 
 
 "block-name" is optional and indicates the block or blocks that you would like to use to overwrite the default settings.
 
