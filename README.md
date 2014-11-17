@@ -2,11 +2,11 @@
 
 Bindle is a wrapper around [Vagrant](http://www.vagrantup.com/) and [Ansible](http://www.ansible.com/) for launching single node and clustered VMs on VirtualBox, Vcloud, AWS, and OpenStack.
 
-Vagrant itself is used to launch the VMs while Ansible is used to provision them. Although Ansible is able to spin up VM's as well, it is not able to spin up machines on all platfroms. In particular Vagrant is able to work with vCloud where Ansible is not. 
+Vagrant itself is used to launch the VMs while Ansible is used to provision them. Although Ansible is able to spin up VMs as well, it is not able to spin up machines on all platfroms. In particular Vagrant is able to work with vCloud where Ansible is not. 
 
-Variables are passed from bindles configuration files ( located: ~/.bindle) to Ansible through a JSON file for each VM.  
+Variables are passed from bindles' configuration files ( located: ~/.bindle) to Ansible through a JSON file for each VM.  
 
-Bindle can be used for is building both Hadoop and GridEngine-based clusters on a variety of cloud environments. 
+Bindle can be used for building both Hadoop and GridEngine-based clusters on a variety of cloud environments. 
 
 In separate repositories, secondary provisioning Ansible scripts are provided that setup a single-node or multi-node SeqWare cluster configured to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic the same process can be adapted to build other cluster types to serve other projects.  
 
@@ -51,6 +51,17 @@ configuration templates in:
 A configuration file will be moved to ~/.bindle upon installation. Parameters are explained in each config. 
 
 There are two types of sections. there is the default section, where you will put most of the configuration settings. And then there are custom blocks. Upon launching a cluster parameters in the custom block will overwrite the default configurations. 
+
+For each custom block, it is also possible to specify the categories that each requested node will be classified under in the Ansible inventory file. 
+
+For the ansible inventory file,
+* if no node types are defined, we will assume that you want to create one master and n-1 worker nodes with the corresponding categories
+* you can specify node types by adding the following to your cluster configurations, the following specifies two worker nodes, one database server, and one master
+    
+         [cluster8]
+         number_of_nodes=4
+         types=master::worker::worker::dbserver
+         target_directory=target-aws-8
 
 ## Base Box requirements
 
@@ -129,7 +140,7 @@ You now have a workflow development environment and a place where you can run wo
 
 ## Logging
 
-Every node launched by launch_cluster.pl has it's own log file that you can view (or watch during cluster building).  Take a look inside the directory specified in the --working-dir option.  There you should see a .log file for each server being launched (for a cluster) or just master.log if you launched a node.  You can use "tail -f <logname>" to watch the progress of building your VMs.
+Every node launched by launch\_cluster.pl has its own log file that you can view (or watch during cluster building).  Take a look inside the directory specified in the config\_block in your config file. There you should see a .log file for each server being launched (for a cluster) or just master.log if you launched one node.  You can use "tail -f <logname>" to watch the progress of building your VMs.
 
 ### Re-provisioning VMs
 
