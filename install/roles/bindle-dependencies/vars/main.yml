@@ -2,7 +2,7 @@
 # Add one of the following: 
 # For AWS, use: vagrant_plugin: "vagrant-aws"  and vagrant_plugin_version: "0.5.0"
 # For Openstack, use: vagrant_plugin: "vagrant-openstack-plugin" and vagrant_plugin_version: "0.7.0"
-# For vCloud, use vagrant_plugin: "vagrant-vcloud" and vagrant_plugin_version: "" 
+# For vCloud, use vagrant_plugin: "vagrant-vcloud" and vagrant_plugin_version: "0.4.3" 
 vagrant_plugin: "vagrant-aws" 
 vagrant_plugin_version: "0.5.0"
 
