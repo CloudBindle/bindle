@@ -1,9 +1,13 @@
 ---
-# Add one of the following: vagrant-aws, vagrant-openstack-plugin or vagrant-vcloud
+# Add one of the following: 
+# For AWS, use: vagrant_plugin: "vagrant-aws"  and vagrant_plugin_version: "0.5.0"
+# For Openstack, use: vagrant_plugin: "vagrant-openstack-plugin" and vagrant_plugin_version: "0.7.0"
+# For vCloud, use vagrant_plugin: "vagrant-vcloud" and vagrant_plugin_version: "" 
 vagrant_plugin: "vagrant-aws" 
 vagrant_plugin_version: "0.5.0"
+
 # The git repo branches, if you're working in production then use "master"
 bindle_git_branch: "master"
 
-# Add the name of the template Bindle config you will work with (e.g. "openstack.cfg")
+# Add the name of the template Bindle config you will work with (e.g. "openstack.cfg", "aws.cfg" or "vcloud.cfg")
 bindle_config: "aws.cfg"
