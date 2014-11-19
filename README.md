@@ -32,6 +32,9 @@ Install dependencies (our install script is in ansible):
     sudo apt-get install ansible
     git clone https://github.com/CloudBindle/Bindle.git
     cd Bindle 
+    
+    Edit "install/roles/bindle-dependencies/vars/main.yml" and set the variable for the type of environment you are building Bindle for (e.g. AWS, Openstack)
+
     ansible-playbook -i install/inventory install/site.yml 
    
 Note: Ansible is a very actice project and we have experienced compatibility issues between playbooks and versions of Ansible. Our playbooks are made to work with Ansible [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
