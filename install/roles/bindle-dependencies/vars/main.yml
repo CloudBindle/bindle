@@ -4,7 +4,7 @@
 # For Openstack, use: vagrant_plugin: "vagrant-openstack-plugin" and vagrant_plugin_version: "0.7.0"
 # For vCloud, use vagrant_plugin: "vagrant-vcloud" and vagrant_plugin_version: "0.4.3" 
 vagrant_plugin: "vagrant-aws" 
-vagrant_plugin_version: "\"0.5.0\""
+vagrant_plugin_version: "0.5.0"
 
 # The git repo branches, if you're working in production then use "master"
 bindle_git_branch: "master"
