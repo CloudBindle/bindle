@@ -10,6 +10,10 @@ Bindle can be used for building both Hadoop and GridEngine-based clusters on a v
 
 In separate repositories, secondary provisioning Ansible scripts are provided that setup a single-node or multi-node SeqWare cluster configured to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic the same process can be adapted to build other cluster types to serve other projects.  
 
+The graphic below shows the flow of vagrant creating blank VMs, ansible setting up applications (SeqWare for example), and then a user would create an image for distribution or repeated launches. 
+
+![Image of Bindle](bindle.png)
+
 You can also base anything that needs a Hadoop and/or GridEngine cluster of machines created on a variety of cloud platforms on our Ansible playbooks. Ansible playbooks are included by specifying the the path to the playbook with the parameter 'ansible_playbook' in the  bindle configuration files.
 
 ## Sister Repositories
