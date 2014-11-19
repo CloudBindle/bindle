@@ -31,6 +31,13 @@ Install dependencies (our install script is in ansible):
     sudo apt-get update
     sudo apt-get install ansible
     git clone https://github.com/CloudBindle/Bindle.git
+    
+    # If you are buildng Bindle for PanCancer, clone the following three as well:
+    git clone https://github.com/ICGC-TCGA-PanCancer/pancancer-bag.git
+    git clone https://github.com/SeqWare/seqware-bag.git
+    git clone https://github.com/ICGC-TCGA-PanCancer/monitoring-bag.git
+    
+    
     cd Bindle 
     
     Edit "install/roles/bindle-dependencies/vars/main.yml" and set the variable for the type of environment you are building Bindle for (e.g. AWS, Openstack)
@@ -51,7 +58,7 @@ configuration templates in:
 
     templates/config
 
-A configuration file will be moved to ~/.bindle upon installation. Parameters are explained in each config. 
+A configuration file will be moved to ~/.bindle upon installation, based on the "bindle_config" variable you defined in "install/roles/bindle-dependencies/vars/main.yml". Parameters are explained in each config. 
 
 There are two types of sections. there is the default section, where you will put most of the configuration settings. And then there are custom blocks. Upon launching a cluster parameters in the custom block will overwrite the default configurations. 
 
@@ -86,11 +93,14 @@ The wrapper script that controls the system is the launcher script:
 
     perl bin/launch_cluster.pl --config=aws --custom-params=<block-name> 
     
+    Or:
+    
+    perl bin/launch_cluster.pl --config=openstack --custom-params=singlenode1
+    
     Required arguments:
     --custom-params[=][ ]<config_block>
-    --config[=][ ]<cluster>
+    --config[=][ ]<configuration filename located in ~/.bindle, without the .cfg externsion>
 
-"block-name" is optional and indicates the block or blocks that you would like to use to overwrite the default settings.
 
 ## Terminating a Cluster
 
