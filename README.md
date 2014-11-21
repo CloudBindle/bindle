@@ -10,7 +10,7 @@ Bindle can be used for building both Hadoop and GridEngine-based clusters on a v
 
 In separate repositories, secondary provisioning Ansible scripts are provided that setup a single-node or multi-node SeqWare cluster configured to use the Oozie workflow engine. Since this Vagrant wrapper is fairly generic the same process can be adapted to build other cluster types to serve other projects.  
 
-The graphic below shows the flow of vagrant creating blank VMs, ansible setting up applications (SeqWare for example), and then a user would create an image for distribution or repeated launches. 
+The graphic below shows the flow of vagrant creating blank VMs, Ansible setting up applications (SeqWare for example), and then a user would create an image for distribution or repeated launches. 
 
 ![Image of Bindle](bindle.png)
 
@@ -36,7 +36,7 @@ Install dependencies (our install script is in ansible):
     sudo apt-get install ansible
     git clone https://github.com/CloudBindle/Bindle.git
     
-    # If you are buildng Bindle for PanCancer, clone the following three as well:
+    # If you are building Bindle for PanCancer, clone the following three as well:
     git clone https://github.com/ICGC-TCGA-PanCancer/pancancer-bag.git
     git clone https://github.com/SeqWare/seqware-bag.git
     git clone https://github.com/ICGC-TCGA-PanCancer/monitoring-bag.git
@@ -44,11 +44,11 @@ Install dependencies (our install script is in ansible):
     
     cd Bindle 
     
-    Edit "install/roles/bindle-dependencies/vars/main.yml" and set the variable for the type of environment you are building Bindle for (e.g. AWS, Openstack)
+    Edit "install/roles/bindle-dependencies/vars/main.yml" and set the variables for the type of environment you are building Bindle for (e.g. AWS needs the "vagrant-aws" plugin, Openstack needs the "vagrant-openstack-plugin", etc.)
 
     ansible-playbook -i install/inventory install/site.yml 
    
-Note: Ansible is a very actice project and we have experienced compatibility issues between playbooks and versions of Ansible. Our playbooks are made to work with Ansible [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
+Note: Ansible is a very active project and we have experienced compatibility issues between playbooks and versions of Ansible. Our playbooks are tested with Ansible [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
 
 ### Installing with Virtual Box
 
