@@ -40,11 +40,18 @@
   sudo: True
   shell: dpkg -i /tmp/vagrant_1.6.3_x86_64.deb
 
-- name: Install Vagrant providers
-  command: vagrant plugin install "{{ vagrant_plugin }}" --plugin-version {{ vagrant_plugin_version }}
+- name: Install Vagrant providers - AWS
+  sudo: "{{ user_name }}"
+  command: vagrant plugin install vagrant-aws --plugin-version 0.5.0 
+   
+- name: Install Vagrant providers - OpenStack 
+  sudo: "{{ user_name }}"
+  command: vagrant plugin install vagrant-openstack-plugin --plugin-version 0.7.0
 
-# vagrant plugin install vagrant-openstack-plugin --plugin-version 0.7.0
-# vagrant plugin install vagrant-vcloud --plugin-version 0.4.3
+- name: Install Vagrant providers - VCloud
+  sudo: "{{ user_name }}"
+  command: vagrant plugin install vagrant-vcloud --plugin-version 0.4.3 
+
 
 - name: Install Perl dependencies
   sudo: True
