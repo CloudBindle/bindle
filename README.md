@@ -49,6 +49,9 @@ Install dependencies (our install script is in ansible):
     # ie. aws.cfg for AWS
     vi install/roles/bindle-dependencies/vars/main.yml
 
+    # Modify the cloud specific config file:
+    vi install/roles/bindle-dependencies/templates/aws.cfg
+
     ansible-playbook -i install/inventory install/site.yml 
    
 Note: Ansible is a very active project and we have experienced compatibility issues between playbooks and versions of Ansible. Our playbooks are tested with Ansible [version 1.6.10](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb). 
