@@ -46,6 +46,7 @@ Install dependencies (our install script is in ansible):
     
     # You need to set the bindle_config option in main.yml to point to the correct file:
     # ls install/roles/bindle-dependencies/templates/*.cfg
+    # ie. aws.cfg for AWS
     vi install/roles/bindle-dependencies/vars/main.yml
 
     ansible-playbook -i install/inventory install/site.yml 
