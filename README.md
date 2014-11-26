@@ -44,7 +44,9 @@ Install dependencies (our install script is in ansible):
     
     cd Bindle 
     
-    Edit "install/roles/bindle-dependencies/vars/main.yml" and set the variables for the type of environment you are building Bindle for (e.g. AWS needs the "vagrant-aws" plugin, Openstack needs the "vagrant-openstack-plugin", etc.)
+    # You need to set the bindle_config option in main.yml to point to the correct file:
+    # ls install/roles/bindle-dependencies/templates/*.cfg
+    vi install/roles/bindle-dependencies/vars/main.yml
 
     ansible-playbook -i install/inventory install/site.yml 
    
