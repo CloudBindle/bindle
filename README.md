@@ -131,7 +131,7 @@ Amazon instances provisioned using Bindle store information such as file inputs 
 First, you will want to start by requesting an instance with disabled ephemeral drives and everything mounted on a single EBS volume. 
 To do this, you will want to add the following line into your aws.cfg
 
-        ebs_vols = "aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]"
+        aws_ebs_vols = "aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]"
 
 This creates a root drive with 1000GB of space and disables the single ephemeral drive that would otherwise would have been auto-mounted by Amazon at /dev/sdb that would handle the /mnt directories. Run Bindle normally otherwise. 
 
