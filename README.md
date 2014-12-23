@@ -44,7 +44,13 @@ Install dependencies (our install script is in ansible):
     
     cd Bindle 
     
-    Edit "install/roles/bindle-dependencies/vars/main.yml" and set the variables for the type of environment you are building Bindle for (e.g. AWS needs the "vagrant-aws" plugin, Openstack needs the "vagrant-openstack-plugin", etc.)
+    # You need to set the bindle_config option in main.yml to point to the correct file:
+    # ls install/roles/bindle-dependencies/templates/*.cfg
+    # ie. aws.cfg for AWS
+    vi install/roles/bindle-dependencies/vars/main.yml
+
+    # Modify the cloud specific config file:
+    vi install/roles/bindle-dependencies/templates/aws.cfg
 
     ansible-playbook -i install/inventory install/site.yml 
    
@@ -125,7 +131,7 @@ Amazon instances provisioned using Bindle store information such as file inputs 
 First, you will want to start by requesting an instance with disabled ephemeral drives and everything mounted on a single EBS volume. 
 To do this, you will want to add the following line into your aws.cfg
 
-        ebs_vols = "aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]"
+        aws_ebs_vols = "aws.block_device_mapping = [{ 'DeviceName' => '/dev/sda1', 'Ebs.VolumeSize' => 1000 },{'DeviceName' => '/dev/sdb', 'NoDevice' => '' }]"
 
 This creates a root drive with 1000GB of space and disables the single ephemeral drive that would otherwise would have been auto-mounted by Amazon at /dev/sdb that would handle the /mnt directories. Run Bindle normally otherwise. 
 
