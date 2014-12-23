@@ -66,25 +66,6 @@ sub vagrantfile_template_map {
 
     $parameters->{custom_hostname} = $node;
 
-    if ($parameters->{platform} eq 'virtualbox') {
-       my @ebs_vols = $parameters->{ebs_vols};
-        if (scalar @ebs_vols > 0) {
-                $parameters->{aws_ebs_vols} .= "aws.block_device_mapping = [";
-                # starts at "f=102"
-                my $count = 102;
-                foreach my $size (@ebs_vols){
-                    my $current_name = chr $count;
-    	            $parameters->{aws_ebs_vols} .= "{'DeviceName' => \"/dev/sd$current_name\", 'VirtualName' => \"block_storage\", 'Ebs.VolumeSize' => $size, 'Ebs.DeleteOnTermination' => true},";
-    	        $count++;
-    	    }
-            chop $parameters->{aws_ebs_vols};
-    	    $parameters->{aws_ebs_vols} .= "]";
-        }
-        else {
-            die 'Specify the parameter ebs_vols in the config file';
-        }
-    }
-
     return $parameters;
 }
 

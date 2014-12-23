@@ -170,12 +170,6 @@ In order to specify regions and zones, c templates support two variables AWS\_RE
     aws_region=us-east-1
     aws_zone=a,
 
-## AWS - Additional EBS Space
-
-In order to add extra EBS volumes across the board, use the following syntax in order to provision a 400 and 500 GB volume attached to each node:
-
-    aws_ebs=400,500
-
 ## Interacting with the VM(s)
 
 Once the launch_cluster.pl script finishes running you will have one or more VM instances running on a given cloud or local VM environment. [Vagrant](http://vagrantup.com) provides functions for interacting with the generated VMs. Information used to lanch the VM's can ve found in target deirecrtories' "Vagranfile"(s).

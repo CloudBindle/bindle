@@ -103,7 +103,7 @@ sub run_ansible_playbook {
         say INVENTORY "[$type]";
         foreach my $host_name (@{$nodeHash{$type}}) {
             my $host = $hosts->{$host_name};
-            say INVENTORY "$host_name\tansible_ssh_host=$host->{ip}\tansible_ssh_user=$host->{user}\tansible_ssh_private_key_file=$host->{key}";
+            say INVENTORY "$host_name\tansible_ssh_port=$host->{port}\tansible_ssh_host=$host->{ip}\tansible_ssh_user=$host->{user}\tansible_ssh_private_key_file=$host->{key}";
         } 
     }
     say INVENTORY "[all_groups:children]";
