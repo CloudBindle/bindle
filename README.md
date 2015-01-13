@@ -97,6 +97,8 @@ The SeqWare "HelloWorld" example workflow will schedule using 8G of RAM.  So
 please make sure you launch on a machine instance type (AWS, Google Cloud, etc)
 with at least 12G of RAM.  For VirtualBox, you should do the same. 
 
+Note that Bindle will deploy to the default AWS security group, so make sure you have SSH access to instances in your default security group from your launcher host. 
+
 ## Launching a Cluster
 
 The wrapper script that controls the system is the launcher script:
