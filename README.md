@@ -251,6 +251,10 @@ We are under active development. Feel free to contribute to the code base.
 
 The project follows [HubFlow](http://datasift.github.io/gitflow/) pragma for development. The working branch is "develop".  If you need to make changes work on a feature branch and make a pull request to another developer when ready to merge with develop.  See the HubFlow docs above for a detailed description of this process.
 
+## Creating Monitoring_Bag Inventory file
+
+    perl bin/launcher/generate_master_inventory.pl <ansible-ssh-host> > inventory
+
 ## TODO
 
 The list of TODO items (some of which are out-of-date):
