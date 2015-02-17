@@ -1,0 +1,39 @@
+=head1 VERSION
+
+Version 0.0.1
+
+=head1 AUTHOR(S)
+
+Brian O'Connor, Adam Wright, Denis Yuen and Amish Patel
+
+=over
+
+=item --usage
+
+=item --help
+
+=item --man
+
+Print the usual program information
+
+=back
+
+=head1 DESCRIPTION
+
+A tool for launching both single and multi node clusters of seqware. 
+
+=head1 NAME
+
+Cloud Bindle - SeqWare
+
+=head1 REQUIRED
+
+=item --config[=][ ]<cluster>
+
+Specify the configuration file that Bindle will use to launch instances. 
+
+
+
+=item --custom-params[=][ ]<config_block>
+
+Specify the name of the block, found in your ~/.bindle/<your-config>.cfg file, that you would like to overwrite the defaults

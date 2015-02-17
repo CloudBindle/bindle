@@ -1,0 +1,71 @@
+---
+
+- name: Install Bindle dependencies
+  sudo: True
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - git 
+    - gcc
+    - make
+    - python-crypto 
+    - python-jinja2 
+    - python-markupsafe 
+    - sshpass 
+    - python-crypto-dbg 
+    - python-crypto-doc 
+    - python-jinja2-doc 
+    - python-markupsafe 
+    - python-setuptools
+    - python-support
+    - python-paramiko
+    - python-httplib2
+
+- name: Download Ansible 1.6 deb package
+  get_url: 
+    dest=/tmp
+    url=https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb
+    mode=755
+
+- name: Install Ansible 1.6 (using default Ansible 1.5.4) 
+  sudo: True
+  shell: dpkg -i /tmp/ansible-1.6.10-precise.deb
+
+- name: Download Vagrant deb package
+  get_url: 
+    dest=/tmp
+    url=https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.deb
+    mode=755
+  
+- name: Install Vagrant deb package (using default Ansible)
+  sudo: True
+  shell: dpkg -i /tmp/vagrant_1.6.3_x86_64.deb
+
+- name: Install Vagrant providers - AWS
+  sudo: "{{ user_name }}"
+  command: vagrant plugin install vagrant-aws --plugin-version 0.5.0 
+   
+- name: Install Vagrant providers - OpenStack 
+  sudo: "{{ user_name }}"
+  command: vagrant plugin install vagrant-openstack-plugin --plugin-version 0.7.0
+
+- name: Install Vagrant providers - VCloud
+  sudo: "{{ user_name }}"
+  command: vagrant plugin install vagrant-vcloud --plugin-version 0.4.3 
+
+
+- name: Install Perl dependencies
+  sudo: True
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - libgetopt-euclid-perl
+    - libjson-perl
+    - libtemplate-perl
+    - libconfig-simple-perl
+    - libcarp-always-perl
+    - libipc-system-simple-perl
+
+- name: Create .bindle directory
+  file: path=~/.bindle state=directory
+
+- name: Template over default config files
+  template: src={{ bindle_config }} dest=~/.bindle

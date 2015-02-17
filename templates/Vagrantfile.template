@@ -1,0 +1,104 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+ # config.ssh.timeout = 60
+ # config.ssh.max_tries = 10
+  # Every Vagrant virtual environment requires a box to build off of.
+  #config.vm.box = "%{BOX}"
+
+  # The url from where the 'config.vm.box' box will be fetched if it
+  # doesn't already exist on the user's system.
+  config.vm.box_url = "%{box_url}"
+  config.vm.box_download_insecure = true
+  config.vm.define :%{custom_hostname} do |%{custom_hostname}|
+    
+    # name it
+    %{custom_hostname}.vm.box = "%{box}"
+
+    %{custom_hostname}.vm.provider "vmware_fusion" do |v|
+      v.box = "precise64"
+      v.vmx["memsize"]  = "4096"
+    end
+    # Provider-specific configuration so you can fine-tune various
+    # backing providers for Vagrant. These expose provider-specific options.
+    # Example for VirtualBox:
+    #
+    %{custom_hostname}.vm.provider :virtualbox do |vb|
+   
+      # Don't boot with headless mode
+      vb.gui = true
+   
+      # Use VBoxManage to customize the VM. For example to change memory:
+      vb.customize ["modifyvm", :id, "--memory", "%{vb_ram}", "--cpus", "%{vb_cores}", "--nictype1", "Am79C970A", "--vram", "32", "--natdnshostresolver1", "on"]
+  
+    end
+ 
+    # from https://github.com/mitchellh/vagrant-aws
+    %{custom_hostname}.vm.provider :aws do |aws, override|
+  
+      aws.tags = {
+        'Name' => "%{custom_hostname}" 
+      }
+      aws.access_key_id = "%{aws_key}"
+      aws.secret_access_key = "%{aws_secret_key}"
+      # requires patching for AWS spot instances
+      #aws.spot_instance = true
+      #aws.spot_max_price = 0.681
+      aws.keypair_name = "%{aws_ssh_key_name}"
+      aws.user_data = File.read("user_data.txt")
+      aws.region = "%{aws_region}"
+      aws.availability_zone = %{aws_zone}
+      aws.ami = "%{aws_image}"
+      aws.instance_type = "%{aws_instance_type}"
+      aws.instance_ready_timeout = 6000
+      %{aws_ebs_vols}
+      override.ssh.username = "%{aws_ssh_username}"
+      override.ssh.private_key_path = "%{aws_ssh_pem_file}"
+    end
+
+    %{custom_hostname}.vm.provider :openstack do |os, override| # e.g. BioNimbus' Sullivan cluster
+      os.username = "%{os_user}"
+      os.api_key  = "%{os_api_key}"
+      os.flavor   = "%{os_instance_type}"
+      os.image    = "%{os_image}"
+      os.endpoint = "%{os_endpoint}"
+      os.keypair_name = "%{os_ssh_key_name}"
+      os.ssh_username = "%{os_ssh_username}"
+      os.tenant = "%{os_tenant}"
+      # TODO: this is hardcoded!
+      override.ssh.username = "%{os_ssh_username}"
+      override.ssh.private_key_path = "%{os_ssh_pem_file}"
+      os.network = "%{os_network}"
+      os.networks = [ "%{os_network}" ]   
+      os.floating_ip = "%{os_floating_ip}"
+      os.server_name = "%{custom_hostname}"
+      os.user_data = "#cloud-config\nmanage_etc_hosts: True"
+    end
+    
+    %{custom_hostname}.vm.provider :vcloud do |vcloud, override|
+      vcloud.hostname = "%{vcloud_hostname}"
+      vcloud.username = "%{vcloud_username}"
+      vcloud.password = "%{vcloud_password}"
+
+      vcloud.org_name = "%{vcloud_org_name}"
+      vcloud.vdc_name = "%{vcloud_vdc_name}"
+
+      vcloud.catalog_name = "%{vcloud_catalog_name}"
+      vcloud.vdc_network_name = "%{vcloud_vdc_network_name}"
+       vcloud.network_bridge=true
+       override.ssh.private_key_path = "%{vcloud_ssh_pem_file}"
+    end
+
+    %{custom_hostname}.vm.network :forwarded_port, host: 8081, guest: 80
+    %{custom_hostname}.vm.network :forwarded_port, host: 8080, guest: 8080
+    %{custom_hostname}.vm.network :forwarded_port, host: 8888, guest: 8888
+    %{custom_hostname}.vm.network :forwarded_port, host: 11000, guest: 11000
+    %{custom_hostname}.vm.network :forwarded_port, host: 50030, guest: 50030
+    %{custom_hostname}.vm.network :forwarded_port, host: 50070, guest: 50070
+    %{custom_hostname}.vm.network :forwarded_port, host: 60010, guest: 60010
+    %{custom_hostname}.vm.network :forwarded_port, host: 60030, guest: 60030
+    %{custom_hostname}.vm.network :forwarded_port, host: 5432, guest: 5432
+  end
+
+end

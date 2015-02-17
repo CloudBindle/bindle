@@ -1,0 +1,9 @@
+---
+
+# The git repo branches, if you're working in production then use "master"
+bindle_git_branch: "master"
+
+# Add the name of the template Bindle config you will work with (e.g. "openstack.cfg", "aws.cfg" or "vcloud.cfg")
+bindle_config: "aws.cfg"
+
+user_name: "ubuntu"
