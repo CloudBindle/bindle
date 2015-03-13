@@ -65,7 +65,7 @@
     - libipc-system-simple-perl
 
 - name: Create .bindle directory
-  file: path=~{{ user_name }}/.bindle state=directory
+  file: path=/home/{{ user_name }}/.bindle state=directory owner={{ user_name }}
 
 - name: Template over default config files
-  template: src={{ bindle_config }} dest=~{{ user_name }}/.bindle
+  template: src={{ bindle_config }} dest=/home/{{ user_name }}/.bindle/{{ bindle_config }}
