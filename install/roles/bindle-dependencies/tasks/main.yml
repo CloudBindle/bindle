@@ -20,6 +20,15 @@
     - python-paramiko
     - python-httplib2
 
+- name: Download get-pip
+  get_url:
+    url=https://bootstrap.pypa.io/get-pip.py
+    dest=/tmp
+
+- name: Install pip
+  sudo: True
+  shell: python /tmp/get-pip.py
+
 - name: Download Ansible 1.8.4 deb package
   get_url: 
     dest=/tmp
