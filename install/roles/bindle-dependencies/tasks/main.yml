@@ -20,15 +20,24 @@
     - python-paramiko
     - python-httplib2
 
-- name: Download Ansible 1.6 deb package
+- name: Download get-pip
+  get_url:
+    url=https://bootstrap.pypa.io/get-pip.py
+    dest=/tmp
+
+- name: Install pip
+  sudo: True
+  shell: python /tmp/get-pip.py
+
+- name: Download Ansible 1.8.4 deb package
   get_url: 
     dest=/tmp
-    url=https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.6.10-precise/ansible-1.6.10-precise.deb
+    url=https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.8.4-{{ ansible_distribution_release }}/ansible-1.8.4-{{ ansible_distribution_release }}.deb
     mode=755
 
-- name: Install Ansible 1.6 (using default Ansible 1.5.4) 
+- name: Install Ansible 1.8.4
   sudo: True
-  shell: dpkg -i /tmp/ansible-1.6.10-precise.deb
+  shell: dpkg -i /tmp/ansible-1.8.4-{{ ansible_distribution_release }}.deb
 
 - name: Download Vagrant deb package
   get_url: 
@@ -65,7 +74,7 @@
     - libipc-system-simple-perl
 
 - name: Create .bindle directory
-  file: path=~/.bindle state=directory
+  file: path=/home/{{ user_name }}/.bindle state=directory owner={{ user_name }}
 
 - name: Template over default config files
-  template: src={{ bindle_config }} dest=~/.bindle
+  template: src={{ bindle_config }} dest=/home/{{ user_name }}/.bindle/{{ bindle_config }}
