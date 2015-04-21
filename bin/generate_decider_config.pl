@@ -4,7 +4,6 @@ use common::sense;
 use autodie;
 
 use JSON;
-use LibXML::Simple qw(:strict);
 
 use Getopt::Long;
 use File::Basename qw();
