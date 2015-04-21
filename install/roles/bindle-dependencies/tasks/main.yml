@@ -22,7 +22,7 @@
 
 - name: Download get-pip
   get_url:
-    url=https://bootstrap.pypa.io/get-pip.py
+    url=http://bootstrap.pypa.io/get-pip.py
     dest=/tmp
 
 - name: Install pip
