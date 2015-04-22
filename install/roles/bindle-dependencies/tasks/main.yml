@@ -29,16 +29,6 @@
   sudo: True
   shell: python /tmp/get-pip.py
 
-#- name: Download Ansible 1.8.4 deb package
-#  get_url: 
-#    dest=/tmp
-#    url=https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies/ansible/ansible/1.8.4-{{ ansible_distribution_release }}/ansible-1.8.4-{{ ansible_distribution_release }}.deb
-#    mode=755
-
-#- name: Install Ansible 1.8.4
-#  sudo: True
-#  shell: dpkg -i /tmp/ansible-1.8.4-{{ ansible_distribution_release }}.deb
-
 - name: Download Vagrant deb package
   get_url: 
     dest=/tmp
