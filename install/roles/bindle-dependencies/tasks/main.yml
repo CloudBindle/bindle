@@ -72,9 +72,14 @@
 - name: Create .bindle directory
   file: path=/home/{{ user_name }}/.bindle state=directory owner={{ user_name }}
 
-- name: Template over default config files
-  template: src={{ item }}.cfg dest=/home/{{ user_name }}/.bindle/{{ item }}.cfg owner={{ user_name }} group={{ user_name }}
+#- name: Template over default config files
+#  template: src={{ item }}.cfg dest=/home/{{ user_name }}/.bindle/{{ item }}.cfg owner={{ user_name }} group={{ user_name }}
+#  with_items:
+#    - aws
+#    - openstack
+
+- name: Copy Bindle config files
+  copy: src=../templates/{{ item }}.cfg dest=/home/{{ user_name }}/.bindle/{{ item }}.cfg owner={{ user_name }} group={{ user_name }}
   with_items:
     - aws
     - openstack
-
