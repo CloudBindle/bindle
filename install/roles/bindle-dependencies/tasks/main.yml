@@ -73,4 +73,8 @@
   file: path=/home/{{ user_name }}/.bindle state=directory owner={{ user_name }}
 
 - name: Template over default config files
-  template: src={{ bindle_config }} dest=/home/{{ user_name }}/.bindle/{{ bindle_config }} owner={{ user_name }}
+  template: src={{ item }}.cfg dest=/home/{{ user_name }}/.bindle/{{ item }}.cfg owner={{ user_name }} group={{ user_name }}
+  with_items:
+    - aws
+    - openstack
+
