@@ -50,6 +50,7 @@ Vagrant.configure("2") do |config|
       aws.region = "%{aws_region}"
       aws.availability_zone = %{aws_zone}
       aws.ami = "%{aws_image}"
+      aws.security_groups = ["%{aws_security_group}"]
       aws.instance_type = "%{aws_instance_type}"
       aws.instance_ready_timeout = 6000
       %{aws_ebs_vols}
