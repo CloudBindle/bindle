@@ -41,15 +41,21 @@
 
 - name: Install Vagrant providers - AWS
   sudo: "{{ user_name }}"
-  command: vagrant plugin install vagrant-aws --plugin-version 0.5.0 
+  command: vagrant plugin install vagrant-aws --plugin-version 0.5.0
+  retries: 5
+  delay: 10
    
 - name: Install Vagrant providers - OpenStack 
   sudo: "{{ user_name }}"
   command: vagrant plugin install vagrant-openstack-plugin --plugin-version 0.7.0
+  retries: 5
+  delay: 10
 
 - name: Install Vagrant providers - VCloud
   sudo: "{{ user_name }}"
   command: vagrant plugin install vagrant-vcloud --plugin-version 0.4.3 
+  retries: 5
+  delay: 10
 
 
 - name: Install Perl dependencies
@@ -66,5 +72,14 @@
 - name: Create .bindle directory
   file: path=/home/{{ user_name }}/.bindle state=directory owner={{ user_name }}
 
-- name: Template over default config files
-  template: src={{ bindle_config }} dest=/home/{{ user_name }}/.bindle/{{ bindle_config }}
+#- name: Template over default config files
+#  template: src={{ item }}.cfg dest=/home/{{ user_name }}/.bindle/{{ item }}.cfg owner={{ user_name }} group={{ user_name }}
+#  with_items:
+#    - aws
+#    - openstack
+
+- name: Copy Bindle config files
+  copy: src=../templates/{{ item }}.cfg dest=/home/{{ user_name }}/.bindle/{{ item }}.cfg owner={{ user_name }} group={{ user_name }}
+  with_items:
+    - aws
+    - openstack
