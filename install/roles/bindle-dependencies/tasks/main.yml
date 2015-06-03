@@ -51,11 +51,11 @@
   retries: 5
   delay: 10
 
-- name: Install Vagrant providers - VCloud
-  sudo: "{{ user_name }}"
-  command: vagrant plugin install vagrant-vcloud --plugin-version 0.4.3 
-  retries: 5
-  delay: 10
+#- name: Install Vagrant providers - VCloud
+#  sudo: "{{ user_name }}"
+#  command: vagrant plugin install vagrant-vcloud --plugin-version 0.4.3 
+#  retries: 5
+#  delay: 10
 
 
 - name: Install Perl dependencies
