@@ -9,7 +9,7 @@ use autodie;
 use FindBin qw($Bin);
 
 ### usage
-# perl bin/launcher/generate_master_inventory.pl <ansible-ssh-host> > inventory
+# perl bin/launcher/generate_master_inventory_file_for_ansible.pl <ansible-ssh-host> > inventory
 
 my $ansible_ssh_host = $ARGV[0];
 
