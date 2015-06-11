@@ -67,7 +67,7 @@ Vagrant.configure("2") do |config|
       os.keypair_name = "%{os_ssh_key_name}"
       os.ssh_username = "%{os_ssh_username}"
       os.tenant = "%{os_tenant}"
-      # TODO: this is hardcoded!
+      os.availability_zone = "%{availability_zone}"
       override.ssh.username = "%{os_ssh_username}"
       override.ssh.private_key_path = "%{os_ssh_pem_file}"
       os.network = "%{os_network}"
